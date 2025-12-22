@@ -1,0 +1,3 @@
+Interaccion de Menu principal Admin
+
+Menu > usuarios > registrar

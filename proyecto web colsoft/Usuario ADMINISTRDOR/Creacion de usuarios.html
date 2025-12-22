@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema de Usuarios</title>
+    <link rel="stylesheet" href="Estilos.css">
+    <style>
+        /* Inline small reset for SVG icons sizing inside nav */
+        .icon { width: 22px; height: 22px; vertical-align: middle; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Menú lateral -->
+        <nav class="sidebar">
+            <div class="sidebar-top">
+                <!-- Logo grande centrado -->
+                <div class="logo-wrap">
+                    <img src="LOGO_COLSOF.png" alt="Logo" class="logo" aria-hidden="true">
+                    <h2 class="brand">COLSOF S.A.S</h2>
+                </div>
+                <p class="menu-label">Menu</p>
+            </div>
+
+            <ul class="menu-list">
+                <li class="menu-item">
+                    <a href="#">
+                        <!-- home icon -->
+                        <svg class="icon" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                            <path d="M3 10.5L12 3l9 7.5V21a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1V10.5z" stroke="#0b3a66" stroke-width="1.5" fill="#e8f0fb"/>
+                        </svg>
+                        <span>Inicio</span>
+                    </a>
+                </li>
+
+                <li class="menu-item">
+                    <a href="#">
+                        <!-- statistics icon -->
+                           <svg class="icon" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                            <rect x="3" y="13" width="6" height="8" rx="1.5" fill="#e3f2fd" stroke="#1976d2" stroke-width="1.5"/>
+                            <rect x="9" y="3" width="6" height="18" rx="1.5" fill="#e3f2fd" stroke="#1976d2" stroke-width="1.5"/>
+                            <rect x="15" y="9" width="6" height="12" rx="1.5" fill="#e3f2fd" stroke="#1976d2" stroke-width="1.5"/>
+                        </svg>
+
+                        <span>Estadísticas</span>
+                    </a>
+                </li>
+
+                <li class="menu-item">
+                    <a href="#">
+                        <!-- database icon -->
+                        <svg class="icon" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                            <ellipse cx="12" cy="6" rx="9" ry="4" fill="#fffde7" stroke="#fbc02d" stroke-width="1.5"/>
+                            <path d="M3 6v12c0 2.21 4.03 4 9 4s9-1.79 9-4V6" stroke="#fbc02d" stroke-width="1.5" fill="none"/>
+                        </svg>
+                        <span>Herramientas BD</span>
+                    </a>
+                </li>
+
+                <!-- Collapsible group: Usuarios -->
+                <li class="menu-item group">
+                    <details>
+                        <summary>
+                                <!-- user icon -->
+                                <svg class="icon" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                                    <circle cx="12" cy="8" r="4" fill="#e3f2fd" stroke="#1976d2" stroke-width="1.5"/>
+                                    <path d="M4 20c0-3.31 3.58-6 8-6s8 2.69 8 6" stroke="#1976d2" stroke-width="1.5" fill="none"/>
+                                </svg>
+                            <span>Usuarios</span>
+                            <span class="chev">▾</span>
+                        </summary>
+
+                        <ul class="sub-list">
+                            <li><a href="#">Registrar</a></li>
+                            <li><a href="#">Lista</a></li>
+                            <li><a href="#">Roles</a></li>
+                            <li><a href="#">Monitoreo</a></li>
+                        </ul>
+                    </details>
+                </li>
+
+                <!-- Collapsible group: Tecnico -->
+                <li class="menu-item group">
+                    <details>
+                        <summary>
+                            <!-- id card icon -->
+                            <svg class="icon" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                                <rect x="3" y="6" width="18" height="12" rx="2" fill="#fffde7" stroke="#fbc02d" stroke-width="1.5"/>
+                                <circle cx="8" cy="12" r="2" fill="#e3f2fd" stroke="#1976d2" stroke-width="1.2"/>
+                                <rect x="13" y="10" width="5" height="2" rx="1" fill="#e3f2fd" stroke="#1976d2" stroke-width="1.2"/>
+                            </svg>
+                            <span>Tecnico</span>
+                            <span class="chev">▾</span>
+                        </summary>
+
+                        <ul class="sub-list">
+                            <li><a href="#">Mis Casos</a></li>
+                            <li><a href="#">Evidencias</a></li>
+                        </ul>
+                    </details>
+                </li>
+
+                <li class="menu-item">
+                    <a href="#" class="notif">
+                        <svg class="icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                            <path d="M12 22a2 2 0 002-2H10a2 2 0 002 2z" stroke="#111" stroke-width="1.2" fill="none"/>
+                            <path d="M18 16v-5a6 6 0 10-12 0v5l-2 2h16l-2-2z" stroke="#111" stroke-width="1.2" fill="none"/>
+                        </svg>
+                        <span>Notificaciones</span>
+                        <span class="badge">10</span>
+                    </a>
+                </li>
+
+                <li class="menu-item">
+                    <a href="#">
+                        <!-- settings/gear icon -->
+                        <svg class="icon" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                            <circle cx="12" cy="12" r="3" fill="#e3f2fd" stroke="#1976d2" stroke-width="1.5"/>
+                            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09a1.65 1.65 0 0 0 1.51-1 1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33h.09a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51h.09a1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82v.09a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z" stroke="#1976d2" stroke-width="1.2" fill="#e3f2fd"/>
+                        </svg>
+                        <span>Terminal</span>
+                    </a>
+                </li>
+            </ul>
+
+            <div class="sidebar-bottom"></div>
+        </nav>
+        
+        <!-- Contenido principal -->
+        <main class="main-content">
+                    <!-- Barra azul superior -->
+                    <div class="top-header">
+                        <div class="header-left"></div>
+                        <div class="header-right">
+                            <div class="profile">
+                                <div class="avatar"> <img src="LOGO_COLSOF.png" alt="avatar"> </div>
+                                <div class="profile-info">
+                                    <div class="profile-name">AdminColsof</div>
+                                    <div class="profile-email">Admincolsof@colsof.com.co</div>
+                                </div>
+                                <button class="profile-menu-btn" title="Opciones">&#x25BC;</button>
+                                <div class="profile-menu">
+                                    <button class="logout-btn">Cerrar sesión</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <h1 class="form-title">GESTIÓN DE USUARIOS Y ROLES</h1>
+            <form class="user-form">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="nombres">Nombres</label>
+                        <input type="text" id="nombres" name="nombres" placeholder="Nombres" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="apellidos">Apellidos</label>
+                        <input type="text" id="apellidos" name="apellidos" placeholder="Apellidos" required>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="correo">Correo Electrónico</label>
+                        <input type="email" id="correo" name="correo" placeholder="ejemplo@colsof.com.co" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="rol">Rol</label>
+                        <select id="rol" name="rol" required>
+                            <option value="TECNICO">TECNICO</option>
+                            <option value="GESTOR">GESTOR</option>
+                            <option value="ADMINISTRADOR">ADMINISTRADOR</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-row align-end">
+                    <div class="form-group password-group">
+                        <label for="contrasena">Contraseña</label>
+                        <div class="password-input-wrapper">
+                            <input type="text" id="contrasena" name="contrasena" placeholder="Contraseña" required>
+                            <button type="button" class="gen-pass-btn">Generar Contraseña</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="form-row checkbox-row">
+                    <label class="change-pass-label">
+                        <input type="checkbox" name="cambiar_contrasena" value="1">
+                        Cambiar contraseña después de inicio sesión
+                    </label>
+                </div>
+                <div class="form-row">
+                    <button type="submit" class="submit-btn">CREAR USUARIO</button>
+                </div>
+            </form>
+        </main>
+    </div>
+
+    <!-- Modal personalizado -->
+<div id="modal-construccion" class="modal-construccion">
+    <div class="modal-content">
+        <h2 class="modal-title">En proceso de construcción</h2>
+        <button id="cerrar-modal" class="modal-btn">Cerrar</button>
+    </div>
+</div>
+<div id="modal-exito" class="modal-construccion">
+    <div class="modal-content">
+        <h2 class="modal-title">Usuario creado con éxito</h2>
+           </div>
+</div>
+<div id="modal-error" class="modal-construccion">
+    <div class="modal-content">
+        <h2 class="modal-title">Error</h2>
+        <div>Por favor complete todos los campos requeridos.</div>
+        <button id="cerrar-modal-error" class="modal-btn">Cerrar</button>
+    </div>
+</div>
+<script>
+// Mostrar modal en vez de alert
+function mostrarModal() {
+  document.getElementById('modal-construccion').style.display = 'flex';
+}
+document.getElementById('cerrar-modal').onclick = function() {
+  document.getElementById('modal-construccion').style.display = 'none';
+};
+// Opciones principales
+const mainMenuLinks = document.querySelectorAll('.menu-list > .menu-item > a:not(.notif)');
+mainMenuLinks.forEach(link => {
+    link.addEventListener('click', function(e) {
+        e.preventDefault();
+        mostrarModal();
+    });
+});
+// Opciones de submenús
+const subMenuLinks = document.querySelectorAll('.sub-list a');
+subMenuLinks.forEach(link => {
+    link.addEventListener('click', function(e) {
+        e.preventDefault();
+        mostrarModal();
+    });
+});
+// Generar contraseña segura
+function generarContrasena(longitud = 12) {
+    const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz23456789!@#$%&*?';
+    let pass = '';
+    for (let i = 0; i < longitud; i++) {
+        pass += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+    return pass;
+}
+document.querySelector('.gen-pass-btn').addEventListener('click', function(e) {
+    e.preventDefault();
+    const pass = generarContrasena();
+    document.getElementById('contrasena').value = pass;
+});
+// Submenú de perfil
+const menuBtn = document.querySelector('.profile-menu-btn');
+const menu = document.querySelector('.profile-menu');
+menuBtn.addEventListener('click', function(e) {
+    e.stopPropagation();
+    menu.style.display = menu.style.display === 'block' ? 'none' : 'block';
+});
+document.addEventListener('click', function(e) {
+    if (menu.style.display === 'block') menu.style.display = 'none';
+});
+document.querySelector('.logout-btn').addEventListener('click', function() {
+    alert('Sesión cerrada');
+});
+
+// Envío del formulario: validar, mostrar éxito o error y redirigir
+(function(){
+  const form = document.querySelector('.user-form');
+  const modalExito = document.getElementById('modal-exito');
+  const cerrarExito = document.getElementById('cerrar-modal-exito');
+  const modalError = document.getElementById('modal-error');
+  const cerrarError = document.getElementById('cerrar-modal-error');
+  const goToMenu = () => { window.location.href = 'Menu principal Admin.html'; };
+
+  cerrarError && (cerrarError.onclick = () => { modalError.style.display = 'none'; });
+
+  form.addEventListener('submit', function(e){
+    e.preventDefault();
+    if (form.checkValidity()) {
+      // Mostrar modal de éxito y redirigir
+      modalExito.style.display = 'flex';
+      cerrarExito && (cerrarExito.onclick = goToMenu);
+      // Redirección automática tras breve espera
+      setTimeout(goToMenu, 1400);
+    } else {
+      // Forzar mensajes nativos del navegador y mostrar modal de error
+      form.reportValidity();
+      modalError.style.display = 'flex';
+    }
+  });
+})();
+</script>
+</body>
+</html>
