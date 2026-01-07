@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>CSU - Estadísticas y Métricas</title>
+  <link rel="stylesheet" href="styles.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+
+<header class="header">
+  <div>
+    <h1>Estadísticas y Métricas</h1>
+    <p>Análisis del desempeño del centro de soporte</p>
+  </div>
+
+  <div class="header-actions">
+    <select id="dateRange">
+      <option value="7days">Últimos 7 días</option>
+      <option value="30days" selected>Últimos 30 días</option>
+      <option value="3months">Últimos 3 meses</option>
+      <option value="year">Último año</option>
+    </select>
+    <button id="exportBtn">Exportar Reporte</button>
+  </div>
+</header>
+
+<main class="container">
+
+  <!-- KPI -->
+  <section class="kpi-grid">
+    <div class="kpi-card">
+      <h4>Casos Totales</h4>
+      <span class="kpi-value">2,848</span>
+      <small class="positive">+14% vs mes anterior</small>
+    </div>
+
+    <div class="kpi-card">
+      <h4>Tasa de Resolución</h4>
+      <span class="kpi-value">94.2%</span>
+      <small class="positive">+2.3% vs mes anterior</small>
+    </div>
+
+    <div class="kpi-card">
+      <h4>Tiempo Promedio</h4>
+      <span class="kpi-value">2.5h</span>
+      <small class="positive">-15% vs mes anterior</small>
+    </div>
+
+    <div class="kpi-card">
+      <h4>Satisfacción</h4>
+      <span class="kpi-value">96%</span>
+      <small class="positive">+1.2% vs mes anterior</small>
+    </div>
+  </section>
+
+  <!-- Charts -->
+  <section class="charts-grid">
+    <div class="chart-card">
+      <h3>Tendencia Mensual de Casos</h3>
+      <canvas id="monthlyChart"></canvas>
+    </div>
+
+    <div class="chart-card">
+      <h3>Distribución por Categoría</h3>
+      <canvas id="categoryChart"></canvas>
+    </div>
+
+    <div class="chart-card">
+      <h3>Distribución por Prioridad</h3>
+      <canvas id="priorityChart"></canvas>
+    </div>
+
+    <div class="chart-card">
+      <h3>Casos por Hora del Día</h3>
+      <canvas id="hourChart"></canvas>
+    </div>
+  </section>
+
+  <!-- Tabla -->
+  <section class="table-card">
+    <h3>Desempeño de Técnicos</h3>
+    <table>
+      <thead>
+        <tr>
+          <th>Técnico</th>
+          <th>Casos Resueltos</th>
+          <th>Tiempo Promedio (hrs)</th>
+          <th>Satisfacción</th>
+        </tr>
+      </thead>
+      <tbody id="techTable"></tbody>
+    </table>
+  </section>
+
+</main>
+
+<script src="app.js"></script>
+</body>
+</html>
+
