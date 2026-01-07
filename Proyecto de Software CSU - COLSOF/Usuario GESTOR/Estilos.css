@@ -24,10 +24,31 @@ body {
     max-width: 260px;
     background: #fff;
     border-right: 1px solid #e6e9ef;
-    padding: 28px 20px;
+    padding: 16px 12px 12px 12px;
     display: flex;
     flex-direction: column;
+    /* Mantener sidebar visible y con su propio scroll más reducido */
+    position: sticky;
+    top: 12px;
+    align-self: flex-start;
+    height: calc(100vh - 24px);
+    overflow: hidden; /* internal scrolling on menu-list */
 }
+
+/* Estilo de scrollbar para navegadores WebKit */
+.sidebar::-webkit-scrollbar { width: 8px; }
+.sidebar::-webkit-scrollbar-track { background: transparent; }
+.sidebar::-webkit-scrollbar-thumb { background: rgba(21,70,123,0.14); border-radius: 8px; }
+
+/* Permitir que la lista de menú tenga su propio scroll y siempre sea accesible */
+.menu-list {
+    overflow-y: auto;
+    max-height: calc(100vh - 220px);
+    padding-right: 6px;
+}
+
+.menu-list::-webkit-scrollbar { width: 8px; }
+.menu-list::-webkit-scrollbar-thumb { background: rgba(21,70,123,0.06); border-radius: 8px; }
 
 .sidebar-top {
     margin-bottom: 18px;
