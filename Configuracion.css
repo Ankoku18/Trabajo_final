@@ -50,14 +50,6 @@ body {
   font-weight: 700;
 }
 
-/* mantener el antiguo .sidebar estético para compatibilidad (menu principal) */
-.sidebar {
-  background: white;
-  border: 1px solid #e5e7eb;
-  border-radius: 8px;
-  padding: 10px;
-}
-
 .sidebar button { width:100%; padding:10px; border:none; background:none; text-align:left; cursor:pointer; border-radius:6px; }
 
 .sidebar button.active { background:#dbeafe; color:#1d4ed8; font-weight:bold; }
