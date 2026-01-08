@@ -19,6 +19,13 @@ document.addEventListener('DOMContentLoaded', () => {
   // Interceptar enlaces del menú (excepto Inicio si existe)
   $$('.menu-list a').forEach(a => {
     if (a.id === 'link-inicio') return; // dejar navegar
+
+    // Permitir navegación a Notificaciones
+    if (a.textContent.includes('Notificaciones') || a.querySelector('.badge')) {
+      a.href = '../../Menu - Notificaciones.html';
+      return;
+    }
+
     a.addEventListener('click', (e) => {
       e.preventDefault();
       showModal('modal-construccion');
