@@ -38,6 +38,12 @@ document.addEventListener('DOMContentLoaded', () => {
       return;
     }
 
+    // Permitir navegación a Herramientas
+    if (a.textContent.includes('Herramientas')) {
+      a.href = 'Menu - Herramientas.html';
+      return;
+    }
+
     // Permitir navegación a Configuración
     if (a.textContent.includes('Configuración') || a.textContent.includes('Configuracion')) {
       a.href = '../../Menu - Configuracion.html';
