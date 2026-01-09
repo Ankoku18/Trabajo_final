@@ -10,6 +10,15 @@ document.addEventListener('DOMContentLoaded', () => {
   const showModal = (id) => { const m = document.getElementById(id); if (m) m.style.display = 'flex'; };
   const hideModal = (id) => { const m = document.getElementById(id); if (m) m.style.display = 'none'; };
 
+  // Determinar ruta de la API según dónde estemos (Raíz o Subcarpeta)
+  const getApiUrl = () => {
+    // Si la URL contiene 'Usuario GESTOR', el api.php está en la misma carpeta
+    if (window.location.pathname.includes('Usuario GESTOR')) {
+      return 'api.php';
+    }
+    return 'Proyecto de Software CSU - COLSOF/Usuario GESTOR/api.php';
+  };
+
   // =====================
   // Modal de "En proceso de construcción"
   // =====================
@@ -119,13 +128,36 @@ document.addEventListener('DOMContentLoaded', () => {
   if (btnCrear) {
     btnCrear.addEventListener('click', (e) => {
       e.preventDefault();
-      const exito = document.getElementById('modal-exito');
-      if (exito) {
-        exito.style.display = 'flex';
-        setTimeout(() => { window.location.href = 'Menu principal.html'; }, 1500);
-      } else {
-        window.location.href = 'Menu principal.html';
-      }
+      
+      // Recopilar datos del formulario (ajusta los IDs según tu HTML real de creación)
+      const data = {
+        cliente: document.getElementById('cliente')?.value,
+        categoria: document.getElementById('categoria')?.value,
+        prioridad: document.getElementById('prioridad')?.value,
+        descripcion: document.getElementById('descripcion')?.value, // Asumiendo que existe este campo
+        asignado: document.getElementById('asignar')?.value
+      };
+
+      fetch(getApiUrl() + '?action=save_case', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+      })
+      .then(res => res.json())
+      .then(response => {
+        if (response.success) {
+          const exito = document.getElementById('modal-exito');
+          if (exito) {
+            exito.style.display = 'flex';
+            setTimeout(() => { window.location.href = 'Menu principal.html'; }, 1500);
+          } else {
+            window.location.href = 'Menu principal.html';
+          }
+        } else {
+          alert('Error al guardar: ' + response.error);
+        }
+      })
+      .catch(err => console.error('Error:', err));
     });
   }
   const cerrarExito = document.getElementById('cerrar-exito');
@@ -232,20 +264,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (!idEl && !sCliente && !sCategoria && !sPrioridad && !sTecnicos && !sAdjuntos) return;
 
-    const generateId = () => {
-      const prefix = '030';
-      let digits = '';
-      if (window.crypto && window.crypto.getRandomValues) {
-        const buf = new Uint32Array(9);
-        window.crypto.getRandomValues(buf);
-        for (let i = 0; i < buf.length; i++) digits += (buf[i] % 10).toString();
-      } else {
-        for (let i = 0; i < 9; i++) digits += Math.floor(Math.random() * 10).toString();
-      }
-      return prefix + digits;
-    };
-
-    if (idEl) idEl.textContent = generateId();
+    // Obtener ID real de la base de datos
+    if (idEl) {
+      fetch(getApiUrl() + '?action=get_next_id')
+        .then(res => res.json())
+        .then(data => { if(data.new_id) idEl.textContent = data.new_id; })
+        .catch(err => console.error(err));
+    }
 
     const updateCliente = () => { if (sCliente) sCliente.textContent = inputCliente && inputCliente.value ? inputCliente.value : '—'; };
     const updateCategoria = () => {
@@ -274,5 +299,51 @@ document.addEventListener('DOMContentLoaded', () => {
     updatePrioridad();
     updateTecnicos();
     updateAdjuntos();
+  })();
+
+  // =====================
+  // Carga de Datos para Reportes (Si estamos en la página de reportes)
+  // =====================
+  (function loadReportsData() {
+    const kpiGenerados = document.getElementById('kpi-generados');
+    const kpiUsuarios = document.getElementById('kpi-usuarios');
+    const listRecent = document.getElementById('recentReports');
+
+    // Si no existen estos elementos, no estamos en la página de reportes
+    if (!kpiGenerados && !listRecent) return;
+
+    // Cargar Estadísticas
+    fetch(getApiUrl() + '?action=get_dashboard_stats')
+      .then(res => res.json())
+      .then(data => {
+        if (kpiGenerados) kpiGenerados.innerHTML = `<strong>${data.reportes_generados || 0}</strong>`;
+        if (kpiUsuarios) kpiUsuarios.innerHTML = `<strong>${data.usuarios_activos || 0}</strong>`;
+        // Puedes agregar más KPIs aquí
+      })
+      .catch(err => console.error('Error cargando stats:', err));
+
+    // Cargar Lista Reciente
+    if (listRecent) {
+      fetch(getApiUrl() + '?action=get_recent_reports')
+        .then(res => res.json())
+        .then(reports => {
+          listRecent.innerHTML = ''; // Limpiar lista ficticia
+          reports.forEach(rep => {
+            const li = document.createElement('li');
+            li.className = 'report-item';
+            li.innerHTML = `
+              <div class="left">
+                <div class="r-icon">📄</div>
+                <div class="r-info">
+                  <div class="r-title">Caso #${rep.id} - ${rep.cliente}</div>
+                  <div class="r-meta">${rep.fecha_creacion} • ${rep.categoria}</div>
+                </div>
+              </div>
+              <div class="r-actions">🔽</div>
+            `;
+            listRecent.appendChild(li);
+          });
+        });
+    }
   })();
 });

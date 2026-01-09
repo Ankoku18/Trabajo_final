@@ -150,10 +150,10 @@
 
         <!-- KPIs -->
         <section class="kpi-grid">
-          <div class="kpi">Reportes Generados <strong>156</strong></div>
-          <div class="kpi">Descargas Totales <strong>2,847</strong></div>
-          <div class="kpi">Último Reporte <strong>Hoy</strong></div>
-          <div class="kpi">Usuarios Activos <strong>24</strong></div>
+          <div class="kpi" id="kpi-generados">Reportes Generados <strong>...</strong></div>
+          <div class="kpi">Descargas Totales <strong>...</strong></div>
+          <div class="kpi">Último Reporte <strong>...</strong></div>
+          <div class="kpi" id="kpi-usuarios">Usuarios Activos <strong>...</strong></div>
         </section>
 
         <section class="grid">
@@ -329,36 +329,8 @@
             <div class="box">
               <h3>Reportes Recientes</h3>
               <ul id="recentReports" class="recent-list">
-                <li class="report-item">
-                  <div class="left">
-                    <div class="r-icon">📄</div>
-                    <div class="r-info">
-                      <div class="r-title">Reporte_Mensual_enero.pdf</div>
-                      <div class="r-meta">05 Ene 2025 • 2.4 MB • 24 descargas</div>
-                    </div>
-                  </div>
-                  <div class="r-actions">🔽 🖨️</div>
-                </li>
-                <li class="report-item">
-                  <div class="left">
-                    <div class="r-icon">📊</div>
-                    <div class="r-info">
-                      <div class="r-title">Casos_Por_Cliente.xlsx</div>
-                      <div class="r-meta">03 Ene 2025 • 856 KB • 15 descargas</div>
-                    </div>
-                  </div>
-                  <div class="r-actions">🔽 🖨️</div>
-                </li>
-                <li class="report-item">
-                  <div class="left">
-                    <div class="r-icon">📈</div>
-                    <div class="r-info">
-                      <div class="r-title">Desempeño_Técnicos.pdf</div>
-                      <div class="r-meta">02 Ene 2025 • 1.8 MB • 32 descargas</div>
-                    </div>
-                  </div>
-                  <div class="r-actions">🔽 🖨️</div>
-                </li>
+                <!-- Se llenará dinámicamente con JS -->
+                <li style="padding:10px; color:#666;">Cargando datos...</li>
               </ul>
             </div> 
 
