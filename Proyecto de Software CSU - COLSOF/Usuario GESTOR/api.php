@@ -71,6 +71,19 @@ switch ($action) {
         echo json_encode($reports);
         break;
 
+    case 'get_cases_list':
+        // Obtener todos los casos para la tabla principal
+        $sql = "SELECT id, fecha_creacion, asignado_a, prioridad, categoria, cliente FROM casos ORDER BY fecha_creacion DESC";
+        $result = $conn->query($sql);
+        $cases = [];
+        if ($result) {
+            while($row = $result->fetch_assoc()) {
+                $cases[] = $row;
+            }
+        }
+        echo json_encode($cases);
+        break;
+
     default:
         echo json_encode(['error' => 'Acción no válida']);
         break;

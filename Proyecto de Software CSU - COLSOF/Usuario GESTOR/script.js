@@ -346,4 +346,47 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
   })();
+
+  // =====================
+  // Carga de Tabla de Casos (Menu principal.html)
+  // =====================
+  (function loadCasesTable() {
+    const tbody = document.getElementById('cases-table-body');
+    if (!tbody) return;
+
+    fetch(getApiUrl() + '?action=get_cases_list')
+      .then(res => res.json())
+      .then(data => {
+        tbody.innerHTML = ''; // Limpiar contenido previo
+        
+        if (data.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="10" style="text-align:center; padding:20px;">No hay casos registrados</td></tr>';
+            return;
+        }
+
+        data.forEach(c => {
+            const tr = document.createElement('tr');
+            // Ajusta los campos según tu base de datos real
+            tr.innerHTML = `
+              <td class="td-check"><input type="checkbox"></td>
+              <td>#${c.id}</td>
+              <td>${c.fecha_creacion}</td>
+              <td><span class="status activo"><span class="checkdot"></span>Activo</span></td>
+              <td>
+                <div class="assignee">
+                  <span class="ava" style="background:#ccc">${(c.asignado_a || 'U').charAt(0)}</span>
+                  <div>${c.asignado_a || 'Sin asignar'}</div>
+                </div>
+              </td>
+              <td><span class="priority ${c.prioridad ? c.prioridad.toLowerCase() : 'media'}">${c.prioridad || 'Media'}</span></td>
+              <td>${c.categoria || 'General'}</td>
+              <td>${c.cliente || 'N/A'}</td>
+              <td>Sistema</td>
+              <td class="ellipsis">···</td>
+            `;
+            tbody.appendChild(tr);
+        });
+      })
+      .catch(err => console.error('Error cargando tabla:', err));
+  })();
 });
