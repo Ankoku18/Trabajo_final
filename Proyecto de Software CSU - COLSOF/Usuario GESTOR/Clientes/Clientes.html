@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>CSU - Clientes</title>
+  <link rel="stylesheet" href="../Estilos.css">
+  <link rel="stylesheet" href="Clientes.css">
+</head>
+<body>
+  <div class="container">
+    <!-- Menú lateral (como en Menú principal) -->
+    <nav class="sidebar">
+      <div class="sidebar-top">
+        <div class="logo-wrap">
+          <img src="../LOGO_COLSOF.png" alt="Logo" class="logo" aria-hidden="true" />
+          <h2 class="brand">COLSOF S.A.S</h2>
+        </div>
+        <p class="menu-label">Menu</p>
+      </div>
+
+      <ul class="menu-list">
+        <li class="menu-item">
+          <a href="../Menu principal.html">
+            <svg class="icon" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <path d="M3 10.5L12 3l9 7.5V21a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1V10.5z" stroke="#0b3a66" stroke-width="1.5" fill="#e8f0fb"/>
+            </svg>
+            <span>Inicio</span>
+          </a>
+        </li>
+        <li class="menu-item">
+          <a href="../Menu - Estadisticas.html">
+            <svg class="icon" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <rect x="3" y="13" width="6" height="8" rx="1.5" fill="#e3f2fd" stroke="#1976d2" stroke-width="1.5"/>
+              <rect x="9" y="3" width="6" height="18" rx="1.5" fill="#e3f2fd" stroke="#1976d2" stroke-width="1.5"/>
+              <rect x="15" y="9" width="6" height="12" rx="1.5" fill="#e3f2fd" stroke="#1976d2" stroke-width="1.5"/>
+            </svg>
+            <span>Estadísticas</span>
+          </a>
+        </li>
+        <li class="menu-item">
+          <a href="../Menu - Notificaciones.html" class="notif">
+            <svg class="icon" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <path d="M12 22a2 2 0 002-2H10a2 2 0 0 1-4 0v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09a1.65 1.65 0 0 0 1.51-1 1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33h.09a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51h.09a1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82v.09a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z" stroke="#111" stroke-width="1.2" fill="none"/>
+            </svg>
+            <span>Notificaciones</span>
+          </a>
+        </li>
+        <li class="menu-item"><a href="../Menu - Reportes.html">
+          <svg class="icon" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <path d="M3 4h18v4H3zM3 10h18v4H3zM3 16h10v4H3z" fill="#e3f2fd" stroke="#1976d2" stroke-width="1.2"/>
+          </svg>
+          <span>Reportes</span>
+        </a></li>
+      </ul>
+
+      <div class="sidebar-bottom"></div>
+    </nav>
+
+    <!-- Contenido principal -->
+    <main class="main-content">
+      <!-- Barra azul superior -->
+      <div class="top-header">
+        <div class="header-left">
+          <div style="height:52px"></div>
+        </div>
+        <div class="header-right">
+          <div class="profile">
+            <div class="avatar"><img src="../LOGO_COLSOF.png" alt="avatar" /></div>
+            <div class="profile-info">
+              <div class="profile-name">Juan Pérez</div>
+              <div class="profile-email">JPerez@colsof.com.co</div>
+            </div>
+            <button class="profile-menu-btn" title="Opciones">▾</button>
+            <div class="profile-menu">
+              <button class="logout-btn">Cerrar sesión</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="case-card">
+        <header class="header">
+          <div class="header-left">
+            <div class="icon">🏢</div>
+            <div>
+              <h1>Clientes</h1>
+              <p>Gestión de empresas y contactos</p>
+            </div>
+          </div>
+          <button id="newClientBtn" class="btn btn-generate">Nuevo Cliente</button>
+        </header>
+
+        <main>
+
+          <!-- KPIs -->
+          <section class="kpis">
+            <div class="kpi">
+              <span>Clientes Activos</span>
+              <strong id="activeClients"></strong>
+            </div>
+            <div class="kpi">
+              <span>Casos Totales</span>
+              <strong id="totalCases"></strong>
+            </div>
+            <div class="kpi">
+              <span>Satisfacción Promedio</span>
+              <strong id="avgSatisfaction"></strong>
+            </div>
+            <div class="kpi">
+              <span>Contratos Activos</span>
+              <strong id="totalContracts"></strong>
+            </div>
+          </section>
+  <!-- Filtros -->
+  <section class="filters">
+    <input type="text" id="search" placeholder="Buscar cliente">
+    <select id="industryFilter">
+      <option value="all">Todas las industrias</option>
+      <option>Petróleo y Gas</option>
+      <option>Financiero</option>
+      <option>Gobierno</option>
+      <option>Salud</option>
+      <option>Tecnología</option>
+    </select>
+    <select id="statusFilter">
+      <option value="all">Todos los estados</option>
+      <option>Activo</option>
+      <option>Inactivo</option>
+    </select>
+  </section>
+
+  <!-- Listado -->
+  <section id="clientsList"></section>
+
+</main>
+
+        </main>
+      </div>
+
+    </main>
+  </div>
+
+  <!-- Modal -->
+<div id="modal" class="modal hidden">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h2 id="modalTitle"></h2>
+    </div>
+    <div id="modalBody"></div>
+  </div>
+</div>
+
+<script src="Clientes.js"></script>
+</body>
+</html>
