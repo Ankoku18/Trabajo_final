@@ -2,9 +2,8 @@ document.addEventListener('DOMContentLoaded', () => {
   const listContainer = document.getElementById('notificationList');
   const filters = document.querySelectorAll('.filters button');
   
-  // Ruta a la API (ajustada desde la raíz donde está Menu - Notificaciones.html)
-  // Usamos encodeURI para manejar correctamente los espacios en los nombres de carpeta
-  const API_URL = encodeURI('Proyecto de Software CSU - COLSOF/Usuario GESTOR/api.php');
+  // Ruta a la API (archivo `api.php` está en la carpeta padre `Usuario GESTOR`)
+  const API_URL = '../api.php';
 
   let notifications = [];
 

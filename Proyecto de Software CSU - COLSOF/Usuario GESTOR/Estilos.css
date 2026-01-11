@@ -60,12 +60,8 @@ body {
 .sidebar::-webkit-scrollbar-track { background: transparent; }
 .sidebar::-webkit-scrollbar-thumb { background: rgba(21,70,123,0.14); border-radius: 8px; }
 
-/* Permitir que la lista de menú tenga su propio scroll y siempre sea accesible */
-.menu-list {
-    overflow-y: auto;
-    max-height: calc(100vh - 220px);
-    padding-right: 6px;
-}
+/* La lista de menú se controla por flex dentro del sidebar para permitir scroll interno */
+.menu-list { /* see authoritative rules below */ }
 
 .menu-list::-webkit-scrollbar { width: 8px; }
 .menu-list::-webkit-scrollbar-thumb { background: rgba(21,70,123,0.06); border-radius: 8px; }
@@ -106,6 +102,10 @@ body {
     display: flex;
     flex-direction: column;
     gap: 10px;
+    flex: 1 1 auto;
+    min-height: 0; /* allow the list to shrink and scroll inside the sidebar */
+    overflow-y: auto;
+    padding-right: 6px;
 }
 
 .menu-item a,
