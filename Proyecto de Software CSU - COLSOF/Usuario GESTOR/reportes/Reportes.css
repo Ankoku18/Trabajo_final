@@ -139,9 +139,9 @@
 .case-card.case-reportes {
   --kpi-padding: 24px;
   --icon-size: 28px;
-  --brand-600: #b45309; /* warm amber */
-  --brand-700: #7c2d12;
-  --accent: #f97316; /* orange */
+  --brand-600: #15467b; /* system blue */
+  --brand-700: #0f3f86;
+  --accent: #1976d2; /* system accent blue */
 }
 
 .case-card.case-reportes .kpi-grid { gap: 20px; }
