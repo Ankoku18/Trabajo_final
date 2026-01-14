@@ -4,7 +4,7 @@ body {
   background: #f3f4f6;
 }
 
-.header {
+.as-header {
   background: white;
   padding: 20px;
   border-bottom: 1px solid #e5e7eb;
@@ -12,12 +12,12 @@ body {
   justify-content: space-between;
 }
 
-.header-left {
+.as-header-left {
   display: flex;
   gap: 12px;
 }
 
-.icon {
+.as-icon {
   font-size: 32px;
 }
 
@@ -26,10 +26,9 @@ body {
   color: #7c3aed;
 }
 
-.container {
-  max-width: 1600px;
-  margin: auto;
-  padding: 20px;
+.content-area {
+  width: 100%;
+  padding: 0 28px 28px 28px;
 }
 
 .technicians {
