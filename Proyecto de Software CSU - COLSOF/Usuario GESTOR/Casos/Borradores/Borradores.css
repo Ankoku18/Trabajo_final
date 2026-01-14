@@ -195,9 +195,9 @@ body {
     color: #111827;
 }
 
-.container {
-    padding: 1.5rem;
-    max-width: 1600px;
+.content-area {
+    width: 100%;
+    padding: 0 28px 28px 28px;
     margin: 0 auto;
 }
 
