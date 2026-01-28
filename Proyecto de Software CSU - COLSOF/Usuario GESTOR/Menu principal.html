@@ -115,7 +115,7 @@
       <div class="top-header">
         <div class="header-left">
           <!-- Bloque azul de ejemplo del diseño (sin contenido real) -->
-          <div style="height:52px"></div>
+          <div class="header-spacer"></div>
         </div>
         <div class="header-right">
           <div class="profile">
@@ -165,25 +165,67 @@
       <!-- Filtros + Búsqueda -->
       <div class="filters-row">
         <div class="segmented" role="tablist" aria-label="Vistas">
-          <button class="active" role="tab" aria-selected="true">View all</button>
-          <button role="tab">Monitored</button>
-          <button role="tab">Text</button>
+          <button class="active" role="tab" aria-selected="true" data-view="lista">Lista</button>
+          <button role="tab" aria-selected="false" data-view="cuadricula">Cuadrícula</button>
+          <button role="tab" aria-selected="false" data-view="arbol">Árbol</button>
         </div>
         <div class="search-wrap" role="search">
           <span class="search-icon" aria-hidden="true">
             <svg viewBox="0 0 24 24" fill="none"><circle cx="11" cy="11" r="7" stroke="#97a0aa" stroke-width="2"/><path d="M20 20l-4-4" stroke="#97a0aa" stroke-width="2" stroke-linecap="round"/></svg>
           </span>
-          <input type="search" placeholder="Search" aria-label="Buscar casos" />
+          <input type="search" placeholder="Buscar" aria-label="Buscar casos" id="search-input" />
         </div>
-        <button class="filters-btn" title="Filtros" aria-label="Filtros">
+        <button class="filters-btn" title="Filtros" aria-label="Filtros" id="filters-toggle">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M3 5h18M6 12h12M10 19h4" stroke="#374151" stroke-width="1.8" stroke-linecap="round"/></svg>
-          <span>Filters</span>
+          <span>Filtros</span>
         </button>
+        <!-- Panel de filtros -->
+        <div id="filters-panel" class="filters-panel hidden" role="dialog" aria-modal="false" aria-labelledby="filters-title">
+          <h3 id="filters-title">Filtros</h3>
+          <div class="filters-grid">
+            <div class="filter-field">
+              <label for="filter-estado">Estado</label>
+              <select id="filter-estado">
+                <option value="">Todos</option>
+                <option value="abierto">Abierto</option>
+                <option value="en_progreso">En Progreso</option>
+                <option value="pausado">Pausado</option>
+                <option value="resuelto">Resuelto</option>
+                <option value="cerrado">Cerrado</option>
+                <option value="cancelado">Cancelado</option>
+              </select>
+            </div>
+            <div class="filter-field">
+              <label for="filter-prioridad">Prioridad</label>
+              <select id="filter-prioridad">
+                <option value="">Todas</option>
+                <option value="Crítica">Crítica</option>
+                <option value="Urgente">Urgente</option>
+                <option value="Alta">Alta</option>
+                <option value="Media">Media</option>
+                <option value="Baja">Baja</option>
+              </select>
+            </div>
+            <div class="filter-field">
+              <label for="filter-cliente">Cliente</label>
+              <input id="filter-cliente" type="text" placeholder="Nombre del cliente" />
+            </div>
+            <div class="filter-field">
+              <label for="filter-tecnico">Técnico asignado</label>
+              <input id="filter-tecnico" type="text" placeholder="Nombre del técnico" />
+            </div>
+          </div>
+          <div class="filters-actions">
+            <button class="filters-btn" id="filters-apply">Aplicar</button>
+            <button class="filters-btn" id="filters-clear">Limpiar</button>
+            <button class="filters-btn" id="filters-close">Cerrar</button>
+          </div>
+        </div>
       </div>
 
       <!-- Tabla de casos -->
       <section class="table-card" aria-label="Listado de casos">
-        <table>
+        <table id="cases-table" aria-label="Vista lista">
           <thead>
             <tr>
               <th class="td-check"><input type="checkbox" aria-label="Seleccionar todo" id="check-all"></th>
@@ -202,25 +244,23 @@
             <tr><td colspan="10" class="text-center-padded">Cargando casos...</td></tr>
           </tbody>
         </table>
+        <!-- Vista Cuadrícula -->
+        <div id="cases-grid" class="cases-grid hidden" aria-label="Vista cuadrícula"></div>
+        <!-- Vista Árbol -->
+        <div id="cases-tree" class="cases-tree hidden" aria-label="Vista árbol"></div>
         <div class="table-footer">
-          <button class="filters-btn" id="btn-prev">⟵ Previous</button>
+          <button class="filters-btn" id="btn-prev">⟵ Anterior</button>
           <div class="pager" id="pager-container">
             <!-- Los números de página se generan dinámicamente -->
           </div>
-          <button class="filters-btn" id="btn-next">Next ⟶</button>
+          <button class="filters-btn" id="btn-next">Siguiente ⟶</button>
         </div>
       </section>
     </main>
   </div>
 
-  <!-- Modal genérico: navegación en construcción -->
-  <div id="modal-construccion" class="modal-construccion" role="dialog" aria-modal="true" aria-labelledby="modal-title">
-    <div class="modal-content">
-      <h2 id="modal-title" class="modal-title">En proceso de construcción</h2>
-      <button id="cerrar-modal" class="modal-btn">Cerrar</button>
-    </div>
-  </div>
 
+  <script src="../shared/app-init.js"></script>
   <script src="script.js"></script>
 </body>
 </html>

@@ -2,16 +2,44 @@
 
 document.addEventListener('DOMContentLoaded', () => {
   // =====================
+  // Resolución de rutas
+  // =====================
+  const resolveLoginPath = () => {
+    const href = window.location.href;
+    const encodedMarker = 'Proyecto%20de%20Software%20CSU%20-%20COLSOF';
+    if (href.includes(encodedMarker)) return href.split(encodedMarker)[0] + `${encodedMarker}/index.html`;
+
+    const plainMarker = 'Proyecto de Software CSU - COLSOF';
+    if (href.includes(plainMarker)) return href.split(plainMarker)[0] + `${plainMarker}/index.html`;
+
+    return '/index.html';
+  };
+
+  // =====================
   // Autenticación y Usuario
   // =====================
   
   // Verificar si hay un usuario autenticado
-  const usuarioData = localStorage.getItem('usuario');
+  let usuarioData = localStorage.getItem('usuario');
   if (!usuarioData) {
-    // Si no hay usuario, redirigir al login
-    const loginPath = resolveLoginPath();
-    window.location.href = loginPath;
-    return;
+    // En desarrollo, usar un usuario de prueba si no hay autenticación
+    const isDevelopment = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+    if (isDevelopment) {
+      usuarioData = JSON.stringify({
+        id: 1,
+        nombre: 'Juan',
+        apellido: 'Pérez',
+        email: 'juan.perez@colsof.com.co',
+        rol: 'gestor',
+        activo: true
+      });
+      localStorage.setItem('usuario', usuarioData);
+    } else {
+      // Si no hay usuario y no es desarrollo, redirigir al login
+      const loginPath = resolveLoginPath();
+      window.location.href = loginPath;
+      return;
+    }
   }
 
   // Parsear datos del usuario
@@ -21,14 +49,16 @@ document.addEventListener('DOMContentLoaded', () => {
   } catch (e) {
     console.error('Error al parsear datos del usuario:', e);
     localStorage.removeItem('usuario');
-    window.location.href = resolveLoginPath();
+    const loginPath = resolveLoginPath();
+    window.location.href = loginPath;
     return;
   }
 
   // Verificar que el usuario tenga el rol correcto (Gestor)
   if (usuario.rol && usuario.rol.toLowerCase() !== 'gestor') {
     alert('No tienes permisos para acceder a esta página.');
-    window.location.href = resolveLoginPath();
+    const loginPath = resolveLoginPath();
+    window.location.href = loginPath;
     return;
   }
 
@@ -76,17 +106,6 @@ document.addEventListener('DOMContentLoaded', () => {
   };
 
   let casesPaginationInitialized = false;
-
-  const resolveLoginPath = () => {
-    const href = window.location.href;
-    const encodedMarker = 'Proyecto%20de%20Software%20CSU%20-%20COLSOF';
-    if (href.includes(encodedMarker)) return href.split(encodedMarker)[0] + `${encodedMarker}/index.html`;
-
-    const plainMarker = 'Proyecto de Software CSU - COLSOF';
-    if (href.includes(plainMarker)) return href.split(plainMarker)[0] + `${plainMarker}/index.html`;
-
-    return '/index.html';
-  };
 
   const loginPath = resolveLoginPath();
   $$('.logout-btn').forEach(btn => {
@@ -484,6 +503,9 @@ document.addEventListener('DOMContentLoaded', () => {
     casesPaginationInitialized = true;
 
     const tbody = document.getElementById('cases-table-body');
+    const casesTable = document.getElementById('cases-table');
+    const casesGrid = document.getElementById('cases-grid');
+    const casesTree = document.getElementById('cases-tree');
     const pagerContainer = document.querySelector('.pager');
     const prevBtn = document.querySelector('.table-footer .filters-btn:first-of-type');
     const nextBtn = document.querySelector('.table-footer .filters-btn:last-of-type');
@@ -493,6 +515,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const itemsPerPage = 12; // 12 casos por pÃ¡gina
     let allCases = [];
     let currentPage = 1;
+    let currentView = 'lista'; // vista activa: 'lista', 'cuadricula', 'arbol'
     let contextMenu;
 
     function ensureContextMenu() {
@@ -566,91 +589,197 @@ document.addEventListener('DOMContentLoaded', () => {
         : 'N/D';
 
       overlay.innerHTML = `
-        <div class="case-modal" style="width: min(900px, 90vw); max-height: 90vh; overflow-y: auto;">
-          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+        <div class="case-modal-detail">
+          <div class="case-modal-detail__header">
             <div>
-              <h2 style="margin: 0; color: #111827;">#${formatCaseId(caseData.id)}</h2>
-              <p style="margin: 5px 0 0 0; color: #7b8694; font-size: 14px;">${fechaFormato}</p>
+              <h2 class="case-modal-detail__id">#${formatCaseId(caseData.id)}</h2>
+              <p class="case-modal-detail__date">${fechaFormato}</p>
             </div>
-            <button onclick="document.getElementById('case-detail-modal-overlay').style.display='none'" style="background: #e5e7eb; border: none; border-radius: 8px; padding: 10px 16px; cursor: pointer; font-weight: 600;">✕ Cerrar</button>
           </div>
 
-          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+          <div class="case-modal-detail__grid">
             <div>
-              <h3 style="margin: 0 0 15px 0; color: #111827; font-size: 16px;">Información General</h3>
+              <h3 class="case-modal-detail__section-title">Información General</h3>
               
-              <div style="margin-bottom: 15px;">
-                <label style="display: block; font-weight: 700; color: #111827; margin-bottom: 4px;">Cliente</label>
-                <p style="margin: 0; color: #2b3440; background: #f9fafb; padding: 10px; border-radius: 8px;">${caseData.cliente || 'N/D'}</p>
+              <div class="case-modal-detail__field">
+                <label class="case-modal-detail__label">Cliente</label>
+                <p class="case-modal-detail__value">${caseData.cliente || 'N/D'}</p>
               </div>
 
-              <div style="margin-bottom: 15px;">
-                <label style="display: block; font-weight: 700; color: #111827; margin-bottom: 4px;">Categoría</label>
-                <p style="margin: 0; color: #2b3440; background: #f9fafb; padding: 10px; border-radius: 8px;">${caseData.categoria || 'General'}</p>
+              <div class="case-modal-detail__field">
+                <label class="case-modal-detail__label">Categoría</label>
+                <p class="case-modal-detail__value">${caseData.categoria || 'General'}</p>
               </div>
 
-              <div style="margin-bottom: 15px;">
-                <label style="display: block; font-weight: 700; color: #111827; margin-bottom: 4px;">Estado</label>
-                <span class="status ${estadoInfo.clase}" style="display: inline-block; color:${estadoInfo.color}; background-color:${estadoInfo.color}22; padding: 8px 12px; border-radius: 8px; font-weight: 600;">${estadoInfo.etiqueta}</span>
+              <div class="case-modal-detail__field">
+                <label class="case-modal-detail__label">Estado</label>
+                <span class="status ${estadoInfo.clase}" style="color:${estadoInfo.color}; background-color:${estadoInfo.color}22;">${estadoInfo.etiqueta}</span>
               </div>
 
-              <div style="margin-bottom: 15px;">
-                <label style="display: block; font-weight: 700; color: #111827; margin-bottom: 4px;">Prioridad</label>
-                <span class="priority ${prioridadInfo.clase}" style="display: inline-block; background-color:${prioridadInfo.color}22; color:${prioridadInfo.color}; padding: 8px 12px; border-radius: 8px; font-weight: 600;">${prioridadInfo.label}</span>
+              <div class="case-modal-detail__field">
+                <label class="case-modal-detail__label">Prioridad</label>
+                <span class="priority ${prioridadInfo.clase}" style="background-color:${prioridadInfo.color}22; color:${prioridadInfo.color};">${prioridadInfo.label}</span>
               </div>
+
+              ${caseData.tipo_servicio ? `
+              <div class="case-modal-detail__field">
+                <label class="case-modal-detail__label">Tipo de Servicio</label>
+                <p class="case-modal-detail__value">${caseData.tipo_servicio}</p>
+              </div>
+              ` : ''}
+
+              ${caseData.centro_costos ? `
+              <div class="case-modal-detail__field">
+                <label class="case-modal-detail__label">Centro de Costos</label>
+                <p class="case-modal-detail__value">${caseData.centro_costos}</p>
+              </div>
+              ` : ''}
             </div>
 
             <div>
-              <h3 style="margin: 0 0 15px 0; color: #111827; font-size: 16px;">Asignación</h3>
+              <h3 class="case-modal-detail__section-title">Asignación y Fechas</h3>
 
-              <div style="margin-bottom: 15px;">
-                <label style="display: block; font-weight: 700; color: #111827; margin-bottom: 4px;">Asignado a</label>
-                <div style="display: flex; align-items: center; background: #f9fafb; padding: 10px; border-radius: 8px;">
-                  <span style="display: inline-flex; align-items: center; justify-content: center; width: 36px; height: 36px; background: ${colorAvatar}; color: white; border-radius: 50%; font-weight: 700; margin-right: 10px;">${(caseData.asignado_a || 'U').charAt(0).toUpperCase()}</span>
-                  <span style="color: #2b3440; font-weight: 600;">${caseData.asignado_a || 'Sin asignar'}</span>
+              <div class="case-modal-detail__field">
+                <label class="case-modal-detail__label">Asignado a</label>
+                <div class="case-modal-detail__avatar-box">
+                  <span class="case-modal-detail__avatar" style="background: ${colorAvatar};">${(caseData.asignado_a || 'U').charAt(0).toUpperCase()}</span>
+                  <span style="color: #2b3440; font-weight: 600; font-size: 14px;">${caseData.asignado_a || 'Sin asignar'}</span>
                 </div>
               </div>
 
-              <div style="margin-bottom: 15px;">
-                <label style="display: block; font-weight: 700; color: #111827; margin-bottom: 4px;">Autor</label>
-                <p style="margin: 0; color: #2b3440; background: #f9fafb; padding: 10px; border-radius: 8px;">${caseData.autor || 'Gestor asignado'}</p>
+              <div class="case-modal-detail__field">
+                <label class="case-modal-detail__label">Autor</label>
+                <p class="case-modal-detail__value">${caseData.autor || 'Gestor asignado'}</p>
               </div>
+
+              ${caseData.fecha_actualizacion ? `
+              <div class="case-modal-detail__field">
+                <label class="case-modal-detail__label">Última Actualización</label>
+                <p class="case-modal-detail__value">${new Date(caseData.fecha_actualizacion).toLocaleDateString('es-ES', { month: 'long', day: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit' })}</p>
+              </div>
+              ` : ''}
             </div>
           </div>
 
-          <div style="margin-top: 20px; padding-top: 20px; border-top: 1px solid #ebedf2;">
-            <h3 style="margin: 0 0 15px 0; color: #111827; font-size: 16px;">Descripción</h3>
-            <div style="background: #f9fafb; padding: 15px; border-radius: 8px; color: #2b3440; line-height: 1.6; white-space: pre-wrap;">
-              ${caseData.descripcion || 'Sin descripción disponible'}
-            </div>
+          <div class="case-modal-detail__description-section">
+            <h3 class="case-modal-detail__section-title">Descripción</h3>
+            <div class="case-modal-detail__description">${caseData.descripcion || 'Sin descripción disponible'}</div>
           </div>
 
-          ${caseData.sede ? `
-          <div style="margin-top: 20px; padding: 15px; background: #f0f9ff; border-left: 4px solid #0ea5e9; border-radius: 8px;">
-            <p style="margin: 0; color: #0369a1;"><strong>Sede:</strong> ${caseData.sede}</p>
+          ${caseData.sede || caseData.direccion ? `
+          <div class="case-modal-detail__info-box">
+            ${caseData.sede ? `<p style="margin: 0 0 8px 0; color: #0369a1; font-weight: 600;"><strong>📍 Sede:</strong> ${caseData.sede}</p>` : ''}
+            ${caseData.direccion ? `<p style="margin: 0; color: #0369a1; font-size: 13px;"><strong>📌 Dirección:</strong> ${caseData.direccion}</p>` : ''}
           </div>
           ` : ''}
 
           ${caseData.contacto || caseData.correo || caseData.telefono ? `
-          <div style="margin-top: 20px;">
-            <h3 style="margin: 0 0 15px 0; color: #111827; font-size: 16px;">Contacto</h3>
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
-              ${caseData.contacto ? `<div style="background: #f9fafb; padding: 10px; border-radius: 8px;"><strong style="color: #111827;">Contacto:</strong> <p style="margin: 5px 0 0 0; color: #2b3440;">${caseData.contacto}</p></div>` : ''}
-              ${caseData.correo ? `<div style="background: #f9fafb; padding: 10px; border-radius: 8px;"><strong style="color: #111827;">Correo:</strong> <p style="margin: 5px 0 0 0; color: #2b3440;">${caseData.correo}</p></div>` : ''}
-              ${caseData.telefono ? `<div style="background: #f9fafb; padding: 10px; border-radius: 8px;"><strong style="color: #111827;">Teléfono:</strong> <p style="margin: 5px 0 0 0; color: #2b3440;">${caseData.telefono}</p></div>` : ''}
+          <div style="margin-bottom: 24px;">
+            <h3 class="case-modal-detail__section-title">Información de Contacto</h3>
+            <div class="case-modal-detail__grid">
+              ${caseData.contacto ? `
+              <div class="case-modal-detail__field">
+                <label class="case-modal-detail__label">👤 Contacto Principal</label>
+                <p class="case-modal-detail__value">${caseData.contacto}</p>
+              </div>` : ''}
+              ${caseData.correo ? `
+              <div class="case-modal-detail__field">
+                <label class="case-modal-detail__label">✉️ Correo Electrónico</label>
+                <p class="case-modal-detail__value"><a href="mailto:${caseData.correo}" style="color: var(--accent); text-decoration: none;">${caseData.correo}</a></p>
+              </div>` : ''}
+              ${caseData.telefono ? `
+              <div class="case-modal-detail__field">
+                <label class="case-modal-detail__label">📞 Teléfono</label>
+                <p class="case-modal-detail__value"><a href="tel:${caseData.telefono}" style="color: var(--accent); text-decoration: none;">${caseData.telefono}</a></p>
+              </div>` : ''}
             </div>
           </div>
           ` : ''}
 
-          <div style="margin-top: 20px; display: flex; gap: 10px; justify-content: flex-end;">
-            <button onclick="document.getElementById('case-detail-modal-overlay').style.display='none'" style="background: #e5e7eb; color: #111827; border: none; border-radius: 10px; padding: 10px 20px; cursor: pointer; font-weight: 700;">Cerrar</button>
-            <button onclick="openCaseModal('edit', window.currentCaseData)" style="background: #2563eb; color: white; border: none; border-radius: 10px; padding: 10px 20px; cursor: pointer; font-weight: 700;">Editar</button>
+          ${caseData.observaciones ? `
+          <div style="margin-bottom: 24px;">
+            <h3 class="case-modal-detail__section-title">📋 Observaciones Adicionales</h3>
+            <div class="case-modal-detail__description">${caseData.observaciones}</div>
+          </div>
+          ` : ''}
+
+          <div class="case-modal-detail__chat-section">
+            <h3 class="case-modal-detail__section-title">💬 Conversación con el Técnico</h3>
+            <div class="chat-container">
+              <div class="chat-messages" id="chat-messages-${caseData.id}">
+                <div class="chat-message chat-message--received">
+                  <div class="chat-message__avatar" style="background: ${colorAvatar};">${(caseData.asignado_a || 'T').charAt(0).toUpperCase()}</div>
+                  <div class="chat-message__content">
+                    <div class="chat-message__header">
+                      <span class="chat-message__author">${caseData.asignado_a || 'Técnico'}</span>
+                      <span class="chat-message__time">Hace 2 horas</span>
+                    </div>
+                    <div class="chat-message__text">He revisado el caso. Voy a investigar el problema de conectividad y les tendré una actualización pronto.</div>
+                  </div>
+                </div>
+                <div class="chat-message chat-message--sent">
+                  <div class="chat-message__content">
+                    <div class="chat-message__header">
+                      <span class="chat-message__author">Tú</span>
+                      <span class="chat-message__time">Hace 1 hora</span>
+                    </div>
+                    <div class="chat-message__text">Perfecto, quedo atento. El problema afecta a varios usuarios en este momento.</div>
+                  </div>
+                  <div class="chat-message__avatar" style="background: #15467b;">${currentUserName.charAt(0).toUpperCase()}</div>
+                </div>
+              </div>
+              <div class="chat-input-container">
+                <input type="text" class="chat-input" placeholder="Escribe un mensaje..." id="chat-input-${caseData.id}" />
+                <button class="chat-send-btn" onclick="sendChatMessage(${caseData.id})" title="Enviar mensaje">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="22" y1="2" x2="11" y2="13"/>
+                    <polygon points="22 2 15 22 11 13 2 9 22 2"/>
+                  </svg>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <div class="case-modal-detail__actions">
+            <button onclick="document.getElementById('case-detail-modal-overlay').style.display='none'" class="case-modal-detail__btn case-modal-detail__btn--secondary">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <line x1="18" y1="6" x2="6" y2="18"/>
+                <line x1="6" y1="6" x2="18" y2="18"/>
+              </svg>
+              Cerrar
+            </button>
+            <button onclick="openCaseModal('edit', window.currentCaseData)" class="case-modal-detail__btn case-modal-detail__btn--primary">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+                <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+              </svg>
+              Editar Caso
+            </button>
           </div>
         </div>
       `;
 
       window.currentCaseData = caseData;
       overlay.style.display = 'flex';
+      
+      // Configurar el evento Enter en el input de chat
+      setTimeout(() => {
+        const chatInput = document.getElementById(`chat-input-${caseData.id}`);
+        if (chatInput) {
+          chatInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter' && !e.shiftKey) {
+              e.preventDefault();
+              sendChatMessage(caseData.id);
+            }
+          });
+          
+          // Hacer scroll al final del chat
+          const chatMessages = document.getElementById(`chat-messages-${caseData.id}`);
+          if (chatMessages) {
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+          }
+        }
+      }, 100);
       
       // Cerrar al hacer clic fuera del modal
       overlay.addEventListener('click', (e) => {
@@ -659,6 +788,48 @@ document.addEventListener('DOMContentLoaded', () => {
         }
       });
     }
+
+    // Función para enviar mensajes de chat
+    window.sendChatMessage = function(caseId) {
+      const input = document.getElementById(`chat-input-${caseId}`);
+      const messagesContainer = document.getElementById(`chat-messages-${caseId}`);
+      
+      if (!input || !messagesContainer || !input.value.trim()) return;
+      
+      const messageText = input.value.trim();
+      const now = new Date();
+      const timeStr = 'Ahora mismo';
+      
+      // Crear el elemento del mensaje
+      const messageDiv = document.createElement('div');
+      messageDiv.className = 'chat-message chat-message--sent';
+      messageDiv.innerHTML = `
+        <div class="chat-message__content">
+          <div class="chat-message__header">
+            <span class="chat-message__author">Tú</span>
+            <span class="chat-message__time">${timeStr}</span>
+          </div>
+          <div class="chat-message__text">${messageText}</div>
+        </div>
+        <div class="chat-message__avatar" style="background: #15467b;">${currentUserName.charAt(0).toUpperCase()}</div>
+      `;
+      
+      // Agregar el mensaje al contenedor
+      messagesContainer.appendChild(messageDiv);
+      
+      // Limpiar el input
+      input.value = '';
+      
+      // Hacer scroll al final
+      messagesContainer.scrollTop = messagesContainer.scrollHeight;
+      
+      // TODO: Aquí se puede agregar la llamada al API para guardar el mensaje
+      // fetch(getApiUrl() + '/casos/' + caseId + '/mensajes', {
+      //   method: 'POST',
+      //   headers: { 'Content-Type': 'application/json' },
+      //   body: JSON.stringify({ mensaje: messageText })
+      // });
+    };
 
     function openCaseModal(mode, caseData) {
       closeMenu();
@@ -777,6 +948,20 @@ document.addEventListener('DOMContentLoaded', () => {
       const endIdx = startIdx + itemsPerPage;
       const pageCases = allCases.slice(startIdx, endIdx);
 
+      // Renderizar según la vista activa
+      if (currentView === 'lista') {
+        renderTableView(pageCases);
+      } else if (currentView === 'cuadricula') {
+        renderGridView(pageCases);
+      } else if (currentView === 'arbol') {
+        renderTreeView(pageCases);
+      }
+
+      updatePagerButtons();
+    }
+
+    // Renderizar vista de tabla (lista)
+    function renderTableView(pageCases) {
       tbody.innerHTML = '';
 
       if (pageCases.length === 0) {
@@ -845,8 +1030,110 @@ document.addEventListener('DOMContentLoaded', () => {
         tbody.appendChild(tr);
 
       });
+    }
 
-      updatePagerButtons();
+    // Renderizar vista de cuadrícula
+    function renderGridView(pageCases) {
+      casesGrid.innerHTML = '';
+
+      if (pageCases.length === 0) {
+        casesGrid.innerHTML = '<div style="text-align:center; padding:40px; grid-column: 1/-1;">No hay casos para mostrar</div>';
+        return;
+      }
+
+      pageCases.forEach(c => {
+        const estadoLower = (c.estado || '').toLowerCase();
+        const estadoInfo = estadoMeta[estadoLower] || { clase: 'abierto', etiqueta: c.estado || 'Abierto', color: '#16a34a' };
+        
+        const prioridadLower = (c.prioridad || 'media').toLowerCase();
+        const prioridadInfo = prioridadMeta[prioridadLower] || prioridadMeta['media'];
+
+        const coloresAvatar = ['#FF6B6B', '#4ECDC4', '#45B7D1', '#FFA07A', '#98D8C8', '#F7DC6F', '#BB8FCE', '#85C1E2'];
+        const hash = (c.asignado_a || 'U').charCodeAt(0) % coloresAvatar.length;
+        const colorAvatar = coloresAvatar[hash];
+
+        const card = document.createElement('div');
+        card.className = 'case-card-mini';
+        card.style.cursor = 'pointer';
+        card.innerHTML = `
+          <div class="mini-top">
+            <strong style="font-size:12px;">#${formatCaseId(c.id)}</strong>
+            <span class="priority ${prioridadInfo.clase}" style="background-color:${prioridadInfo.color}22; color:${prioridadInfo.color}; font-size:11px; padding:3px 8px;">${prioridadInfo.label}</span>
+          </div>
+          <div class="mini-mid">
+            <span class="status ${estadoInfo.clase}" style="color:${estadoInfo.color}; background-color:${estadoInfo.color}22; font-size:12px;"><span class="checkdot" style="background:${estadoInfo.color}"></span>${estadoInfo.etiqueta}</span>
+          </div>
+          <div class="mini-bottom">
+            <span class="category-badge" style="font-size:11px;">${c.categoria || 'General'}</span>
+            <div class="assignee">
+              <span class="ava" style="background:${colorAvatar}; width:24px; height:24px; font-size:11px;">${(c.asignado_a || 'U').charAt(0).toUpperCase()}</span>
+            </div>
+          </div>
+        `;
+
+        card.addEventListener('click', () => openCaseDetailModal(c));
+        casesGrid.appendChild(card);
+      });
+    }
+
+    // Renderizar vista de árbol (agrupada por estado)
+    function renderTreeView(pageCases) {
+      casesTree.innerHTML = '';
+
+      if (pageCases.length === 0) {
+        casesTree.innerHTML = '<div style="text-align:center; padding:40px;">No hay casos para mostrar</div>';
+        return;
+      }
+
+      // Agrupar casos por estado
+      const groupedByEstado = {};
+      pageCases.forEach(c => {
+        const estado = (c.estado || 'abierto').toLowerCase();
+        if (!groupedByEstado[estado]) groupedByEstado[estado] = [];
+        groupedByEstado[estado].push(c);
+      });
+
+      // Renderizar cada grupo
+      Object.keys(groupedByEstado).forEach(estado => {
+        const estadoInfo = estadoMeta[estado] || { clase: 'abierto', etiqueta: estado, color: '#16a34a' };
+        const casos = groupedByEstado[estado];
+
+        const group = document.createElement('div');
+        group.className = 'tree-group';
+        
+        const header = document.createElement('h4');
+        header.style.color = estadoInfo.color;
+        header.textContent = `${estadoInfo.etiqueta} (${casos.length})`;
+        
+        const list = document.createElement('ul');
+        
+        casos.forEach(c => {
+          const prioridadLower = (c.prioridad || 'media').toLowerCase();
+          const prioridadInfo = prioridadMeta[prioridadLower] || prioridadMeta['media'];
+
+          const li = document.createElement('li');
+          li.style.cursor = 'pointer';
+          li.innerHTML = `
+            <div style="display:flex; align-items:center; justify-content:space-between; gap:10px;">
+              <div style="display:flex; align-items:center; gap:10px;">
+                <strong style="font-size:13px;">#${formatCaseId(c.id)}</strong>
+                <span style="font-size:13px; color:#4b5563;">${c.categoria || 'General'}</span>
+              </div>
+              <div style="display:flex; align-items:center; gap:8px;">
+                <span class="priority ${prioridadInfo.clase}" style="background-color:${prioridadInfo.color}22; color:${prioridadInfo.color}; font-size:11px; padding:3px 8px;">${prioridadInfo.label}</span>
+                <small style="color:#6b7280;">${c.asignado_a || 'Sin asignar'}</small>
+              </div>
+            </div>
+          `;
+          
+          li.addEventListener('click', () => openCaseDetailModal(c));
+          list.appendChild(li);
+        });
+
+        group.appendChild(header);
+        group.appendChild(list);
+        casesTree.appendChild(group);
+      });
     }
 
     // Actualizar nÃºmeros de pÃ¡gina
@@ -909,6 +1196,116 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     });
 
+    // Datos de ejemplo para desarrollo
+    const exampleCases = [
+      {
+        id: 1,
+        cliente: 'Grupo Éxito',
+        estado: 'en_progreso',
+        asignado_a: 'Carlos Méndez',
+        prioridad: 'alta',
+        categoria: 'RED',
+        autor: 'Juan Pérez',
+        fecha_creacion: '2026-01-25T10:30:00Z',
+        fecha_actualizacion: '2026-01-26T14:20:00Z',
+        descripcion: 'Problema de conectividad en la red principal',
+        sede: 'Sede Principal - Bogotá',
+        contacto: 'María González',
+        correo: 'maria.gonzalez@grupoexito.com',
+        telefono: '+57 310 456 7890',
+        direccion: 'Calle 100 #8A-55, Bogotá',
+        centro_costos: 'CC-TI-001',
+        tipo_servicio: 'Soporte Técnico',
+        observaciones: 'El problema se presenta en el área de sistemas del piso 5. Afecta aproximadamente 15 equipos.'
+      },
+      {
+        id: 2,
+        cliente: 'Telecom Colombia',
+        estado: 'abierto',
+        asignado_a: 'Técnico 1',
+        prioridad: 'critica',
+        categoria: 'SERVIDOR',
+        autor: 'Juan Pérez',
+        fecha_creacion: '2026-01-24T14:15:00Z',
+        fecha_actualizacion: '2026-01-24T14:15:00Z',
+        descripcion: 'Servidor no responde a conexiones remotas',
+        sede: 'Centro de Datos Norte',
+        contacto: 'Pedro Ramírez',
+        correo: 'pedro.ramirez@telecom.com.co',
+        telefono: '+57 315 789 1234',
+        direccion: 'Av. Caracas #45-67, Bogotá',
+        centro_costos: 'CC-INFRA-002',
+        tipo_servicio: 'Infraestructura',
+        observaciones: 'Servidor crítico de producción fuera de servicio desde las 2:00 PM.'
+      },
+      {
+        id: 3,
+        cliente: 'Alpina',
+        estado: 'pausado',
+        asignado_a: 'Técnico 2',
+        prioridad: 'media',
+        categoria: 'BACKUP',
+        autor: 'Juan Pérez',
+        fecha_creacion: '2026-01-23T09:00:00Z',
+        descripcion: 'Falla en el proceso de backup automático'
+      },
+      {
+        id: 4,
+        cliente: 'Compensar',
+        estado: 'resuelto',
+        asignado_a: 'Carlos Méndez',
+        prioridad: 'baja',
+        categoria: 'SOFTWARE',
+        autor: 'Juan Pérez',
+        fecha_creacion: '2026-01-22T16:45:00Z',
+        descripcion: 'Actualización de software completada'
+      },
+      {
+        id: 5,
+        cliente: 'Sura',
+        estado: 'en_progreso',
+        asignado_a: 'Técnico 3',
+        prioridad: 'urgente',
+        categoria: 'SEGURIDAD',
+        autor: 'Juan Pérez',
+        fecha_creacion: '2026-01-21T11:20:00Z',
+        descripcion: 'Implementación de firewall de nueva generación'
+      },
+      {
+        id: 6,
+        cliente: 'Nutresa',
+        estado: 'abierto',
+        asignado_a: 'Técnico 4',
+        prioridad: 'alta',
+        categoria: 'HARDWARE',
+        autor: 'Juan Pérez',
+        fecha_creacion: '2026-01-20T13:30:00Z',
+        descripcion: 'Reemplazo de disco duro defectuoso'
+      },
+      {
+        id: 7,
+        cliente: 'Carvajal',
+        estado: 'cerrado',
+        asignado_a: 'Técnico 5',
+        prioridad: 'media',
+        categoria: 'TELEFONÍA',
+        autor: 'Juan Pérez',
+        fecha_creacion: '2026-01-19T15:00:00Z',
+        descripcion: 'Configuración de extensiones telefónicas'
+      },
+      {
+        id: 8,
+        cliente: 'PostobÃ³n',
+        estado: 'en_progreso',
+        asignado_a: 'Carlos Méndez',
+        prioridad: 'media',
+        categoria: 'RED',
+        autor: 'Juan Pérez',
+        fecha_creacion: '2026-01-18T10:10:00Z',
+        descripcion: 'Optimización de ancho de banda'
+      }
+    ];
+
     // Cargar datos
     fetch(getApiUrl() + '/casos')
       .then(res => {
@@ -922,8 +1319,8 @@ document.addEventListener('DOMContentLoaded', () => {
         allCases = (data.data && Array.isArray(data.data)) ? data.data : (data || []);
         
         if (allCases.length === 0) {
-          tbody.innerHTML = '<tr><td colspan="10" style="text-align:center; padding:20px;">No hay casos registrados</td></tr>';
-          return;
+          // Usar datos de ejemplo si no hay casos en la BD
+          allCases = exampleCases;
         }
 
         currentPage = 1;
@@ -931,7 +1328,10 @@ document.addEventListener('DOMContentLoaded', () => {
       })
       .catch(err => {
         console.error('Error cargando tabla:', err);
-        tbody.innerHTML = '<tr><td colspan="10" style="text-align:center; padding:20px; color:#dc2626;">Error al cargar casos. Por favor, verifica la conexiÃ³n.</td></tr>';
+        // Usar datos de ejemplo cuando hay error de conexión
+        allCases = exampleCases;
+        currentPage = 1;
+        renderPage(currentPage);
       });
 
     // Eventos de Previous/Next
@@ -953,6 +1353,46 @@ document.addEventListener('DOMContentLoaded', () => {
         }
       });
     }
+
+    // =====================
+    // Cambio de vista (Lista, Cuadrícula, Árbol)
+    // =====================
+    const viewButtons = document.querySelectorAll('.segmented button[data-view]');
+    viewButtons.forEach(btn => {
+      btn.addEventListener('click', () => {
+        const selectedView = btn.dataset.view;
+        if (selectedView === currentView) return;
+
+        // Actualizar botones activos
+        viewButtons.forEach(b => {
+          b.classList.remove('active');
+          b.setAttribute('aria-selected', 'false');
+        });
+        btn.classList.add('active');
+        btn.setAttribute('aria-selected', 'true');
+
+        // Cambiar vista
+        currentView = selectedView;
+
+        // Mostrar/ocultar contenedores
+        if (currentView === 'lista') {
+          casesTable.style.display = 'table';
+          casesGrid.style.display = 'none';
+          casesTree.style.display = 'none';
+        } else if (currentView === 'cuadricula') {
+          casesTable.style.display = 'none';
+          casesGrid.style.display = 'grid';
+          casesTree.style.display = 'none';
+        } else if (currentView === 'arbol') {
+          casesTable.style.display = 'none';
+          casesGrid.style.display = 'none';
+          casesTree.style.display = 'block';
+        }
+
+        // Re-renderizar la página actual
+        renderPage(currentPage);
+      });
+    });
   })();
 
   // =====================

@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Borradores - CSU</title>
     <link rel="stylesheet" href="../../Estilos.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="Borradores.css">
 </head>
 <body>
@@ -128,183 +129,77 @@
                 </div>
             </div>
 
-            <div class="case-card">
-                <header class="header">
-                    <div class="header-content">
-                        <div class="header-left">
-                            <div class="header-icon drafts-icon">
-                                <i data-lucide="file-edit" class="header-icon-svg"></i>
-                            </div>
-                            <div>
-                                <h1 class="header-title">Borradores</h1>
-                                <p class="header-subtitle">Casos guardados en borrador pendientes de publicación</p>
-                            </div>
-                        </div>
-                        <div class="header-right">
-                            <div class="header-stats">
-                                <p class="stats-label">Borradores guardados</p>
-                                <p class="stats-value" id="drafts-count">7</p>
-                            </div>
-                        </div>
-                    </div>
-                </header>
-
-                <div class="content-area">
-                    <div class="info-banner">
-                        <div class="info-content">
-                            <i data-lucide="alert-circle" class="info-icon"></i>
-                            <div>
-                                <h3 class="info-title">Información sobre borradores</h3>
-                                <p class="info-message">
-                                    Los borradores te permiten guardar casos incompletos para continuar más tarde. 
-                                    Completa todos los campos requeridos (mínimo 80% de completitud) antes de publicar como caso activo.
-                                </p>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="stats-container">
-                        <div class="stat-card">
-                            <div class="stat-header">
-                                <p class="stat-label">Total Borradores</p>
-                                <i data-lucide="file-edit" class="stat-icon stat-icon-gray"></i>
-                            </div>
-                            <p class="stat-value" id="total-drafts">7</p>
-                        </div>
-
-                        <div class="stat-card">
-                            <div class="stat-header">
-                                <p class="stat-label">Listos para Publicar</p>
-                                <i data-lucide="check-circle" class="stat-icon stat-icon-green"></i>
-                            </div>
-                            <p class="stat-value ready-count" id="ready-count">2</p>
-                        </div>
-
-                        <div class="stat-card">
-                            <div class="stat-header">
-                                <p class="stat-label">En Progreso</p>
-                                <i data-lucide="clock" class="stat-icon stat-icon-yellow"></i>
-                            </div>
-                            <p class="stat-value progress-count" id="progress-count">3</p>
-                        </div>
-
-                        <div class="stat-card">
-                            <div class="stat-header">
-                                <p class="stat-label">Incompletos</p>
-                                <i data-lucide="alert-circle" class="stat-icon stat-icon-red"></i>
-                            </div>
-                            <p class="stat-value incomplete-count" id="incomplete-count">2</p>
-                        </div>
-                    </div>
-
-                    <div class="search-bar">
-                        <div class="search-container">
-                            <i data-lucide="search" class="search-icon"></i>
-                            <input type="text" placeholder="Buscar en borradores..." class="search-input" id="search-input" />
-                        </div>
-                    </div>
-
-                    <div class="drafts-list" id="drafts-list"></div>
-                </div>
-
-                <div class="modal-overlay" id="detail-modal">
-                    <div class="modal">
-                        <div class="modal-header">
-                            <div class="modal-title-section">
-                                <div class="modal-title-row">
-                                    <h2 class="modal-title" id="modal-draft-id">DRAFT-001</h2>
-                                    <span class="priority-badge" id="modal-priority">Alta</span>
-                                </div>
-                                <h3 class="modal-subtitle" id="modal-draft-title">Actualización servidores Datacenter</h3>
-                            </div>
-                            <button class="modal-close" id="close-detail-modal">✕</button>
-                        </div>
-
-                        <div class="modal-body">
-                            <div class="completeness-section">
-                                <div class="completeness-header">
-                                    <p class="completeness-label">Progreso de Completitud</p>
-                                    <p class="completeness-value" id="modal-completeness">75%</p>
-                                </div>
-                                <div class="completeness-bar">
-                                    <div class="completeness-fill" id="modal-completeness-bar"></div>
-                                </div>
-                            </div>
-
-                            <div class="missing-fields-section" id="modal-missing-fields"></div>
-
-                            <div class="details-grid">
-                                <div class="detail-item">
-                                    <p class="detail-label">Cliente</p>
-                                    <p class="detail-value" id="modal-client">ECOPETROL</p>
-                                </div>
-                                <div class="detail-item">
-                                    <p class="detail-label">Categoría</p>
-                                    <p class="detail-value" id="modal-category">HARDWARE</p>
-                                </div>
-                                <div class="detail-item">
-                                    <p class="detail-label">Creado</p>
-                                    <p class="detail-value" id="modal-created">10 Ene 2025, 14:30</p>
-                                </div>
-                                <div class="detail-item">
-                                    <p class="detail-label">Última Modificación</p>
-                                    <p class="detail-value" id="modal-modified">Hace 1 hora</p>
-                                </div>
-                                <div class="detail-item">
-                                    <p class="detail-label">Contacto</p>
-                                    <p class="detail-value" id="modal-contact">María Rodríguez</p>
-                                </div>
-                                <div class="detail-item">
-                                    <p class="detail-label">Teléfono</p>
-                                    <p class="detail-value" id="modal-phone">+57 310 456 7890</p>
-                                </div>
-                            </div>
-
-                            <div class="description-section" id="modal-description-section"></div>
-                            <div class="notes-section" id="modal-notes-section"></div>
-                        </div>
-
-                        <div class="modal-footer">
-                            <button class="btn btn-primary" id="continue-editing-btn">Continuar Editando</button>
-                            <button class="btn btn-success" id="publish-draft-btn">Publicar Caso</button>
-                            <button class="btn btn-outline" id="close-modal-btn">Cerrar</button>
+            <!-- Contenido de Borradores -->
+            <div class="content-page">
+                <!-- Header -->
+                <div class="b-header">
+                    <div class="b-header-left">
+                        <div class="b-icon"><i class="fas fa-file-alt"></i></div>
+                        <div>
+                            <h1>Borradores</h1>
+                            <p>Casos guardados como borrador pendientes de publicación</p>
                         </div>
                     </div>
                 </div>
 
-                <div class="modal-overlay" id="delete-modal">
-                    <div class="delete-modal">
-                        <div class="delete-modal-content">
-                            <div class="delete-modal-header">
-                                <div class="delete-icon">
-                                    <i data-lucide="trash-2" class="delete-icon-svg"></i>
-                                </div>
-                                <div>
-                                    <h3 class="delete-title">Eliminar Borrador</h3>
-                                    <p class="delete-subtitle">Esta acción no se puede deshacer</p>
-                                </div>
-                            </div>
-                            <p class="delete-message">
-                                ¿Estás seguro que deseas eliminar el borrador <strong id="delete-draft-id">DRAFT-001</strong>?
-                                <br />
-                                <span class="delete-draft-title" id="delete-draft-title">Actualización servidores Datacenter</span>
-                            </p>
-                            <div class="delete-modal-footer">
-                                <button class="btn btn-outline" id="cancel-delete-btn">Cancelar</button>
-                                <button class="btn btn-danger" id="confirm-delete-btn">Eliminar</button>
-                            </div>
-                        </div>
+                <!-- Info Banner -->
+                <div class="info-banner">
+                    <i class="fas fa-info-circle"></i>
+                    <div>
+                        <h3>Información sobre borradores</h3>
+                        <p>Los borradores son casos incompletos que puedes guardar. Completa todos los campos requeridos antes de publicarlos.</p>
                     </div>
                 </div>
+
+                <!-- KPIs Grid -->
+                <section class="kpi-grid">
+                    <div class="kpi kpi-total">
+                        <div class="kpi-header">
+                            <i class="fas fa-file"></i>
+                            <span class="kpi-label">Total Borradores</span>
+                        </div>
+                        <strong id="kpiTotal">0</strong>
+                    </div>
+                    <div class="kpi kpi-listos">
+                        <div class="kpi-header">
+                            <i class="fas fa-check"></i>
+                            <span class="kpi-label">Listos para Publicar</span>
+                        </div>
+                        <strong id="kpiReady">0</strong>
+                    </div>
+                    <div class="kpi kpi-progreso">
+                        <div class="kpi-header">
+                            <i class="fas fa-spinner"></i>
+                            <span class="kpi-label">En Progreso</span>
+                        </div>
+                        <strong id="kpiProgress">0</strong>
+                    </div>
+                    <div class="kpi kpi-incompletos">
+                        <div class="kpi-header">
+                            <i class="fas fa-exclamation"></i>
+                            <span class="kpi-label">Incompletos</span>
+                        </div>
+                        <strong id="kpiIncomplete">0</strong>
+                    </div>
+                </section>
+
+                <!-- Buscador -->
+                <section class="filters">
+                    <input type="text" id="search" placeholder="🔍 Buscar en borradores">
+                    <select id="statusFilter" aria-label="Filtrar por estado">
+                        <option value="all">Todos los estados</option>
+                        <option>Listos</option>
+                        <option>En Progreso</option>
+                        <option>Incompletos</option>
+                    </select>
+                </section>
+
+                <!-- Listado -->
+                <section id="casesList">
+                </section>
             </div>
         </main>
     </div>
-
-    <script src="https://unpkg.com/lucide@latest"></script>
-    <script>
-        // Inicializar íconos de Lucide
-        lucide.createIcons();
-    </script>
     <script src="Borradores.js"></script>
 </body>
 </html>

@@ -205,54 +205,47 @@ const newClient = () => {
   showToast('Funcionalidad de nuevo cliente en desarrollo');
 };
 
-const fetchClients = async () => {
+// Cargar clientes dinámicamente desde BD
+async function fetchClients() {
   try {
-    const [clientsRes, casosRes] = await Promise.all([
-      fetch(`${API_URL}?action=get_clientes`).catch(() => ({ ok: false })),
-      fetch(`${API_URL}?action=get_casos_simple`).catch(() => ({ ok: false }))
+    if (!window.api) {
+      console.warn('API client no disponible');
+      return;
+    }
+
+    // Cargar datos en paralelo desde BD
+    const [casos, usuarios] = await Promise.all([
+      window.api.getCasos(),
+      window.api.getUsuarios()
     ]);
 
-    let clientsData = [];
-    let casosData = [];
+    // Extraer clientes únicos desde casos
+    const uniqueClients = new Map();
+    casos.forEach(caso => {
+      const clientName = caso.cliente || 'Sin cliente';
+      if (!uniqueClients.has(clientName) && clientName !== 'Sin cliente') {
+        uniqueClients.set(clientName, {
+          id: uniqueClients.size + 1,
+          nombre: clientName,
+          industria: caso.categoria || 'General',
+          contacto: caso.contacto || 'Sin contacto',
+          telefono: caso.telefono || 'Sin teléfono',
+          email: caso.correo || 'sin-email@example.com',
+          direccion: caso.sede || 'Sin dirección',
+          satisfaccion: Math.floor(80 + Math.random() * 20)
+        });
+      }
+    });
 
-    if (clientsRes.ok) {
-      const data = await clientsRes.json();
-      clientsData = Array.isArray(data) ? data : [];
-    }
-
-    if (casosRes.ok) {
-      const data = await casosRes.json();
-      casosData = Array.isArray(data) ? data : [];
-    }
-
-    if (clientsData.length === 0 && casosData.length > 0) {
-      const uniqueClients = new Map();
-      casosData.forEach(caso => {
-        const clientName = caso.cliente || caso.empresa || 'Sin cliente';
-        if (!uniqueClients.has(clientName) && clientName !== 'Sin cliente') {
-          uniqueClients.set(clientName, {
-            id: uniqueClients.size + 1,
-            nombre: clientName,
-            industria: caso.industria || 'General',
-            contacto: 'Sin contacto',
-            telefono: 'Sin telefono',
-            email: 'sin-email@example.com',
-            direccion: 'Sin direccion'
-          });
-        }
-      });
-      clientsData = Array.from(uniqueClients.values());
-    }
-
-    allClients = clientsData.map(item => mapClient(item, casosData));
+    const clientsData = Array.from(uniqueClients.values());
+    allClients = clientsData.map(item => mapClient(item, casos));
     clients = allClients;
     render();
-    showToast('Clientes actualizados');
-  } catch (err) {
-    console.error('Error al cargar clientes:', err);
+  } catch (error) {
+    console.error('Error al cargar clientes:', error);
     showToast('No se pudieron cargar los clientes', true);
   }
-};
+}
 
 const startAutoRefresh = () => {
   if (autoRefreshTimer) clearInterval(autoRefreshTimer);

@@ -81,12 +81,53 @@ function updateKPIs(stats, casos) {
   const avgHours = calcularTiempoPromedio(casos);
   const satisfaccion = Math.max(80, Math.min(100, Math.round(tasaResolucion || 90))); // proxy al no tener dato real
 
-  if (totalElement) totalElement.textContent = total;
-  if (resolucionElement) resolucionElement.textContent = `${tasaResolucion}%`;
-  if (tiempoElement) tiempoElement.textContent = `${avgHours}h`;
-  if (satisfaccionElement) satisfaccionElement.textContent = `${satisfaccion}%`;
+  // Animación de conteo con colores dinámicos
+  if (totalElement) {
+    animateValue(totalElement, 0, total, 1200);
+    totalElement.closest('.kpi-card')?.classList.add('kpi-loaded');
+  }
+  if (resolucionElement) {
+    animateValue(resolucionElement, 0, tasaResolucion, 1400, '%');
+    const card = resolucionElement.closest('.kpi-card');
+    card?.classList.add('kpi-loaded');
+    if (tasaResolucion >= 80) card?.classList.add('kpi-success');
+    else if (tasaResolucion >= 60) card?.classList.add('kpi-warning');
+    else card?.classList.add('kpi-danger');
+  }
+  if (tiempoElement) {
+    animateValue(tiempoElement, 0, avgHours, 1600, 'h');
+    tiempoElement.closest('.kpi-card')?.classList.add('kpi-loaded');
+  }
+  if (satisfaccionElement) {
+    animateValue(satisfaccionElement, 0, satisfaccion, 1800, '%');
+    const card = satisfaccionElement.closest('.kpi-card');
+    card?.classList.add('kpi-loaded');
+    if (satisfaccion >= 90) card?.classList.add('kpi-success');
+    else if (satisfaccion >= 75) card?.classList.add('kpi-warning');
+  }
 
   setTrends();
+}
+
+function animateValue(element, start, end, duration, suffix = '') {
+  const startTime = Date.now();
+  const isDecimal = String(end).includes('.');
+  
+  function update() {
+    const elapsed = Date.now() - startTime;
+    const progress = Math.min(elapsed / duration, 1);
+    const easeOut = 1 - Math.pow(1 - progress, 3);
+    const current = start + (end - start) * easeOut;
+    
+    const value = isDecimal ? current.toFixed(1) : Math.round(current);
+    element.textContent = value + suffix;
+    
+    if (progress < 1) {
+      requestAnimationFrame(update);
+    }
+  }
+  
+  update();
 }
 
 function setTrends() {
@@ -154,30 +195,73 @@ function renderMonthlyChart(casos) {
         {
           label: 'Creados',
           data: totals,
-          borderWidth: 2,
+          borderWidth: 3,
           borderColor: '#1d4ed8',
-          backgroundColor: 'rgba(29,78,216,0.08)',
-          tension: 0.3,
-          pointRadius: 3
+          backgroundColor: 'rgba(29,78,216,0.12)',
+          tension: 0.4,
+          pointRadius: 5,
+          pointHoverRadius: 7,
+          pointBackgroundColor: '#1d4ed8',
+          pointBorderColor: '#fff',
+          pointBorderWidth: 2,
+          fill: true
         },
         {
           label: 'Resueltos',
           data: solved,
-          borderWidth: 2,
+          borderWidth: 3,
           borderColor: '#16a34a',
-          backgroundColor: 'rgba(22,163,74,0.08)',
-          tension: 0.3,
-          pointRadius: 3
+          backgroundColor: 'rgba(22,163,74,0.12)',
+          tension: 0.4,
+          pointRadius: 5,
+          pointHoverRadius: 7,
+          pointBackgroundColor: '#16a34a',
+          pointBorderColor: '#fff',
+          pointBorderWidth: 2,
+          fill: true
         }
       ]
     },
     options: {
       responsive: true,
       maintainAspectRatio: false,
-      plugins: { legend: { position: 'top' } },
+      animation: {
+        duration: 1500,
+        easing: 'easeInOutQuart'
+      },
+      plugins: { 
+        legend: { 
+          position: 'top',
+          labels: {
+            padding: 15,
+            font: { size: 13, weight: '600' },
+            usePointStyle: true,
+            pointStyle: 'circle'
+          }
+        },
+        tooltip: {
+          backgroundColor: 'rgba(0,0,0,0.8)',
+          padding: 12,
+          cornerRadius: 8,
+          titleFont: { size: 14, weight: '600' },
+          bodyFont: { size: 13 }
+        }
+      },
       scales: {
-        x: { ticks: { color: palette.muted }, grid: { display: false } },
-        y: { ticks: { color: palette.muted }, grid: { color: 'rgba(0,0,0,0.04)' } }
+        x: { 
+          ticks: { color: palette.muted, font: { size: 12 } }, 
+          grid: { display: false },
+          border: { display: false }
+        },
+        y: { 
+          ticks: { color: palette.muted, font: { size: 12 } }, 
+          grid: { color: 'rgba(0,0,0,0.05)', drawBorder: false },
+          border: { display: false }
+        }
+      },
+      interaction: {
+        intersect: false,
+        mode: 'index'
       }
     }
   });
@@ -205,13 +289,59 @@ function renderCategoryChart(casos) {
       labels,
       datasets: [{
         data: valores,
-        backgroundColor: ['#1d4ed8', '#2563eb', '#60a5fa', '#93c5fd', '#7c3aed', '#a855f7']
+        backgroundColor: [
+          '#1d4ed8', // Azul primary
+          '#2563eb', // Azul medium
+          '#60a5fa', // Azul claro
+          '#7c3aed', // Violeta
+          '#a855f7', // Violeta claro
+          '#06b6d4', // Cyan
+          '#14b8a6', // Teal
+          '#f59e0b'  // Amber
+        ],
+        borderWidth: 3,
+        borderColor: '#fff',
+        hoverOffset: 15,
+        hoverBorderColor: '#fff',
+        hoverBorderWidth: 3
       }]
     },
     options: {
       responsive: true,
       maintainAspectRatio: false,
-      plugins: { legend: { position: 'bottom' } }
+      animation: {
+        duration: 1500,
+        easing: 'easeInOutQuart'
+      },
+      plugins: { 
+        legend: { 
+          position: 'bottom',
+          labels: {
+            padding: 12,
+            font: { size: 12, weight: '500' },
+            usePointStyle: true,
+            pointStyle: 'circle',
+            boxWidth: 10
+          }
+        },
+        tooltip: {
+          backgroundColor: 'rgba(0,0,0,0.8)',
+          padding: 12,
+          cornerRadius: 8,
+          titleFont: { size: 14, weight: '600' },
+          bodyFont: { size: 13 },
+          callbacks: {
+            label: function(context) {
+              const label = context.label || '';
+              const value = context.parsed || 0;
+              const total = context.dataset.data.reduce((a, b) => a + b, 0);
+              const percentage = ((value / total) * 100).toFixed(1);
+              return `${label}: ${value} (${percentage}%)`;
+            }
+          }
+        }
+      },
+      cutout: '65%'
     }
   });
 }
@@ -231,16 +361,61 @@ function renderPriorityChart(casos, stats) {
       labels: orden,
       datasets: [{
         data: counts,
-        backgroundColor: ['#ef4444', '#f97316', '#f59e0b', '#60a5fa', '#a3e635']
+        backgroundColor: [
+          '#ef4444', // Crítica - Rojo
+          '#f97316', // Urgente - Naranja oscuro
+          '#f59e0b', // Alta - Naranja
+          '#3b82f6', // Media - Azul
+          '#10b981'  // Baja - Verde
+        ],
+        borderRadius: 8,
+        borderSkipped: false,
+        hoverBackgroundColor: [
+          '#dc2626',
+          '#ea580c',
+          '#d97706',
+          '#2563eb',
+          '#059669'
+        ]
       }]
     },
     options: {
       responsive: true,
       maintainAspectRatio: false,
-      plugins: { legend: { display: false } },
+      animation: {
+        duration: 1500,
+        easing: 'easeInOutQuart'
+      },
+      plugins: { 
+        legend: { display: false },
+        tooltip: {
+          backgroundColor: 'rgba(0,0,0,0.8)',
+          padding: 12,
+          cornerRadius: 8,
+          titleFont: { size: 14, weight: '600' },
+          bodyFont: { size: 13 },
+          callbacks: {
+            title: function(context) {
+              return `Prioridad ${context[0].label}`;
+            },
+            label: function(context) {
+              return `Casos: ${context.parsed.y}`;
+            }
+          }
+        }
+      },
       scales: {
-        x: { ticks: { color: palette.muted } },
-        y: { ticks: { color: palette.muted }, beginAtZero: true }
+        x: { 
+          ticks: { color: palette.muted, font: { size: 12, weight: '600' } },
+          grid: { display: false },
+          border: { display: false }
+        },
+        y: { 
+          ticks: { color: palette.muted, font: { size: 12 } }, 
+          beginAtZero: true,
+          grid: { color: 'rgba(0,0,0,0.05)', drawBorder: false },
+          border: { display: false }
+        }
       }
     }
   });
@@ -264,22 +439,64 @@ function renderHourChart(casos) {
 
   if (hourChart) hourChart.destroy();
 
+  // Colores más vibrantes para horas pico
+  const maxValue = Math.max(...valoresLaborales);
+  const backgroundColors = valoresLaborales.map(val => {
+    const intensity = val / maxValue;
+    if (intensity > 0.7) return '#1d4ed8'; // Azul oscuro para pico
+    if (intensity > 0.4) return '#3b82f6'; // Azul medio
+    return '#93c5fd'; // Azul claro para bajo volumen
+  });
+
   hourChart = new Chart(ctx, {
     type: 'bar',
     data: {
       labels,
       datasets: [{
         data: valoresLaborales,
-        backgroundColor: '#60a5fa'
+        backgroundColor: backgroundColors,
+        borderRadius: 8,
+        borderSkipped: false,
+        hoverBackgroundColor: '#2563eb'
       }]
     },
     options: {
       responsive: true,
       maintainAspectRatio: false,
-      plugins: { legend: { display: false } },
+      animation: {
+        duration: 1500,
+        easing: 'easeInOutQuart'
+      },
+      plugins: { 
+        legend: { display: false },
+        tooltip: {
+          backgroundColor: 'rgba(0,0,0,0.8)',
+          padding: 12,
+          cornerRadius: 8,
+          titleFont: { size: 14, weight: '600' },
+          bodyFont: { size: 13 },
+          callbacks: {
+            title: function(context) {
+              return `Hora: ${context[0].label}`;
+            },
+            label: function(context) {
+              return `Casos creados: ${context.parsed.y}`;
+            }
+          }
+        }
+      },
       scales: {
-        x: { ticks: { color: palette.muted } },
-        y: { ticks: { color: palette.muted }, beginAtZero: true }
+        x: { 
+          ticks: { color: palette.muted, font: { size: 12, weight: '600' } },
+          grid: { display: false },
+          border: { display: false }
+        },
+        y: { 
+          ticks: { color: palette.muted, font: { size: 12 } }, 
+          beginAtZero: true,
+          grid: { color: 'rgba(0,0,0,0.05)', drawBorder: false },
+          border: { display: false }
+        }
       }
     }
   });

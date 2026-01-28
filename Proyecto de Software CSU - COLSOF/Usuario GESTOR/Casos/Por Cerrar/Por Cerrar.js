@@ -1,7 +1,3 @@
-const API_URL = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
-  ? 'http://localhost:3001/api'
-  : '/api';
-
 let cases = [];
 let selectedCase = null;
 let autoRefreshTimer = null;
@@ -199,9 +195,8 @@ const rejectCase = (id) => {
 
 const fetchPendingClose = async () => {
   try {
-    const res = await fetch(`${API_URL}?action=get_casos_simple`);
-    if (!res.ok) throw new Error('HTTP ' + res.status);
-    const data = await res.json();
+    if (!window.api) return;
+    const data = await window.api.getCasos();
     const filtered = Array.isArray(data) ? data.filter(isPendingClose) : [];
     cases = filtered.map(mapCase);
     render();

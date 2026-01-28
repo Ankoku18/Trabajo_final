@@ -4,12 +4,11 @@
   "description": "CSU COLSOF - Frontend con conexión a Supabase",
   "type": "module",
   "scripts": {
-    "db:check": "node ./db/check-connection.js",
-    "db:seed-users": "node ./db/seed-usuarios.js",
     "start": "node server.js",
     "dev": "node --watch server.js",
     "build": "echo \"Sin paso de build: proyecto Express para Vercel\"",
-    "vercel-build": "npm run build"
+    "vercel-build": "npm run build",
+    "check-vercel": "node setup-vercel.js"
   },
   "dependencies": {
     "bcrypt": "^6.0.0",

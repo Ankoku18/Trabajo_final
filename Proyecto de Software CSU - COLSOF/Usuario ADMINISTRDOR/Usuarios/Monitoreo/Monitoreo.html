@@ -125,18 +125,17 @@
       <div class="monitor-page">
         <header class="page-header">
           <div>
-            <p class="page-eyebrow">Usuarios</p>
-            <h1>Monitoreo de Usuarios</h1>
+            <h1>📊 Monitoreo de Usuarios</h1>
             <p class="page-desc">Seguimiento en tiempo real de sesiones y actividad</p>
           </div>
           <div class="page-actions">
-            <select id="timeRange" class="select-control">
+            <select id="timeRange" class="select-control" aria-label="Seleccionar rango de tiempo">
               <option value="1h">Última hora</option>
               <option value="24h" selected>Últimas 24 horas</option>
               <option value="7d">Últimos 7 días</option>
               <option value="30d">Últimos 30 días</option>
             </select>
-            <button class="btn primary" id="btnRefresh"><i class="fa fa-rotate-right"></i> Actualizar</button>
+            <button class="btn btn-primary" id="btnRefresh"><i class="fa fa-rotate-right"></i> Actualizar</button>
           </div>
         </header>
 

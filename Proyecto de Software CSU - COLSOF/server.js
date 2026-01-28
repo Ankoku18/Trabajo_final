@@ -19,20 +19,29 @@ let dbConnected = false
 app.use(cors())
 app.use(express.json())
 
-// Servir archivos estáticos
-app.use(express.static(path.join(__dirname)))
+// Servir archivos estáticos desde la raíz del proyecto
+app.use(express.static(__dirname))
+
+// Servir específicamente los directorios de usuarios
+app.use('/Usuario GESTOR', express.static(path.join(__dirname, 'Usuario GESTOR')))
+app.use('/Usuario ADMINISTRADOR', express.static(path.join(__dirname, 'Usuario ADMINISTRADOR')))
+app.use('/Usuario ADMINISTRDOR', express.static(path.join(__dirname, 'Usuario ADMINISTRDOR')))
+
+// Servir assets y otros recursos
 app.use('/assets', express.static(path.join(__dirname, 'assets')))
+app.use('/shared', express.static(path.join(__dirname, 'shared')))
 
 // Servir páginas HTML para rutas SPA
 app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'index.html'))
 })
 
-app.get('/Usuario\ GESTOR/*', (req, res) => {
+// Manejar rutas dinámicas de Usuario GESTOR
+app.get('/Usuario\\ GESTOR/*', (req, res) => {
   const filePath = path.join(__dirname, req.path.replace(/\%20/g, ' '))
   res.sendFile(filePath, (err) => {
     if (err) {
-      res.status(404).json({ error: 'Not found' })
+      res.status(404).json({ error: 'Archivo no encontrado' })
     }
   })
 })
