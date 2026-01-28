@@ -17,23 +17,7 @@ let dbConnected = false
 app.use(cors())
 app.use(express.json())
 
-// Servir archivos estáticos
-app.use(express.static(path.join(__dirname)))
-app.use('/assets', express.static(path.join(__dirname, 'assets')))
-
-// Servir páginas HTML para rutas SPA
-app.get('/', (req, res) => {
-  res.sendFile(path.join(__dirname, 'index.html'))
-})
-
-app.get('/Usuario\ GESTOR/*', (req, res) => {
-  const filePath = path.join(__dirname, req.path.replace(/\%20/g, ' '))
-  res.sendFile(filePath, (err) => {
-    if (err) {
-      res.status(404).json({ error: 'Not found' })
-    }
-  })
-})
+// ==================== RUTAS DE API (ANTES DE ARCHIVOS ESTÁTICOS) ====================
 
 // Health check
 app.get('/api/health', (req, res) => {
@@ -379,33 +363,38 @@ app.use((req, res) => {
   })
 })
 
-// Iniciar servidor
-app.listen(PORT, async () => {
-  console.log(`✅ Servidor API ejecutándose en http://localhost:${PORT}`)
-  
-  // Verificar conexión a BD al iniciar
-  try {
-    const client = await pool.connect()
-    const result = await client.query('SELECT current_database() as db, current_user as user')
-    client.release()
-    dbConnected = true
-    console.log(`✅ Conexión a BD exitosa: ${result.rows[0].db} (${result.rows[0].user})`)
-  } catch (error) {
-    console.error(`❌ Error en conexión a BD: ${error.message}`)
-    console.log('⚠️  El servidor continúa ejecutándose, pero las queries fallarán.')
-  }
-  
-  console.log(`📊 Endpoints disponibles:`)
-  console.log(`   GET  http://localhost:${PORT}/api/health`)
-  console.log(`   GET  http://localhost:${PORT}/api/casos`)
-  console.log(`   GET  http://localhost:${PORT}/api/casos/:id`)
-  console.log(`   POST http://localhost:${PORT}/api/casos`)
-  console.log(`   PUT  http://localhost:${PORT}/api/casos/:id`)
-  console.log(`   GET  http://localhost:${PORT}/api/estadisticas`)
-  console.log(`   GET  http://localhost:${PORT}/api/usuarios`)
-  console.log(`   GET  http://localhost:${PORT}/api/usuarios/:id`)
-  console.log(`   POST http://localhost:${PORT}/api/usuarios`)
-  console.log(`   PUT  http://localhost:${PORT}/api/usuarios/:id`)
-  console.log(`   GET  http://localhost:${PORT}/api/usuarios-stats`)
-  console.log(`\n🌐 Abre http://localhost:${PORT} en tu navegador`)
-})
+// Iniciar servidor solo en modo local. En Vercel exportamos el handler sin levantar listener.
+if (!isVercel) {
+  app.listen(PORT, async () => {
+    console.log(`✅ Servidor API ejecutándose en http://localhost:${PORT}`)
+    
+    // Verificar conexión a BD al iniciar
+    try {
+      const client = await pool.connect()
+      const result = await client.query('SELECT current_database() as db, current_user as user')
+      client.release()
+      dbConnected = true
+      console.log(`✅ Conexión a BD exitosa: ${result.rows[0].db} (${result.rows[0].user})`)
+    } catch (error) {
+      console.error(`❌ Error en conexión a BD: ${error.message}`)
+      console.log('⚠️  El servidor continúa ejecutándose, pero las queries fallarán.')
+    }
+    
+    console.log(`📊 Endpoints disponibles:`)
+    console.log(`   GET  http://localhost:${PORT}/api/health`)
+    console.log(`   GET  http://localhost:${PORT}/api/casos`)
+    console.log(`   GET  http://localhost:${PORT}/api/casos/:id`)
+    console.log(`   POST http://localhost:${PORT}/api/casos`)
+    console.log(`   PUT  http://localhost:${PORT}/api/casos/:id`)
+    console.log(`   GET  http://localhost:${PORT}/api/estadisticas`)
+    console.log(`   GET  http://localhost:${PORT}/api/usuarios`)
+    console.log(`   GET  http://localhost:${PORT}/api/usuarios/:id`)
+    console.log(`   POST http://localhost:${PORT}/api/usuarios`)
+    console.log(`   PUT  http://localhost:${PORT}/api/usuarios/:id`)
+    console.log(`   GET  http://localhost:${PORT}/api/usuarios-stats`)
+    console.log(`\n🌐 Abre http://localhost:${PORT} en tu navegador`)
+  })
+}
+
+// Exportar app para Vercel (serverless handler)
+export default app

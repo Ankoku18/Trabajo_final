@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <title>CSU - Reportes</title>
+  <meta charset="UTF-8">    <meta name="viewport" content="width=device-width, initial-scale=1.0">  <title>CSU - Reportes</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <link rel="stylesheet" href="../Estilos.css">
   <link rel="stylesheet" href="Reportes.css">
 </head>
@@ -43,6 +43,7 @@
               <path d="M12 22a2 2 0 002-2H10a2 2 0 0 1-4 0v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09a1.65 1.65 0 0 0 1.51-1 1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33h.09a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51h.09a1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82v.09a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z" stroke="#111" stroke-width="1.2" fill="none"/>
             </svg>
             <span>Notificaciones</span>
+            <span class="badge hidden" id="notificationBadge">0</span>
           </a>
         </li>
         <li class="menu-item active"><a href="Menu - Reportes.html">
@@ -114,7 +115,7 @@
       <div class="top-header">
         <div class="header-left">
           <!-- Bloque azul de ejemplo del diseño (sin contenido real) -->
-          <div style="height:52px"></div>
+          <div class="spacer-height-52"></div>
         </div>
         <div class="header-right">
           <div class="profile">
@@ -134,26 +135,50 @@
       <div class="case-card case-reportes">
         <header class="header">
           <div>
-            <h1>Reportes</h1>
-            <p>Genera y descarga reportes del sistema CSU</p>
+            <h1><i class="fas fa-chart-line"></i> Reportes</h1>
+            <p>Genera y descarga reportes detallados del sistema CSU</p>
           </div>
           <div class="header-actions">
-            <select id="dateRange">
-              <option value="week">Esta semana</option>
-              <option value="month" selected>Este mes</option>
-              <option value="quarter">Este trimestre</option>
-              <option value="year">Este año</option>
+            <select id="dateRange" title="Selecciona el rango de fechas">
+              <option value="week"><i class="fas fa-calendar"></i> Esta semana</option>
+              <option value="month" selected=""><i class="fas fa-calendar"></i> Este mes</option>
+              <option value="quarter"><i class="fas fa-calendar"></i> Este trimestre</option>
+              <option value="year"><i class="fas fa-calendar"></i> Este año</option>
             </select>
-            <button class="btn btn-generate">Exportar Todo</button>
+            <button class="btn btn-generate" title="Exportar todos los reportes en formato ZIP"><i class="fas fa-download"></i> Exportar Todo</button>
           </div>
         </header>
 
         <!-- KPIs -->
         <section class="kpi-grid">
-          <div class="kpi" id="kpi-generados">Reportes Generados <strong id="kpi-generados-valor">...</strong></div>
-          <div class="kpi" id="kpi-descargas">Descargas Totales <strong id="kpi-descargas-valor">...</strong></div>
-          <div class="kpi" id="kpi-ultimo">Último Reporte <strong id="kpi-ultimo-valor">...</strong></div>
-          <div class="kpi" id="kpi-usuarios">Usuarios Activos <strong id="kpi-usuarios-valor">...</strong></div>
+          <div class="kpi kpi-generados">
+            <div class="kpi-header">
+              <i class="fas fa-file-alt"></i>
+              <span class="kpi-label">Reportes Generados</span>
+            </div>
+            <strong id="kpi-generados-valor">0</strong>
+          </div>
+          <div class="kpi kpi-descargas">
+            <div class="kpi-header">
+              <i class="fas fa-download"></i>
+              <span class="kpi-label">Descargas Totales</span>
+            </div>
+            <strong id="kpi-descargas-valor">0</strong>
+          </div>
+          <div class="kpi kpi-ultimo">
+            <div class="kpi-header">
+              <i class="fas fa-calendar-alt"></i>
+              <span class="kpi-label">Último Reporte</span>
+            </div>
+            <strong id="kpi-ultimo-valor">-</strong>
+          </div>
+          <div class="kpi kpi-usuarios">
+            <div class="kpi-header">
+              <i class="fas fa-users"></i>
+              <span class="kpi-label">Usuarios Activos</span>
+            </div>
+            <strong id="kpi-usuarios-valor">0</strong>
+          </div>
         </section>
 
         <section class="grid">
@@ -163,7 +188,7 @@
             <h2>Reportes Operativos</h2>
             <div class="cards">
               <div class="card" data-report="Casos por Estado">
-                <div class="card-icon">📊</div>
+                <div class="card-icon"><i class="fas fa-chart-pie"></i></div>
                 <div class="card-body">
                   <h3>Casos por Estado</h3>
                   <p>Estado actual de todos los casos</p>
@@ -175,7 +200,7 @@
               </div>
 
               <div class="card" data-report="Casos por Prioridad">
-                <div class="card-icon">🔴</div>
+                <div class="card-icon"><i class="fas fa-exclamation-circle"></i></div>
                 <div class="card-body">
                   <h3>Casos por Prioridad</h3>
                   <p>Distribución de casos según prioridad</p>
@@ -187,7 +212,7 @@
               </div>
 
               <div class="card" data-report="Casos por Categoría">
-                <div class="card-icon">📁</div>
+                <div class="card-icon"><i class="fas fa-folder-open"></i></div>
                 <div class="card-body">
                   <h3>Casos por Categoría</h3>
                   <p>Clasificación por tipo de soporte</p>
@@ -199,7 +224,7 @@
               </div>
 
               <div class="card" data-report="Casos por Cliente">
-                <div class="card-icon">🏢</div>
+                <div class="card-icon"><i class="fas fa-building"></i></div>
                 <div class="card-body">
                   <h3>Casos por Cliente</h3>
                   <p>Resumen de casos por empresa</p>
@@ -214,7 +239,7 @@
             <h2>Reportes de Desempeño</h2>
             <div class="cards">
               <div class="card" data-report="Desempeño de Técnicos">
-                <div class="card-icon">👥</div>
+                <div class="card-icon"><i class="fas fa-users"></i></div>
                 <div class="card-body">
                   <h3>Desempeño de Técnicos</h3>
                   <p>Métricas individuales de cada técnico</p>
@@ -226,7 +251,7 @@
               </div>
 
               <div class="card" data-report="Tiempos de Respuesta">
-                <div class="card-icon">⏱️</div>
+                <div class="card-icon"><i class="fas fa-clock"></i></div>
                 <div class="card-body">
                   <h3>Tiempos de Respuesta</h3>
                   <p>Análisis de SLA y tiempos</p>
@@ -238,7 +263,7 @@
               </div>
 
               <div class="card" data-report="Satisfacción del Cliente">
-                <div class="card-icon">⭐</div>
+                <div class="card-icon"><i class="fas fa-star"></i></div>
                 <div class="card-body">
                   <h3>Satisfacción del Cliente</h3>
                   <p>Encuestas y puntuaciones</p>
@@ -250,7 +275,7 @@
               </div>
 
               <div class="card" data-report="Resolución Primera Llamada">
-                <div class="card-icon">✅</div>
+                <div class="card-icon"><i class="fas fa-check-circle"></i></div>
                 <div class="card-body">
                   <h3>Resolución Primera Llamada</h3>
                   <p>Casos resueltos en el primer contacto</p>
@@ -265,7 +290,7 @@
             <h2>Reportes Administrativos</h2>
             <div class="cards">
               <div class="card" data-report="Centro de Costos">
-                <div class="card-icon">💰</div>
+                <div class="card-icon"><i class="fas fa-money-bill-wave"></i></div>
                 <div class="card-body">
                   <h3>Centro de Costos</h3>
                   <p>Resumen por centros de costo</p>
@@ -277,7 +302,7 @@
               </div>
 
               <div class="card" data-report="Facturación">
-                <div class="card-icon">💵</div>
+                <div class="card-icon"><i class="fas fa-receipt"></i></div>
                 <div class="card-body">
                   <h3>Facturación</h3>
                   <p>Informes detallados de facturas</p>
@@ -289,7 +314,7 @@
               </div>
 
               <div class="card" data-report="Productividad Mensual">
-                <div class="card-icon">📈</div>
+                <div class="card-icon"><i class="fas fa-chart-area"></i></div>
                 <div class="card-body">
                   <h3>Productividad Mensual</h3>
                   <p>Velocidad y rendimiento por periodo</p>
@@ -301,7 +326,7 @@
               </div>
 
               <div class="card" data-report="Inventario de Equipos">
-                <div class="card-icon">📦</div>
+                <div class="card-icon"><i class="fas fa-box"></i></div>
                 <div class="card-body">
                   <h3>Inventario de Equipos</h3>
                   <p>Listado y estado de equipos</p>
@@ -320,9 +345,9 @@
             <div class="box">
               <h3>Acciones Rápidas</h3>
               <div class="box-actions">
-                <button class="btn btn-secondary">⚙️ Reporte Personalizado</button>
-                <button class="btn btn-secondary">📅 Programar Reporte</button>
-                <button class="btn btn-secondary">🔗 Compartir Reporte</button>
+                <button class="btn btn-secondary" id="btnCustomReport"><i class="fas fa-sliders-h"></i> Reporte Personalizado</button>
+                <button class="btn btn-secondary" id="btnScheduleReport"><i class="fas fa-calendar-check"></i> Programar Reporte</button>
+                <button class="btn btn-secondary" id="btnShareReport"><i class="fas fa-share-alt"></i> Compartir Reporte</button>
               </div>
             </div> 
 
@@ -330,7 +355,7 @@
               <h3>Reportes Recientes</h3>
               <ul id="recentReports" class="recent-list">
                 <!-- Se llenará dinámicamente con JS -->
-                <li style="padding:10px; color:#666;">Cargando datos...</li>
+                <li class="loading-item">Cargando datos...</li>
               </ul>
             </div> 
 
@@ -349,6 +374,128 @@
     </main>
   </div>
 
+  <!-- Modal: Reporte Personalizado -->
+  <div id="customReportModal" class="modal-overlay">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2><i class="fas fa-sliders-h"></i> Reporte Personalizado</h2>
+        <button class="modal-close" onclick="cerrarModal('customReportModal')">&times;</button>
+      </div>
+      <div class="modal-body">
+        <form id="customReportForm">
+          <div class="form-group">
+            <label for="reportName">Nombre del Reporte</label>
+            <input type="text" id="reportName" placeholder="Ej: Reporte de Carga Semanal" required>
+          </div>
+          <div class="form-group">
+            <label for="reportType">Tipo de Reporte</label>
+            <select id="reportType" required>
+              <option value="">-- Seleccionar --</option>
+              <option value="estado">Por Estado</option>
+              <option value="prioridad">Por Prioridad</option>
+              <option value="categoria">Por Categoría</option>
+              <option value="cliente">Por Cliente</option>
+              <option value="desempeño">Desempeño del Equipo</option>
+              <option value="tiempos">Tiempos de Respuesta</option>
+              <option value="satisfaccion">Satisfacción del Cliente</option>
+              <option value="fcr">FCR - Primera Llamada</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="customFilters">Filtros Adicionales</label>
+            <div class="filter-options">
+              <label><input type="checkbox" name="filter" value="urgentes"> Solo Urgentes</label>
+              <label><input type="checkbox" name="filter" value="asignados"> Solo Asignados</label>
+              <label><input type="checkbox" name="filter" value="abiertos"> Solo Abiertos</label>
+              <label><input type="checkbox" name="filter" value="recientes"> Últimos 30 días</label>
+            </div>
+          </div>
+          <div class="form-actions">
+            <button type="button" class="btn btn-secondary" onclick="cerrarModal('customReportModal')">Cancelar</button>
+            <button type="submit" class="btn btn-primary">Generar Reporte</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Programar Reporte -->
+  <div id="scheduleReportModal" class="modal-overlay">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2><i class="fas fa-calendar-check"></i> Programar Reporte</h2>
+        <button class="modal-close" onclick="cerrarModal('scheduleReportModal')">&times;</button>
+      </div>
+      <div class="modal-body">
+        <form id="scheduleReportForm">
+          <div class="form-group">
+            <label for="scheduleReportName">Nombre del Reporte</label>
+            <input type="text" id="scheduleReportName" placeholder="Ej: Reporte Mensual" required>
+          </div>
+          <div class="form-group">
+            <label for="frequencySelect">Frecuencia</label>
+            <select id="frequencySelect" required>
+              <option value="">-- Seleccionar --</option>
+              <option value="daily">Diario</option>
+              <option value="weekly">Semanal</option>
+              <option value="monthly">Mensual</option>
+              <option value="custom">Personalizado</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="scheduleDay">Día/Hora de Ejecución</label>
+            <input type="datetime-local" id="scheduleDay" required>
+          </div>
+          <div class="form-group">
+            <label for="scheduleEmail">Enviar a (Email)</label>
+            <input type="email" id="scheduleEmail" placeholder="correo@empresa.com" required>
+          </div>
+          <div class="form-actions">
+            <button type="button" class="btn btn-secondary" onclick="cerrarModal('scheduleReportModal')">Cancelar</button>
+            <button type="submit" class="btn btn-primary">Programar</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Compartir Reporte -->
+  <div id="shareReportModal" class="modal-overlay">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2><i class="fas fa-share-alt"></i> Compartir Reporte</h2>
+        <button class="modal-close" onclick="cerrarModal('shareReportModal')">&times;</button>
+      </div>
+      <div class="modal-body">
+        <form id="shareReportForm">
+          <div class="form-group">
+            <label for="shareReportSelect">Seleccionar Reporte</label>
+            <select id="shareReportSelect" required>
+              <option value="">-- Cargando reportes recientes --</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="shareEmails">Correos Electrónicos (separados por comas)</label>
+            <textarea id="shareEmails" placeholder="correo1@empresa.com, correo2@empresa.com" rows="4" required></textarea>
+          </div>
+          <div class="form-group">
+            <label for="shareMessage">Mensaje Personalizado</label>
+            <textarea id="shareMessage" placeholder="Escribe un mensaje opcional..." rows="3"></textarea>
+          </div>
+          <div class="form-group">
+            <label><input type="checkbox" id="shareIncludePDF" checked> Incluir como PDF</label>
+            <label><input type="checkbox" id="shareIncludeExcel"> Incluir como Excel</label>
+          </div>
+          <div class="form-actions">
+            <button type="button" class="btn btn-secondary" onclick="cerrarModal('shareReportModal')">Cancelar</button>
+            <button type="submit" class="btn btn-primary">Compartir</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <script src="../../shared/app-init.js"></script>
   <script src="../script.js"></script>
   <script src="Reportes.js"></script>
 </body>

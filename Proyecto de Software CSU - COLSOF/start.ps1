@@ -21,16 +21,9 @@ if (-not (Test-Path "node_modules")) {
     npm install
 }
 
-# Verificar conexión a la BD
-Write-Host "🔌 Verificando conexión a base de datos..." -ForegroundColor Yellow
-npm run db:check
-if ($LASTEXITCODE -ne 0) {
-    Write-Host "⚠️  No se pudo verificar la conexión a BD. El servidor intentará conectar de todas formas." -ForegroundColor Yellow
-}
-
 # Iniciar el servidor
-Write-Host "▶️  Iniciando servidor en puerto 3001..." -ForegroundColor Cyan
+Write-Host "▶️  Iniciando servidor en puerto 3000..." -ForegroundColor Cyan
 npm start
 
 Write-Host "✅ Servidor iniciado correctamente" -ForegroundColor Green
-Write-Host "🌐 Abre http://localhost:3001 en tu navegador" -ForegroundColor Cyan
+Write-Host "🌐 Abre http://localhost:3000 en tu navegador" -ForegroundColor Cyan

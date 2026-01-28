@@ -4,6 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>CSU - Casos Asignados</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <link rel="stylesheet" href="../../Estilos.css">
   <link rel="stylesheet" href="Asignados.css">
 </head>
@@ -43,6 +44,7 @@
                             <path d="M12 22a2 2 0 002-2H10a2 2 0 0 1-4 0v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09a1.65 1.65 0 0 0 1.51-1 1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33h.09a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51h.09a1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82v.09a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z" stroke="#111" stroke-width="1.2" fill="none"/>
                         </svg>
                         <span>Notificaciones</span>
+                        <span class="badge hidden" id="notificationBadge">0</span>
                     </a>
                 </li>
                 <li class="menu-item"><a href="../../reportes/Menu - Reportes.html">
@@ -131,64 +133,60 @@
             <div class="content-area">
                 <header class="as-header">
   <div class="as-header-left">
-    <div class="as-icon">👥</div>
+    <div class="as-icon"><i class="fas fa-users-gear"></i></div>
     <div>
       <h1>Casos Asignados</h1>
-      <p>Vista general de casos por técnico</p>
+      <p>Gestión de casos asignados por técnico</p>
     </div>
-  </div>
-  <div class="total">
-    <span>Total Asignados</span>
-    <strong id="totalCases"></strong>
   </div>
 </header>
 
-  <!-- Técnicos -->
-  <section id="technicians" class="technicians"></section>
-
   <!-- KPIs -->
-  <section class="kpis">
-    <div class="kpi blue">
-      <span>En Progreso</span>
-      <strong id="kpiProgress"></strong>
+  <section class="kpi-grid">
+    <div class="kpi kpi-progreso">
+      <div class="kpi-header">
+        <i class="fas fa-spinner"></i>
+        <span class="kpi-label">En Progreso</span>
+      </div>
+      <strong id="kpiProgress">0</strong>
     </div>
-    <div class="kpi yellow">
-      <span>Pendientes</span>
-      <strong id="kpiPending"></strong>
+    <div class="kpi kpi-pendiente">
+      <div class="kpi-header">
+        <i class="fas fa-clock"></i>
+        <span class="kpi-label">Pendientes</span>
+      </div>
+      <strong id="kpiPending">0</strong>
     </div>
-    <div class="kpi red">
-      <span>Urgentes</span>
-      <strong id="kpiUrgent"></strong>
+    <div class="kpi kpi-urgente">
+      <div class="kpi-header">
+        <i class="fas fa-fire"></i>
+        <span class="kpi-label">Urgentes</span>
+      </div>
+      <strong id="kpiUrgent">0</strong>
     </div>
-    <div class="kpi purple">
-      <span>Programados</span>
-      <strong id="kpiScheduled"></strong>
+    <div class="kpi kpi-programado">
+      <div class="kpi-header">
+        <i class="fas fa-calendar-check"></i>
+        <span class="kpi-label">Programados</span>
+      </div>
+      <strong id="kpiScheduled">0</strong>
     </div>
   </section>
 
   <!-- Buscador -->
-  <div class="search">
-    <input type="text" placeholder="Buscar casos asignados...">
-  </div>
+  <section class="filters">
+    <input type="text" id="search" placeholder="🔍 Buscar por técnico o caso">
+    <select id="priorityFilter" aria-label="Filtrar por prioridad">
+      <option value="all">Todas las prioridades</option>
+      <option>Urgente</option>
+      <option>Alta</option>
+      <option>Media</option>
+      <option>Baja</option>
+    </select>
+  </section>
 
-  <!-- Tabla -->
-  <div class="table-wrapper">
-    <table>
-      <thead>
-        <tr>
-          <th>ID / Título</th>
-          <th>Técnico</th>
-          <th>Cliente</th>
-          <th>Categoría</th>
-          <th>Prioridad</th>
-          <th>Estado</th>
-          <th>Fecha Límite</th>
-          <th></th>
-        </tr>
-      </thead>
-      <tbody id="casesTable"></tbody>
-    </table>
-  </div>
+  <!-- Listado -->
+  <section id="casesList">
 
 </main>
 

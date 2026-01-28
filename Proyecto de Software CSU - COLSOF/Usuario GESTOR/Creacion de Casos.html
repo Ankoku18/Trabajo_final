@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Creación de Casos</title>
     <link rel="stylesheet" href="Estilos.css" />
 </head>
@@ -148,12 +148,12 @@
                     <div class="case-col">
                         <h3 class="section-title">Cliente</h3>
                         <div class="form-group">
-                            <label for="cliente">Cliente</label>
-                            <input id="cliente" type="text" placeholder="Nombre Empresa" />
+                            <label for="cliente">Cliente <span class="required-mark">*</span></label>
+                            <input id="cliente" type="text" placeholder="Nombre Empresa" list="clientes-list" required />
                         </div>
                         <div class="form-group">
-                            <label for="sede">Sede / Dirección</label>
-                            <input id="sede" type="text" placeholder="Ubicacion equipo" />
+                            <label for="sede">Sede / Dirección <span class="required-mark">*</span></label>
+                            <input id="sede" type="text" placeholder="Ubicacion equipo" required />
                         </div>
                         <div class="form-group">
                             <label for="contacto">Contacto / Responsable</label>
@@ -190,7 +190,7 @@
                         <h3 class="section-title">Equipo</h3>
                         <div class="form-group">
                             <label for="serial">Serial</label>
-                            <input id="serial" type="text" />
+                            <input id="serial" type="text" list="seriales-list" />
                         </div>
                         <div class="form-group">
                             <label for="marca">Marca</label>
@@ -201,8 +201,8 @@
                             <input id="tipo" type="text" placeholder="Ej: Laptop, PC de escritorio, etc." />
                         </div>
                         <div class="form-group">
-  <label for="categoria">Categoría</label>
-  <select id="categoria">
+  <label for="categoria">Categoría <span class="required-mark">*</span></label>
+  <select id="categoria" required>
     <option></option>
     <option title="Sistema Operativo (Windows, macOS)
 Software Ofimático (Microsoft 365, Google Workspace)
@@ -230,8 +230,8 @@ Consultas y Soporte al Usuario (Cómo usar un software)">Solicitudes de Servicio
   </select>
 </div>
                         <div class="form-group">
-                            <label for="descripcion">Descripción de la Falla</label>
-                            <textarea id="descripcion" placeholder="Enter a description..."></textarea>
+                            <label for="descripcion">Descripción de la Falla <span class="required-mark">*</span></label>
+                            <textarea id="descripcion" placeholder="Enter a description..." required></textarea>
                         </div>
                     </div>
 
@@ -307,6 +307,10 @@ Consultas y Soporte al Usuario (Cómo usar un software)">Solicitudes de Servicio
         </div>
     </div>
 
-    <script src="script.js"></script>
+    <datalist id="clientes-list"></datalist>
+    <datalist id="seriales-list"></datalist>
+
+    <script src="../shared/app-init.js"></script>
+    <script src="scripts.js"></script>
 </body>
 </html>

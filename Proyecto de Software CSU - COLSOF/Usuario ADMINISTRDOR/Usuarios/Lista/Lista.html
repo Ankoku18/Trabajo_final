@@ -125,12 +125,11 @@
       <div class="user-list-page">
         <header class="page-header">
           <div>
-            <p class="page-eyebrow">Usuarios</p>
-            <h1>Lista de Usuarios</h1>
+            <h1>👥 Lista de Usuarios</h1>
             <p class="page-desc">Gestión completa de usuarios del sistema</p>
           </div>
           <div class="page-actions">
-            <a class="btn primary" href="../../Creacion de usuarios.html"><i class="fa fa-user-plus"></i> Nuevo usuario</a>
+            <a class="btn btn-primary" href="../../Creacion de usuarios.html"><i class="fa fa-user-plus"></i> Nuevo usuario</a>
           </div>
         </header>
 
@@ -160,14 +159,14 @@
         <section class="filters-card">
           <div class="filters-row">
             <input type="text" id="search" placeholder="Buscar por nombre, email o ID">
-            <select id="filterRole">
+            <select id="filterRole" aria-label="Filtrar por rol">
               <option value="todos">Todos los roles</option>
               <option value="Administrador">Administrador</option>
               <option value="Gestor">Gestor</option>
               <option value="Técnico">Técnico</option>
               <option value="Empleado">Empleado</option>
             </select>
-            <select id="filterStatus">
+            <select id="filterStatus" aria-label="Filtrar por estado">
               <option value="todos">Todos los estados</option>
               <option value="Activo">Activo</option>
               <option value="Inactivo">Inactivo</option>

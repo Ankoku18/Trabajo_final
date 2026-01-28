@@ -91,7 +91,7 @@
                 </li>
             </ul>
 
-                  <a href="../../Terminal/Terminal.html">
+                  <a href="../../Terminal/Terminal.html" title="Ir a Terminal">
         </aside>
 
         <main class="main-content">
@@ -116,10 +116,16 @@
 
             <div class="casos-page">
                 <div class="casos-container">
-                  <div class="header">
-                    <h1>Gestión de Casos</h1>
-                    <p>Administración centralizada de todos los casos de soporte</p>
-                  </div>
+                  <header class="header">
+                    <div>
+                      <h1>📋 Gestión de Casos</h1>
+                      <p>Administración centralizada de todos los casos de soporte</p>
+                    </div>
+                    <div class="page-actions">
+                      <button class="btn" id="btnRefresh"><i class="fa fa-rotate-right"></i> Refrescar</button>
+                      <button class="btn btn-primary" id="btnNew"><i class="fa fa-plus"></i> Nuevo caso</button>
+                    </div>
+                  </header>
 
                   <div class="stats-grid cases-stats">
                     <div class="stat-card">
@@ -144,29 +150,25 @@
                     </div>
                   </div>
 
-                  <section class="toolbar card">
-                    <div class="toolbar-left">
+                  <section class="filters-card card">
+                    <div class="filters-row">
                       <div class="input-icon">
                         <i class="fa fa-search"></i>
                         <input type="text" id="searchInput" placeholder="Buscar por ID, título o cliente" />
                       </div>
-                    </div>
-                    <div class="toolbar-right">
-                      <select id="statusFilter">
+                      <select id="statusFilter" aria-label="Filtrar por estado">
                         <option value="todos">Todos los estados</option>
                         <option value="Creado">Creado</option>
                         <option value="En Curso">En Curso</option>
                         <option value="Pausado">Pausado</option>
                         <option value="Resuelto">Resuelto</option>
                       </select>
-                      <select id="priorityFilter">
+                      <select id="priorityFilter" aria-label="Filtrar por prioridad">
                         <option value="todos">Todas las prioridades</option>
                         <option value="Alta">Alta</option>
                         <option value="Media">Media</option>
                         <option value="Baja">Baja</option>
                       </select>
-                      <button class="btn" id="btnRefresh">Refrescar</button>
-                      <button class="btn primary" id="btnNew">Nuevo caso</button>
                     </div>
                   </section>
 

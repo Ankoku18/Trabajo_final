@@ -1,6 +1,51 @@
 // scripts.js - lógica unificada para el dashboard y creación de usuarios
 
 (function(){
+  // =====================
+  // Autenticación y Usuario
+  // =====================
+  
+  // Verificar si hay un usuario autenticado
+  const usuarioData = localStorage.getItem('usuario');
+  if (!usuarioData) {
+    // Si no hay usuario, redirigir al login
+    const loginPath = resolveLoginPath();
+    window.location.href = loginPath;
+    return;
+  }
+
+  // Parsear datos del usuario
+  let usuario;
+  try {
+    usuario = JSON.parse(usuarioData);
+  } catch (e) {
+    console.error('Error al parsear datos del usuario:', e);
+    localStorage.removeItem('usuario');
+    window.location.href = resolveLoginPath();
+    return;
+  }
+
+  // Verificar que el usuario tenga el rol correcto (Administrador o Técnico)
+  if (usuario.rol && !['administrador', 'tecnico'].includes(usuario.rol.toLowerCase())) {
+    alert('No tienes permisos para acceder a esta página.');
+    window.location.href = resolveLoginPath();
+    return;
+  }
+
+  // Actualizar la información del perfil en la interfaz cuando el DOM esté listo
+  document.addEventListener('DOMContentLoaded', function() {
+    const profileName = document.querySelector('.profile-name');
+    const profileEmail = document.querySelector('.profile-email');
+    
+    if (profileName) {
+      profileName.textContent = `${usuario.nombre} ${usuario.apellido}`;
+    }
+    
+    if (profileEmail) {
+      profileEmail.textContent = usuario.email;
+    }
+  });
+
   // Utilidades
   function qs(sel, ctx=document){ return ctx.querySelector(sel); }
   function qsa(sel, ctx=document){ return Array.from(ctx.querySelectorAll(sel)); }
@@ -32,11 +77,22 @@
       return '/index.html';
     };
 
+    /* LOGOUT DESCONECTADO - REQUIERE LOGIN
     const loginPath = resolveLoginPath();
     qsa('.logout-btn').forEach(btn => {
       btn.addEventListener('click', () => {
         alert('Sesión cerrada.');
         window.location.href = loginPath;
+      });
+    });
+    */
+
+    // Botón de logout en modo standalone
+    qsa('.logout-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        alert('Modo standalone - La funcionalidad de logout está desconectada del login.');
+      });
+    });
       });
     });
   })();

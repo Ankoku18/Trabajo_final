@@ -32,9 +32,18 @@ function setupEventListeners() {
     });
   }
 
+  /* LOGOUT DESCONECTADO - REQUIERE LOGIN
   if (logoutBtn) {
     logoutBtn.addEventListener('click', () => {
       window.location.href = '../../index.html';
+    });
+  }
+  */
+
+  // Botón de logout en modo standalone
+  if (logoutBtn) {
+    logoutBtn.addEventListener('click', () => {
+      alert('Modo standalone - La funcionalidad de logout está desconectada del login.');
     });
   }
 
@@ -53,27 +62,21 @@ function setupAutoRefresh() {
 
 async function fetchData(silent = false) {
   try {
-    const response = await fetch(API_URL, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ action: 'get_casos_simple' })
-    });
+    if (!window.api) {
+      console.warn('API client no disponible');
+      return;
+    }
 
-    if (!response.ok) throw new Error('Error al obtener datos');
-
-    const data = await response.json();
+    // Cargar datos desde BD usando API global
+    const casos = await window.api.getCasos();
     
-    if (data.success && Array.isArray(data.data)) {
-      allCases = data.data.map(mapCase);
-      buildCentersFromCases();
-      updateMetrics();
-      applyFilters();
-      
-      if (!silent) {
-        showToast('Datos actualizados correctamente', 'success');
-      }
-    } else {
-      throw new Error('Formato de respuesta invalido');
+    allCases = casos.map(mapCase);
+    buildCentersFromCases();
+    updateMetrics();
+    applyFilters();
+    
+    if (!silent) {
+      showToast('Datos actualizados correctamente', 'success');
     }
   } catch (error) {
     console.error('Error:', error);

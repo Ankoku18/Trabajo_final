@@ -1,7 +1,3 @@
-const API_URL = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
-  ? 'http://localhost:3001/api'
-  : '/api'
-
 let cases = []
 let technicians = []
 let selectedTechnician = 'all'
@@ -225,22 +221,19 @@ const setupSearch = () => {
 
 const fetchAssigned = async () => {
   try {
-    console.log('🔄 Cargando casos asignados...')
-    const res = await fetch(`${API_URL}/casos`)
-    if (!res.ok) throw new Error(`HTTP ${res.status}`)
-
-    const data = await res.json()
-    if (!data.success) throw new Error(data.error || 'API error')
-
-    const filtered = Array.isArray(data.data) ? data.data.filter(isAssigned) : []
+    if (!window.api) {
+      showToast('API no disponible', true)
+      return
+    }
+    const data = await window.api.getCasos()
+    const filtered = Array.isArray(data) ? data.filter(isAssigned) : []
     cases = filtered.map(mapCase)
     buildTechnicians()
     render()
-    console.log(`✅ ${cases.length} casos cargados`)
     showToast(`${cases.length} casos asignados cargados`)
   } catch (err) {
-    console.error('❌ Error al cargar casos asignados:', err)
-    showToast('No se pudieron cargar los casos. Verifica la conexión.', true)
+    console.error('Error al cargar casos asignados:', err)
+    showToast('No se pudieron cargar los casos', true)
   }
 }
 

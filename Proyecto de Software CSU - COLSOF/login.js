@@ -1,9 +1,17 @@
+// ============================================================
+// ARCHIVO DESCONECTADO DEL PROYECTO - VERSIÓN STANDALONE
+// ============================================================
+
 const form = document.getElementById('loginForm');
 const alertBox = document.getElementById('alertBox');
 const passwordInput = document.getElementById('password');
 const emailInput = document.getElementById('email');
 const togglePassword = document.querySelector('.toggle');
 const inputGroups = Array.from(form.querySelectorAll('.input-group[data-field]'));
+const submitButton = form.querySelector('.submit');
+
+// API base URL - DESCONECTADO
+// const API_URL = window.location.origin + '/api';
 
 // Toggle password visibility
 if (togglePassword) {
@@ -88,8 +96,108 @@ form.addEventListener('submit', (event) => {
     if (firstError) {
       firstError.focus();
     }
+    return;
   }
+
+  // Si la validación es correcta, mostrar mensaje de éxito (modo standalone)
+  performLoginStandalone(emailValue, passwordValue);
 });
+
+// ============================================================
+// VERSIÓN STANDALONE - SIN CONEXIÓN A BASE DE DATOS
+// ============================================================
+function performLoginStandalone(email, password) {
+  // Simular proceso de login
+  submitButton.disabled = true;
+  submitButton.textContent = 'Ingresando...';
+  
+  setTimeout(() => {
+    // Resetear botón
+    submitButton.disabled = false;
+    submitButton.textContent = 'Ingresar';
+    
+    // Mostrar mensaje de éxito
+    alertBox.querySelector('.alert-content').innerHTML = `
+      <h2>Modo Demostración</h2>
+      <p>✓ Formulario validado correctamente</p>
+      <p>Email: ${email}</p>
+      <p><small>Este archivo está desconectado del proyecto principal.</small></p>
+    `;
+    alertBox.classList.add('show');
+    alertBox.style.backgroundColor = '#d4edda';
+    alertBox.style.color = '#155724';
+    alertBox.style.borderColor = '#c3e6cb';
+  }, 1000);
+}
+
+// ============================================================
+// CÓDIGO ORIGINAL COMENTADO - REQUIERE CONEXIÓN AL BACKEND
+// ============================================================
+/*
+// Perform login with API
+async function performLogin(email, password) {
+  try {
+    // Deshabilitar el botón durante la solicitud
+    submitButton.disabled = true;
+    submitButton.textContent = 'Ingresando...';
+
+    const response = await fetch(`${API_URL}/login`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        email: email,
+        password: password
+      })
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      // Error en autenticación
+      showAlert(data.error || 'Error en la autenticación');
+      submitButton.disabled = false;
+      submitButton.textContent = 'Ingresar';
+      return;
+    }
+
+    // Autenticación exitosa
+    hideAlert();
+    
+    // Guardar datos del usuario en localStorage
+    const userData = {
+      id: data.data.id,
+      nombre: data.data.nombre,
+      apellido: data.data.apellido,
+      email: data.data.email,
+      rol: data.data.rol,
+      loginTime: new Date().toISOString()
+    };
+
+    localStorage.setItem('usuario', JSON.stringify(userData));
+
+    // Redirigir según el rol
+    setTimeout(() => {
+      if (data.data.rol.toLowerCase() === 'administrador') {
+        window.location.href = 'Usuario ADMINISTRDOR/Menu principal Admin.html';
+      } else if (data.data.rol.toLowerCase() === 'gestor') {
+        window.location.href = 'Usuario GESTOR/Menu principal.html';
+      } else if (data.data.rol.toLowerCase() === 'tecnico') {
+        window.location.href = 'Usuario ADMINISTRDOR/Menu principal Admin.html'; // O redirigir a página de técnico si existe
+      } else {
+        showAlert('Rol de usuario no reconocido');
+      }
+    }, 500);
+
+  } catch (error) {
+    console.error('Error en login:', error);
+    showAlert('Error al conectar con el servidor. Intenta más tarde.');
+    submitButton.disabled = false;
+    submitButton.textContent = 'Ingresar';
+  }
+}
+*/
 
 // Remove error styles on input
 inputGroups.forEach((group) => {

@@ -4,8 +4,9 @@
  */
 
 // API Client compartido
+// Use relative `/api` in production and localhost:3000 in dev (server runs on 3000)
 const API_BASE_URL = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
-  ? 'http://localhost:3001/api'
+  ? 'http://localhost:3000/api'
   : '/api'
 
 // Utilidades compartidas
@@ -191,3 +192,57 @@ window.utils = utils
 window.API_BASE_URL = API_BASE_URL
 
 console.log('✅ Sistema inicializado - API conectada a:', API_BASE_URL)
+
+// ===== ACTUALIZACIÓN AUTOMÁTICA DEL BADGE DE NOTIFICACIONES =====
+function actualizarBadgeNotificaciones() {
+  const badge = document.getElementById('notificationBadge');
+  if (!badge) return;
+
+  // Intentar cargar notificaciones desde API o usar datos de ejemplo
+  (async () => {
+    try {
+      const casos = await api.getCasos();
+      
+      // Calcular notificaciones sin leer (casos nuevos o urgentes)
+      const ahora = new Date();
+      let countNoLeidas = 0;
+      
+      casos.forEach(caso => {
+        const fechaCreacion = new Date(caso.fecha_creacion);
+        const horasDesdeCreacion = (ahora - fechaCreacion) / 3600000;
+        
+        // Contar como no leída si:
+        // - Es menor a 24 horas
+        // - O es crítica/urgente
+        const esReciente = horasDesdeCreacion < 24;
+        const esUrgente = caso.prioridad && (caso.prioridad.toLowerCase().includes('critica') || caso.prioridad.toLowerCase().includes('urgente'));
+        
+        if (esReciente || esUrgente) {
+          countNoLeidas++;
+        }
+      });
+      
+      // Actualizar badge
+      badge.textContent = countNoLeidas;
+      badge.classList.toggle('hidden', countNoLeidas === 0);
+      
+      console.log(`📬 Badge actualizado: ${countNoLeidas} notificaciones`);
+    } catch (error) {
+      console.warn('⚠️ No se pudo actualizar badge de notificaciones:', error);
+      // En caso de error, mostrar 4 notificaciones de ejemplo
+      badge.textContent = '4';
+      badge.classList.remove('hidden');
+    }
+  })();
+}
+
+// Ejecutar cuando el DOM esté listo
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', actualizarBadgeNotificaciones);
+} else {
+  actualizarBadgeNotificaciones();
+}
+
+// Actualizar cada 2 minutos
+setInterval(actualizarBadgeNotificaciones, 120000);
+

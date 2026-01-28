@@ -122,25 +122,18 @@
 
             <div class="terminal-page">
                 <div class="terminal-container">
-                    <div class="terminal-header">
-                        <div class="header-content">
-                <div class="header-left">
-                    <div class="title-section">
-                        <div class="title-with-icon">
-                            <i class="fas fa-cogs title-icon"></i>
-                            <h1>Administración Técnica</h1>
+                    <header class="header">
+                        <div>
+                            <h1>⚙️ Administración Técnica</h1>
+                            <p>Panel de control y monitoreo del sistema CSU</p>
                         </div>
-                        <p>Panel de control y monitoreo del sistema CSU</p>
-                    </div>
-                </div>
-                <div class="header-right">
-                    <button id="refreshBtn" class="btn-primary">
-                        <i class="fas fa-sync-alt"></i>
-                        Actualizar
-                    </button>
-                </div>
-            </div>
-        </div>
+                        <div class="page-actions">
+                            <button id="refreshBtn" class="btn btn-primary">
+                                <i class="fas fa-sync-alt"></i>
+                                Actualizar
+                            </button>
+                        </div>
+                    </header>
 
         <!-- System Status Cards -->
         <div class="stats-container">
@@ -161,7 +154,7 @@
                                 <span id="cpuValue" class="metric-value">34%</span>
                             </div>
                             <div class="progress-bar">
-                                <div class="progress-fill cpu-progress" style="width: 34%"></div>
+                                <div class="progress-fill cpu-progress" data-width="34"></div>
                             </div>
                         </div>
                         <div class="metric">
@@ -170,7 +163,7 @@
                                 <span id="ramValue" class="metric-value">62%</span>
                             </div>
                             <div class="progress-bar">
-                                <div class="progress-fill ram-progress" style="width: 62%"></div>
+                                <div class="progress-fill ram-progress" data-width="62"></div>
                             </div>
                         </div>
                         <div class="metric">
@@ -179,7 +172,7 @@
                                 <span id="diskValue" class="metric-value">45%</span>
                             </div>
                             <div class="progress-bar">
-                                <div class="progress-fill disk-progress" style="width: 45%"></div>
+                                <div class="progress-fill disk-progress" data-width="45"></div>
                             </div>
                         </div>
                         <div class="uptime">
@@ -291,7 +284,7 @@
                                     <span class="storage-value">45 GB / 100 GB</span>
                                 </div>
                                 <div class="progress-bar">
-                                    <div class="progress-fill system-storage" style="width: 45%"></div>
+                                    <div class="progress-fill system-storage" data-width="45"></div>
                                 </div>
                             </div>
                             <div class="storage-item">
@@ -300,7 +293,7 @@
                                     <span class="storage-value">2.4 GB / 50 GB</span>
                                 </div>
                                 <div class="progress-bar">
-                                    <div class="progress-fill db-storage" style="width: 5%"></div>
+                                    <div class="progress-fill db-storage" data-width="5"></div>
                                 </div>
                             </div>
                             <div class="storage-item">
@@ -309,7 +302,7 @@
                                     <span class="storage-value">18 GB / 200 GB</span>
                                 </div>
                                 <div class="progress-bar">
-                                    <div class="progress-fill backup-storage" style="width: 9%"></div>
+                                    <div class="progress-fill backup-storage" data-width="9"></div>
                                 </div>
                             </div>
                         </div>
