@@ -244,6 +244,52 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
+  // =====================
+  // Panel de filtros (Menú principal)
+  // =====================
+  (function initInlineFiltersPanel() {
+    const filtersToggle = document.getElementById('filters-toggle');
+    const filtersPanel = document.getElementById('filters-panel');
+    if (!filtersToggle || !filtersPanel) return;
+
+    const closePanel = () => {
+      filtersPanel.classList.add('hidden');
+      filtersToggle.setAttribute('aria-expanded', 'false');
+    };
+
+    const openPanel = () => {
+      filtersPanel.classList.remove('hidden');
+      filtersToggle.setAttribute('aria-expanded', 'true');
+    };
+
+    filtersToggle.setAttribute('aria-controls', 'filters-panel');
+    filtersToggle.setAttribute('aria-expanded', 'false');
+
+    filtersToggle.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const isHidden = filtersPanel.classList.contains('hidden');
+      if (isHidden) {
+        openPanel();
+      } else {
+        closePanel();
+      }
+    });
+
+    filtersPanel.addEventListener('click', (e) => {
+      e.stopPropagation();
+    });
+
+    document.addEventListener('click', () => {
+      if (!filtersPanel.classList.contains('hidden')) closePanel();
+    });
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && !filtersPanel.classList.contains('hidden')) {
+        closePanel();
+      }
+    });
+  })();
+
   const checkAll = document.getElementById('check-all');
   if (checkAll) {
     checkAll.addEventListener('change', () => {
