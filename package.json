@@ -3,6 +3,7 @@
   "version": "3.0.0",
   "description": "CSU COLSOF - Frontend con conexión a Supabase",
   "type": "module",
+    "main": "api/index.js",
   "scripts": {
     "start": "node Proyecto\\ de\\ Software\\ CSU\\ -\\ COLSOF/server.js",
     "dev": "node --watch Proyecto\\ de\\ Software\\ CSU\\ -\\ COLSOF/server.js",
@@ -17,6 +18,8 @@
   },
   "devDependencies": {},
   "engines": {
-    "node": ">=18.0.0"
-  }
+        "node": "20.x"
+  },
+  "keywords": ["esm", "serverless", "vercel", "express"]
 }
+
