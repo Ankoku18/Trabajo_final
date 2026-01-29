@@ -1,39 +1,25 @@
 {
   "version": 2,
-  "projectId": "csu-colsof",
   "name": "CSU COLSOF - Gestión de Casos",
   "public": false,
-  
   "env": {
     "NODE_ENV": "production",
     "VERCEL": "1"
   },
-  
   "functions": {
-    "Proyecto de Software CSU - COLSOF/api/index.js": {
+    "api/index.js": {
       "maxDuration": 30,
-      "memory": 1024,
-      "runtime": "nodejs18.x"
+      "memory": 1024
     }
   },
-  
-  "routes": [
+  "rewrites": [
     {
-      "src": "/api/(.*)",
-      "dest": "Proyecto de Software CSU - COLSOF/api/index.js",
-      "methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS"]
+      "source": "/api/(.*)",
+      "destination": "/api"
     },
     {
-      "src": "/Usuario GESTOR/(.*)",
-      "dest": "Proyecto de Software CSU - COLSOF/Usuario GESTOR/$1"
-    },
-    {
-      "src": "/Usuario ADMINISTRDOR/(.*)",
-      "dest": "Proyecto de Software CSU - COLSOF/Usuario ADMINISTRDOR/$1"
-    },
-    {
-      "src": "/(.*)",
-      "dest": "Proyecto de Software CSU - COLSOF/api/index.js"
+      "source": "/(.*)",
+      "destination": "/api"
     }
   ],
   
