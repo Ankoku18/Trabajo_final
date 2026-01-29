@@ -2,6 +2,7 @@ import express from 'express'
 import cors from 'cors'
 import path from 'path'
 import { fileURLToPath } from 'url'
+import bcrypt from 'bcrypt'
 import { pool } from '../Proyecto de Software CSU - COLSOF/db/connection.js'
 
 const app = express()
@@ -22,6 +23,81 @@ app.use(express.json())
 // Health check
 app.get('/api/health', (req, res) => {
   res.json({ status: 'ok', message: 'API running', dbConnected })
+})
+
+// ==================== AUTENTICACIÓN ====================
+
+// Login endpoint
+app.post('/api/login', async (req, res) => {
+  try {
+    const { email, password } = req.body
+
+    // Validar que ambos campos estén presentes
+    if (!email || !password) {
+      return res.status(400).json({
+        success: false,
+        error: 'Email y contraseña son requeridos'
+      })
+    }
+
+    // Buscar usuario por email
+    const userResult = await pool.query(
+      'SELECT id, nombre, apellido, email, password, rol, activo FROM usuarios WHERE email = $1',
+      [email.toLowerCase()]
+    )
+
+    // Verificar si el usuario existe
+    if (userResult.rows.length === 0) {
+      return res.status(401).json({
+        success: false,
+        error: 'Usuario no encontrado'
+      })
+    }
+
+    const usuario = userResult.rows[0]
+
+    // Verificar si el usuario está activo
+    if (!usuario.activo) {
+      return res.status(403).json({
+        success: false,
+        error: 'Usuario inactivo. Contacta al administrador.'
+      })
+    }
+
+    // Comparar contraseña con bcrypt
+    const passwordMatch = await bcrypt.compare(password, usuario.password)
+
+    if (!passwordMatch) {
+      return res.status(401).json({
+        success: false,
+        error: 'Contraseña incorrecta'
+      })
+    }
+
+    // Autenticación exitosa - registrar último acceso
+    await pool.query(
+      'UPDATE usuarios SET ultimo_acceso = NOW() WHERE id = $1',
+      [usuario.id]
+    )
+
+    // Retornar datos del usuario (sin contraseña)
+    res.json({
+      success: true,
+      data: {
+        id: usuario.id,
+        nombre: usuario.nombre,
+        apellido: usuario.apellido,
+        email: usuario.email,
+        rol: usuario.rol
+      }
+    })
+  } catch (error) {
+    console.error('Error en POST /api/login:', error)
+    res.status(500).json({
+      success: false,
+      error: error.message
+    })
+  }
 })
 
 // Obtener todos los casos

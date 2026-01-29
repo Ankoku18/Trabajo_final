@@ -1,5 +1,5 @@
 // ============================================================
-// ARCHIVO DESCONECTADO DEL PROYECTO - VERSIÓN STANDALONE
+// AUTENTICACIÓN CON BASE DE DATOS
 // ============================================================
 
 const form = document.getElementById('loginForm');
@@ -10,8 +10,8 @@ const togglePassword = document.querySelector('.toggle');
 const inputGroups = Array.from(form.querySelectorAll('.input-group[data-field]'));
 const submitButton = form.querySelector('.submit');
 
-// API base URL - DESCONECTADO
-// const API_URL = window.location.origin + '/api';
+// Obtener URL de la API - funciona tanto en local como en Vercel
+const API_URL = window.location.origin + '/api';
 
 // Toggle password visibility
 if (togglePassword) {
@@ -76,20 +76,11 @@ form.addEventListener('submit', (event) => {
   alertBox.classList.toggle('show', hasError);
 
   if (!hasError) {
-    // Success: Hide alert and prepare for navigation/API call
+    // Success: Hide alert and perform login
     alertBox.classList.remove('show');
     
-    // Aquí iría la lógica de autenticación real
-    console.log('Login attempt:', {
-      email: emailValue,
-      remember: form.remember.checked
-    });
-    
-    // Simulate successful login - replace with actual API call
-    // window.location.href = 'Usuario GESTOR/Menu principal.html';
-    
-    // For demo, just reset the form
-    form.reset();
+    // Llamar a la función de autenticación real
+    performLogin(emailValue, passwordValue);
   } else {
     // Focus on first error field for accessibility
     const firstError = form.querySelector('.input-group.error input');
@@ -104,40 +95,29 @@ form.addEventListener('submit', (event) => {
 });
 
 // ============================================================
-// VERSIÓN STANDALONE - SIN CONEXIÓN A BASE DE DATOS
+// FUNCIONES DE AUTENTICACIÓN
 // ============================================================
-function performLoginStandalone(email, password) {
-  // Simular proceso de login
-  submitButton.disabled = true;
-  submitButton.textContent = 'Ingresando...';
-  
-  setTimeout(() => {
-    // Resetear botón
-    submitButton.disabled = false;
-    submitButton.textContent = 'Ingresar';
-    
-    // Mostrar mensaje de éxito
-    alertBox.querySelector('.alert-content').innerHTML = `
-      <h2>Modo Demostración</h2>
-      <p>✓ Formulario validado correctamente</p>
-      <p>Email: ${email}</p>
-      <p><small>Este archivo está desconectado del proyecto principal.</small></p>
-    `;
-    alertBox.classList.add('show');
-    alertBox.style.backgroundColor = '#d4edda';
-    alertBox.style.color = '#155724';
-    alertBox.style.borderColor = '#c3e6cb';
-  }, 1000);
+
+// Función para mostrar alerta con el nuevo contenido
+function showAlert(mensaje, tipo = 'error') {
+  alertBox.classList.remove('success', 'warning');
+  alertBox.classList.add(tipo);
+  alertBox.querySelector('.alert-content').innerHTML = `
+    <h2>${tipo === 'error' ? 'Error de autenticación' : 'Información'}</h2>
+    <p>${mensaje}</p>
+  `;
+  alertBox.classList.add('show');
 }
 
-// ============================================================
-// CÓDIGO ORIGINAL COMENTADO - REQUIERE CONEXIÓN AL BACKEND
-// ============================================================
-/*
-// Perform login with API
+// Función para ocultar alerta
+function hideAlert() {
+  alertBox.classList.remove('show');
+}
+
+// Autenticación con API
 async function performLogin(email, password) {
   try {
-    // Deshabilitar el botón durante la solicitud
+    // Deshabilitar botón durante la solicitud
     submitButton.disabled = true;
     submitButton.textContent = 'Ingresando...';
 
@@ -156,7 +136,7 @@ async function performLogin(email, password) {
 
     if (!response.ok) {
       // Error en autenticación
-      showAlert(data.error || 'Error en la autenticación');
+      showAlert(data.error || 'Error en la autenticación', 'error');
       submitButton.disabled = false;
       submitButton.textContent = 'Ingresar';
       return;
@@ -177,27 +157,38 @@ async function performLogin(email, password) {
 
     localStorage.setItem('usuario', JSON.stringify(userData));
 
-    // Redirigir según el rol
+    // Guardar email si "Recordar" está marcado
+    if (form.remember.checked) {
+      localStorage.setItem('rememberedEmail', email);
+    } else {
+      localStorage.removeItem('rememberedEmail');
+    }
+
+    // Redirigir según el rol después de 500ms
     setTimeout(() => {
-      if (data.data.rol.toLowerCase() === 'administrador') {
+      const rol = data.data.rol.toLowerCase();
+      
+      if (rol === 'administrador') {
         window.location.href = 'Usuario ADMINISTRDOR/Menu principal Admin.html';
-      } else if (data.data.rol.toLowerCase() === 'gestor') {
+      } else if (rol === 'gestor') {
         window.location.href = 'Usuario GESTOR/Menu principal.html';
-      } else if (data.data.rol.toLowerCase() === 'tecnico') {
-        window.location.href = 'Usuario ADMINISTRDOR/Menu principal Admin.html'; // O redirigir a página de técnico si existe
+      } else if (rol === 'tecnico' || rol === 'técnico') {
+        // Redirigir a página de técnico (usar admin por ahora si no existe)
+        window.location.href = 'Usuario ADMINISTRDOR/Menu principal Admin.html';
       } else {
-        showAlert('Rol de usuario no reconocido');
+        showAlert('Rol de usuario no reconocido: ' + data.data.rol, 'error');
+        submitButton.disabled = false;
+        submitButton.textContent = 'Ingresar';
       }
     }, 500);
 
   } catch (error) {
     console.error('Error en login:', error);
-    showAlert('Error al conectar con el servidor. Intenta más tarde.');
+    showAlert('Error al conectar con el servidor. Intenta más tarde.', 'error');
     submitButton.disabled = false;
     submitButton.textContent = 'Ingresar';
   }
 }
-*/
 
 // Remove error styles on input
 inputGroups.forEach((group) => {
@@ -222,7 +213,7 @@ alertBox.addEventListener('click', () => {
   alertBox.classList.remove('show');
 });
 
-// Handle "Remember me" with localStorage (optional enhancement)
+// Handle "Remember me" with localStorage
 const rememberCheckbox = form.querySelector('input[name="remember"]');
 if (rememberCheckbox) {
   // Load remembered email if exists
@@ -231,13 +222,4 @@ if (rememberCheckbox) {
     emailInput.value = rememberedEmail;
     rememberCheckbox.checked = true;
   }
-
-  // Save email when form is submitted successfully
-  form.addEventListener('submit', () => {
-    if (rememberCheckbox.checked && !form.querySelector('.input-group.error')) {
-      localStorage.setItem('rememberedEmail', emailInput.value);
-    } else {
-      localStorage.removeItem('rememberedEmail');
-    }
-  });
 }
