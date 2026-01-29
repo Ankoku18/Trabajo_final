@@ -2,11 +2,13 @@
   "version": 2,
   "name": "csu-colsof",
   "public": false,
+   "runtime": "nodejs20.x",
   "env": {
     "NODE_ENV": "production"
   },
   "functions": {
     "api/index.js": {
+   "runtime": "nodejs20.x",
    "maxDuration": 30
     }
   },
