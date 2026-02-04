@@ -57,32 +57,39 @@ body {
 
 .header {
     display: flex;
-    align-items: flex-start;
+    align-items: center;
     justify-content: space-between;
     background: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary-bright) 100%);
     border-top: 6px solid;
     border-image: linear-gradient(90deg, var(--accent-cyan), var(--success), var(--purple)) 1;
     border-radius: 14px;
-    padding: 24px 32px;
+    padding: 10px 16px;
     margin-bottom: 20px;
     box-shadow: 0 12px 48px rgba(0, 0, 0, 0.12);
     animation: slideUp 0.6s cubic-bezier(0.4, 0, 0.2, 1);
-    gap: 12px;
-    flex-wrap: wrap;
+    gap: 6px;
+    flex-wrap: nowrap;
+}
+
+.tabs {
+    display: flex;
+    width: 100%;
+    gap: 6px;
+    flex-wrap: nowrap;
 }
 
 .header h1 {
     margin: 0;
     color: #fff;
-    font-size: 32px;
+    font-size: 22px;
     font-weight: 700;
     letter-spacing: -0.5px;
 }
 
 .header p {
-    margin: 6px 0 0 0;
+    margin: 2px 0 0 0;
     color: rgba(255, 255, 255, 0.9);
-    font-size: 15px;
+    font-size: 12px;
     font-weight: 400;
 }
 
@@ -151,20 +158,23 @@ body {
 .stats-container {
     display: grid;
     grid-template-columns: repeat(5, 1fr);
-    gap: 20px;
-    margin-bottom: 24px;
+    gap: 10px;
+    margin-bottom: 12px;
     animation: fadeInUp 0.6s ease;
 }
 
 .stat-card {
     background: #fff;
-    border: 2px solid var(--slate-200);
+    border: 1px solid var(--slate-200);
     border-radius: 14px;
-    padding: 24px;
+    padding: 10px 12px;
     position: relative;
     overflow: hidden;
     transition: all 0.3s ease;
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+    display: flex;
+    align-items: center;
+    gap: 10px;
 }
 
 .stat-card::before {
@@ -172,15 +182,33 @@ body {
     position: absolute;
     top: 0;
     left: 0;
-    width: 4px;
+    width: 3px;
     height: 100%;
     border-radius: 14px 0 0 14px;
 }
 
 .stat-card:hover {
-    transform: translateY(-4px);
+    transform: translateY(-2px);
     border-color: var(--slate-300);
-    box-shadow: 0 12px 36px rgba(25, 118, 210, 0.15);
+    box-shadow: 0 8px 18px rgba(25, 118, 210, 0.12);
+}
+
+.stat-icon {
+    width: 32px;
+    height: 32px;
+    border-radius: 10px;
+    display: grid;
+    place-items: center;
+    background: var(--slate-50);
+    color: var(--slate-600);
+    flex: 0 0 32px;
+    font-size: 14px;
+}
+
+.stat-details {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
 }
 
 .stat-card.critical::before {
@@ -204,20 +232,25 @@ body {
 }
 
 .stat-label {
-    font-size: 12px;
+    font-size: 10px;
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 0.5px;
     color: #6b7280;
-    margin-bottom: 8px;
+    margin-bottom: 2px;
     display: block;
 }
 
 .stat-value {
-    font-size: 32px;
+    font-size: 20px;
     font-weight: 700;
     color: var(--primary-dark);
-    margin-bottom: 8px;
+    margin-bottom: 2px;
+}
+
+.stat-subtext {
+    font-size: 11px;
+    color: var(--slate-500);
 }
 
 .stat-change {
@@ -244,19 +277,20 @@ body {
 
 .tabs-header {
     display: flex;
-    gap: 0;
+    gap: 6px;
     border-bottom: 2px solid var(--slate-200);
     background: #fff;
-    padding: 0;
+    padding: 6px;
+    flex-wrap: wrap;
 }
 
 .tab-btn {
-    flex: 1;
-    padding: 16px 24px;
+    flex: 1 1 180px;
+    padding: 10px 12px;
     border: none;
     background: none;
     color: var(--slate-600);
-    font-size: 14px;
+    font-size: 13px;
     font-weight: 600;
     cursor: pointer;
     transition: all 0.3s ease;
@@ -265,6 +299,7 @@ body {
     align-items: center;
     justify-content: center;
     gap: 8px;
+    border-radius: 10px;
 }
 
 .tab-btn:hover {
@@ -292,12 +327,12 @@ body {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    min-width: 24px;
-    height: 24px;
+    min-width: 20px;
+    height: 20px;
     background: linear-gradient(135deg, var(--primary-bright) 0%, var(--primary-dark) 100%);
     color: #fff;
     border-radius: 50%;
-    font-size: 12px;
+    font-size: 11px;
     font-weight: 700;
 }
 
@@ -307,7 +342,7 @@ body {
 
 .tab-content {
     display: none;
-    padding: 24px 32px;
+    padding: 16px 18px;
     animation: fadeInUp 0.4s ease;
 }
 
@@ -323,24 +358,24 @@ body {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 24px;
-    gap: 16px;
+    margin-bottom: 14px;
+    gap: 10px;
     flex-wrap: wrap;
 }
 
 .filter-buttons {
     display: flex;
-    gap: 8px;
+    gap: 6px;
     flex-wrap: wrap;
 }
 
 .filter-btn {
-    padding: 8px 16px;
+    padding: 6px 10px;
     border-radius: 8px;
     border: 2px solid var(--slate-200);
     background: #fff;
     color: var(--slate-600);
-    font-size: 13px;
+    font-size: 12px;
     font-weight: 600;
     cursor: pointer;
     transition: all 0.3s ease;
@@ -362,10 +397,10 @@ body {
     background: linear-gradient(135deg, var(--success) 0%, var(--success-dark) 100%);
     color: #fff;
     border: none;
-    padding: 11px 20px;
+    padding: 8px 12px;
     border-radius: 10px;
     font-weight: 600;
-    font-size: 14px;
+    font-size: 12px;
     cursor: pointer;
     transition: all 0.3s ease;
     box-shadow: 0 8px 18px rgba(16, 185, 129, 0.25);
@@ -1058,4 +1093,132 @@ textarea.form-control {
 
 .toast.info {
     background: linear-gradient(135deg, var(--primary-bright) 0%, var(--primary-dark) 100%);
+}
+
+/* Responsividad mejorada */
+@media (max-width: 1200px) {
+    .notif-container {
+        max-width: 100%;
+        padding: 0 12px;
+    }
+    
+    .stats-container {
+        grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    }
+    
+    .tabs {
+        gap: 4px;
+    }
+}
+
+@media (max-width: 900px) {
+    .header {
+        padding: 10px 12px;
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    
+    .page-actions {
+        width: 100%;
+        gap: 8px;
+    }
+    
+    .btn {
+        flex: 1;
+        justify-content: center;
+    }
+    
+    .stats-container {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 8px;
+    }
+    
+    .stat-card {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 4px;
+        padding: 8px 10px;
+    }
+    
+    .stat-icon {
+        width: 28px;
+        height: 28px;
+        font-size: 12px;
+    }
+}
+
+@media (max-width: 600px) {
+    .notif-page {
+        padding: 8px 12px;
+    }
+    
+    .header {
+        padding: 8px 10px;
+        gap: 4px;
+    }
+    
+    .header h1 {
+        font-size: 14px;
+    }
+    
+    .header p {
+        font-size: 10px;
+    }
+    
+    .stats-container {
+        grid-template-columns: 1fr;
+        gap: 6px;
+    }
+    
+    .stat-card {
+        padding: 6px 8px;
+        min-width: 100%;
+    }
+    
+    .stat-value {
+        font-size: 16px;
+    }
+    
+    .stat-label {
+        font-size: 9px;
+    }
+    
+    .btn {
+        padding: 6px 10px;
+        font-size: 11px;
+        gap: 4px;
+    }
+    
+    .page-actions {
+        flex-direction: column;
+        width: 100%;
+    }
+    
+    .tab-content {
+        padding: 12px 10px;
+    }
+    
+    .toast {
+        bottom: 10px;
+        right: 10px;
+        padding: 12px 16px;
+        font-size: 12px;
+        max-width: 280px;
+    }
+}
+
+@media (max-width: 380px) {
+    .header h1 {
+        font-size: 12px;
+    }
+    
+    .btn {
+        padding: 6px 8px;
+        font-size: 10px;
+    }
+    
+    .stat-icon {
+        width: 24px;
+        height: 24px;
+    }
 }

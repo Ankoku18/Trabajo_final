@@ -4,9 +4,12 @@
  */
 
 // API Client compartido
-// Use relative `/api` in production and localhost:3000 in dev (server runs on 3000)
-const API_BASE_URL = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
-  ? 'http://localhost:3000/api'
+// Use relative `/api` in production and localhost:4000 in dev (server runs on 4000)
+const API_BASE_URL = (window.location.hostname === 'localhost' ||
+  window.location.hostname === '127.0.0.1' ||
+  window.location.hostname === '' ||
+  window.location.protocol === 'file:')
+  ? 'http://localhost:4000/api'
   : '/api'
 
 // Utilidades compartidas
