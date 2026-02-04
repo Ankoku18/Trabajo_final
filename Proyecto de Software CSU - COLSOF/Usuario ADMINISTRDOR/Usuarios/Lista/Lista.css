@@ -22,23 +22,24 @@
   border-top: 6px solid;
   border-image: linear-gradient(90deg, #06b6d4, #10b981, #8b5cf6) 1;
   border-radius: 14px;
-  padding: 24px 32px;
+  padding: 10px 20px;
   box-shadow: 0 12px 48px rgba(0, 0, 0, 0.12);
   animation: slideUp 0.6s cubic-bezier(0.4, 0, 0.2, 1);
   color: #fff;
+  margin-bottom: 18px;
 }
 
 .page-header h1 {
-  font-size: 32px;
+  font-size: clamp(18px, 4vw, 28px);
   font-weight: 700;
-  margin-bottom: 8px;
+  margin-bottom: 3px;
   color: #fff;
 }
 
 .page-desc {
   color: rgba(255, 255, 255, 0.85);
   margin-top: 0;
-  font-size: 14px;
+  font-size: clamp(11px, 2vw, 13px);
   font-weight: 500;
 }
 
@@ -56,18 +57,19 @@
 
 .user-kpis {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-  gap: 20px;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: clamp(12px, 2.5vw, 16px);
+  margin-bottom: 12px;
 }
 
 .kpi-card {
-  background: #fff;
+  background: linear-gradient(135deg, #ffffff 0%, #f8fbff 100%);
   border: 2px solid #e2e8f0;
   border-radius: 14px;
-  padding: 24px;
+  padding: clamp(12px, 2vw, 16px);
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 8px;
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
   transition: all 0.3s ease;
   animation: slideUp 0.6s cubic-bezier(0.4, 0, 0.2, 1);
@@ -77,7 +79,7 @@
 .kpi-card:hover {
   border-color: #1976d2;
   box-shadow: 0 12px 36px rgba(25, 118, 210, 0.15);
-  transform: translateY(-4px);
+  transform: translateY(-2px);
 }
 
 .kpi-card::before {
@@ -92,7 +94,7 @@
 }
 
 .kpi-label {
-  font-size: 12px;
+  font-size: clamp(11px, 1.8vw, 12px);
   letter-spacing: 0.5px;
   color: #6b7280;
   text-transform: uppercase;

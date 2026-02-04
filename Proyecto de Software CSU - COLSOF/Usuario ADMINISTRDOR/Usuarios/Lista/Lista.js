@@ -1,5 +1,5 @@
 // API Configuration
-const API_URL = 'http://localhost:3001/api';
+const API_URL = 'http://localhost:4000/api';
 
 let usuarios = [];
 let casesData = [];

@@ -2,19 +2,53 @@ import express from 'express'
 import cors from 'cors'
 import path from 'path'
 import { fileURLToPath } from 'url'
+import dotenv from 'dotenv'
 import { pool } from './db/connection.js'
 
 const app = express()
-const PORT = process.env.PORT || 3001
+const PORT = process.env.PORT || 4000
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
 
+dotenv.config({ path: path.resolve(__dirname, '../Config.env') })
+
+// Detectar si está en Vercel
+const isVercel = !!process.env.VERCEL
+
 // Variable global para rastrear estado de BD
 let dbConnected = false
 
+// ==================== CORS (configuración para desarrollo y producción) ====================
+const isDevelopment = !isVercel
+
+const corsOptions = {
+  origin: (origin, callback) => {
+    // En desarrollo, permitir cualquier origen (file://, localhost, etc.)
+    if (isDevelopment) {
+      return callback(null, true)
+    }
+    
+    // En producción, validar contra lista de orígenes permitidos
+    const allowedOrigins = (process.env.CORS_ORIGINS || 'https://example.com')
+      .split(',')
+      .map((o) => o.trim())
+      .filter(Boolean)
+    
+    if (!origin) return callback(null, true) // Permitir herramientas como curl o Postman
+    if (allowedOrigins.includes(origin)) return callback(null, true)
+    
+    console.warn(`❌ CORS bloqueado: origen ${origin} no permitido`)
+    return callback(new Error('Origen no permitido por CORS'))
+  },
+  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+  credentials: true,
+  maxAge: 86400
+}
+
 // Middleware
-app.use(cors())
+app.use(cors(corsOptions))
+app.options('*', cors(corsOptions))
 app.use(express.json())
 
 // ==================== RUTAS DE API (ANTES DE ARCHIVOS ESTÁTICOS) ====================
