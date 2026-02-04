@@ -2,6 +2,7 @@
   "version": 2,
   "name": "csu-colsof",
   "public": false,
+   "runtime": "nodejs20.x",
   "env": {
     "NODE_ENV": "production"
   },
