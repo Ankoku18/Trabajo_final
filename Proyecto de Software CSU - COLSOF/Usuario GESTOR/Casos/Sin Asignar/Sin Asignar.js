@@ -3,6 +3,18 @@ let technicians = [];
 let currentSelectedCase = null;
 let autoRefreshTimer = null;
 
+// Alert banner control
+function initAlertBanner() {
+  const banner = document.getElementById('alertBanner');
+  const closeBtn = document.getElementById('closeAlertBtn');
+  
+  if (!banner || !closeBtn) return;
+  
+  closeBtn.addEventListener('click', () => {
+    banner.classList.add('hide');
+  });
+}
+
 const qs = (sel, ctx = document) => ctx.querySelector(sel);
 const qsa = (sel, ctx = document) => Array.from(ctx.querySelectorAll(sel));
 
@@ -375,6 +387,7 @@ const startAutoRefresh = () => {
 
 document.addEventListener('DOMContentLoaded', () => {
   if (window.lucide) window.lucide.createIcons();
+  initAlertBanner();
   setupEventListeners();
   fetchUnassigned();
   startAutoRefresh();

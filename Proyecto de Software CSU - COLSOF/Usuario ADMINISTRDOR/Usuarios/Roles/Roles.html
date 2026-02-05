@@ -132,6 +132,38 @@
             <button class="btn btn-primary" id="btnCrear"><i class="fa fa-plus"></i> Crear rol</button>
           </div>
         </header>
+        <div id="acciones" class="acciones hidden">
+          <button class="btn" id="btnCancelar">Cancelar</button>
+          <button class="btn primary" id="btnGuardar">Guardar Cambios</button>
+        </div>
+        <section class="templates card">
+          <div class="card-header">
+            <div>
+              <div class="card-title">🎯 Plantillas de Roles</div>
+              <div class="card-subtitle">Inicia rápidamente con plantillas predefinidas</div>
+            </div>
+          </div>
+          <div class="templates-grid">
+            <div class="template template-card" data-template="supervisor">
+              <div class="template-icon">👔</div>
+              <div class="template-name">Supervisor de Soporte</div>
+              <div class="template-desc">Gestiona casos y supervisa el equipo</div>
+              <div class="template-perms">+8 permisos</div>
+            </div>
+            <div class="template template-card" data-template="analyst">
+              <div class="template-icon">📊</div>
+              <div class="template-name">Analista de Reportes</div>
+              <div class="template-desc">Genera y analiza reportes del sistema</div>
+              <div class="template-perms">+6 permisos</div>
+            </div>
+            <div class="template template-card" data-template="custom">
+              <div class="template-icon">⚙️</div>
+              <div class="template-name">Rol Personalizado</div>
+              <div class="template-desc">Crea un rol con permisos específicos</div>
+              <div class="template-perms">Configurable</div>
+            </div>
+          </div>
+        </section>
 
         <section class="roles-grid" id="roles"></section>
 
@@ -139,19 +171,7 @@
 
         <section class="card" id="permisos"></section>
 
-        <div id="acciones" class="acciones hidden">
-          <button class="btn" id="btnCancelar">Cancelar</button>
-          <button class="btn primary" id="btnGuardar">Guardar Cambios</button>
-        </div>
 
-        <section class="templates card">
-          <div class="card-header"><div class="card-title">Plantillas de Roles</div></div>
-          <div class="templates-grid">
-            <div class="template">Supervisor de Soporte</div>
-            <div class="template">Analista de Reportes</div>
-            <div class="template">Rol Personalizado</div>
-          </div>
-        </section>
       </div>
     </main>
   </div>

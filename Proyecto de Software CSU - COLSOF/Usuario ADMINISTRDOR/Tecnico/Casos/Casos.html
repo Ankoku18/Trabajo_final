@@ -90,8 +90,6 @@
                     <span>Terminal</span></a>
                 </li>
             </ul>
-
-                  <a href="../../Terminal/Terminal.html" title="Ir a Terminal">
         </aside>
 
         <main class="main-content">
@@ -122,8 +120,9 @@
                       <p>Administración centralizada de todos los casos de soporte</p>
                     </div>
                     <div class="page-actions">
-                      <button class="btn" id="btnRefresh"><i class="fa fa-rotate-right"></i> Refrescar</button>
-                      <button class="btn btn-primary" id="btnNew"><i class="fa fa-plus"></i> Nuevo caso</button>
+                      <button type="button" class="btn" id="btnRefresh"><i class="fa fa-rotate-right"></i> Refrescar</button>
+                      <button type="button" class="btn" id="btnExport"><i class="fa fa-download"></i> Exportar</button>
+                      <button type="button" class="btn btn-primary" id="btnNew"><i class="fa fa-plus"></i> Nuevo caso</button>
                     </div>
                   </header>
 
@@ -183,13 +182,15 @@
                       <table id="casesTable">
                         <thead>
                           <tr>
-                            <th>ID</th>
-                            <th>Caso</th>
-                            <th>Cliente</th>
-                            <th>Técnico</th>
-                            <th>Prioridad</th>
-                            <th>Estado</th>
-                            <th>SLA</th>
+                            <th class="col-select"><input type="checkbox" id="selectAll" title="Seleccionar todos" /></th>
+                            <th title="Haz clic para ordenar">ID</th>
+                            <th title="Haz clic para ordenar">Caso</th>
+                            <th title="Haz clic para ordenar">Cliente</th>
+                            <th title="Haz clic para ordenar">Técnico</th>
+                            <th title="Haz clic para ordenar">Prioridad</th>
+                            <th title="Haz clic para ordenar">Estado</th>
+                            <th title="Haz clic para ordenar">SLA</th>
+                            <th class="col-actions">Acciones</th>
                           </tr>
                         </thead>
                         <tbody>

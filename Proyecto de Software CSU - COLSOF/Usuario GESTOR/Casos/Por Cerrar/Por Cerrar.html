@@ -146,14 +146,16 @@
             </div>
           </div>
           <div class="pending">
-            <span>Pendientes</span>
             <strong id="totalPending"></strong>
           </div>
         </header>
 
         <!-- Alerta -->
-        <div class="alert">
-          <strong>Atención:</strong> estos casos fueron completados por los técnicos y requieren tu aprobación para cierre definitivo.
+        <div class="alert-banner" id="alertBanner">
+          <div>
+            <strong>Atención:</strong> estos casos fueron completados por los técnicos y requieren tu aprobación para cierre definitivo.
+          </div>
+          <button class="alert-banner-close" id="closeAlertBtn" title="Cerrar" aria-label="Cerrar banner">✕</button>
         </div>
 
         <!-- KPIs -->

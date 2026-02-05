@@ -6,7 +6,7 @@ import bcrypt from 'bcrypt'
 import { pool } from '../Proyecto de Software CSU - COLSOF/db/connection.js'
 
 const app = express()
-const PORT = process.env.PORT || 3001
+const PORT = process.env.PORT || 3000
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)

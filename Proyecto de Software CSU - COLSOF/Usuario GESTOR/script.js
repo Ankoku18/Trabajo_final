@@ -68,7 +68,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Colores por prioridad
   const prioridadMeta = {
-    'critica': { clase: 'critica', color: '#b91c1c', label: 'CrÃ­tica' },
+    'critica': { clase: 'critica', color: '#b91c1c', label: 'Crítica' },
     'urgente': { clase: 'critica', color: '#b91c1c', label: 'Urgente' },
     'alta': { clase: 'alta', color: '#f97316', label: 'Alta' },
     'media': { clase: 'media', color: '#facc15', label: 'Media' },
@@ -78,15 +78,15 @@ document.addEventListener('DOMContentLoaded', () => {
   let casesPaginationInitialized = false;
 
   const loginPath = resolveLoginPath();
-  $$('.logout-btn').forEach(btn => {
+  $('.logout-btn').forEach(btn => {
     btn.addEventListener('click', () => {
-      alert('SesiÃ³n cerrada.');
+      alert('Sesión cerrada.');
       window.location.href = loginPath;
     });
   });
 
 
-  // Estilos rÃ¡pidos para el menÃº contextual y modales
+  // Estilos rápidos para el menú contextual y modales
   (function injectCaseMenuStyles() {
     if (document.getElementById('case-menu-styles')) return;
     const style = document.createElement('style');
@@ -117,11 +117,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
   const empresasBogota = [
     'Ecopetrol', 'Bancolombia', 'Davivienda', 'Avianca', 'Claro Colombia',
-    'Movistar Colombia', 'ETB', 'Tigo Une', 'Grupo Ã‰xito', 'PostobÃ³n',
-    'Alpina', 'Nutresa', 'Carvajal', 'Compensar', 'Sura', 'Seguros BolÃ­var'
+    'Movistar Colombia', 'ETB', 'Tigo Une', 'Grupo Éxito', 'Postobón',
+    'Alpina', 'Nutresa', 'Carvajal', 'Compensar', 'Sura', 'Seguros Bolívar'
   ];
 
-  // API base (local: http://localhost:4000/api, producciÃ³n: {origin}/api, file:// -> localhost)
+  // API base (local: http://localhost:4000/api, producción: {origin}/api, file:// -> localhost)
   const getApiUrl = () => {
     const isLocal = window.location.hostname === 'localhost' ||
       window.location.hostname === '127.0.0.1' ||

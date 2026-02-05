@@ -428,29 +428,107 @@ button.perm.disabled {
 
 .templates-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-  gap: 16px;
-  padding: 16px 0;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: 10px;
+  padding: 12px 0;
 }
 
 .template {
-  border: 2px dashed #bfdbfe;
-  padding: 20px;
+  border: 2px solid #e2e8f0;
+  padding: 12px 10px;
   text-align: center;
-  border-radius: 12px;
-  background: linear-gradient(135deg, #f0f9ff 0%, #dbeafe 100%);
+  border-radius: 10px;
+  background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
   cursor: pointer;
-  font-weight: 700;
+  font-weight: 600;
   color: #0f3f86;
-  transition: all 0.3s ease;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.03);
 }
 
-.template:hover {
+.template::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, #1976d2, #06b6d4);
+  transform: scaleX(0);
+  transition: transform 0.3s ease;
+  transform-origin: left;
+}
+
+.template:hover::before {
+  transform: scaleX(1);
+}
+
+.template-card {
+  border: 2px solid #e2e8f0;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  align-items: center;
+  justify-content: center;
+}
+
+.template-card:hover {
   border-color: #1976d2;
-  border-style: solid;
+  background: linear-gradient(135deg, #f0f9ff 0%, #dbeafe 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 16px rgba(25, 118, 210, 0.12);
+}
+
+.template-icon {
+  font-size: 28px;
+  line-height: 1;
+}
+
+.template-card:hover .template-icon {
+  font-size: 32px;
+}
+
+@keyframes bounce {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-4px);
+  }
+}
+
+.template-name {
+  font-size: 12px;
+  font-weight: 700;
+  color: #0f3f86;
+  margin: 2px 0 1px 0;
+  line-height: 1.2;
+}
+
+.template-desc {
+  font-size: 10px;
+  color: #6b7280;
+  font-weight: 500;
+  line-height: 1.2;
+  margin: 0;
+}
+
+.template-perms {
+  font-size: 10px;
+  font-weight: 600;
+  color: #1976d2;
   background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
-  transform: translateY(-4px);
-  box-shadow: 0 8px 24px rgba(25, 118, 210, 0.15);
+  padding: 3px 8px;
+  border-radius: 5px;
+  margin-top: 4px;
+  display: inline-block;
+}
+
+.template-card:hover .template-perms {
+  background: linear-gradient(135deg, #1976d2, #0f3f86);
+  color: #fff;
 }
 
 @media (max-width: 1024px) {

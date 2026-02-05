@@ -217,7 +217,21 @@ window.closeModal = closeModal;
 window.approveCase = approveCase;
 window.rejectCase = rejectCase;
 
+// Función para el botón de cerrar el alert banner
+function initAlertBanner() {
+  const alertBanner = document.getElementById('alertBanner');
+  const closeBtn = document.getElementById('closeAlertBtn');
+  
+  if (alertBanner && closeBtn) {
+    closeBtn.addEventListener('click', () => {
+      alertBanner.classList.add('hide');
+    });
+  }
+}
+
 document.addEventListener('DOMContentLoaded', () => {
+  initAlertBanner();
   fetchPendingClose();
   startAutoRefresh();
 });
+
