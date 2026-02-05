@@ -1,6 +1,6 @@
 .case-card .header {
   background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
-  padding: 20px 24px;
+  padding: 12px 16px;
   border-bottom: 1px solid var(--card-border);
   display: flex;
   justify-content: space-between;
@@ -11,15 +11,15 @@
 
 .case-card .header p {
   color: var(--muted);
-  margin: 6px 0 0;
-  font-size: 14px;
+  margin: 4px 0 0;
+  font-size: 12px;
 }
 
 .case-card .header .header-actions select,
 .case-card .header .header-actions button {
-  padding: 10px 16px;
-  margin-left: 10px;
-  border-radius: 10px;
+  padding: 8px 12px;
+  margin-left: 8px;
+  border-radius: 8px;
   border: 1px solid var(--card-border);
   background: #fff;
   color: var(--text);
@@ -47,21 +47,21 @@
 .case-card .kpi-grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  gap: 18px;
-  margin: 20px 0;
+  gap: 12px;
+  margin: 14px 0;
 }
 
 .case-card .kpi {
   background: linear-gradient(135deg, #fff 0%, #f8fafc 100%);
-  padding: 20px;
+  padding: 14px;
   border-radius: 12px;
   border: 1px solid var(--card-border);
   box-shadow: 0 2px 8px rgba(21,70,123,0.06);
   color: var(--muted);
-  font-size: 13px;
+  font-size: 12px;
   font-weight: 600;
   text-transform: uppercase;
-  letter-spacing: 0.5px;
+  letter-spacing: 0.4px;
   position: relative;
   overflow: hidden;
   transition: all 0.3s;
@@ -84,9 +84,9 @@
 
 .case-card .kpi strong {
   display: block;
-  font-size: 28px;
+  font-size: 22px;
   color: var(--brand-600);
-  margin-top: 8px;
+  margin-top: 6px;
   font-weight: 700;
 }
 
@@ -203,41 +203,41 @@
 
 .case-card .header {
   background: linear-gradient(135deg, #0f3f86 0%, #1976d2 100%);
-  padding: 24px;
+  padding: 12px 16px;
   border-bottom: none;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  border-radius: 14px 14px 0 0;
-  box-shadow: 0 4px 12px rgba(15, 63, 134, 0.15);
+  border-radius: 12px 12px 0 0;
+  box-shadow: 0 2px 8px rgba(15, 63, 134, 0.12);
 }
 
 .case-card .header h1 {
   color: #fff;
-  margin: 0 0 8px 0;
-  font-size: 24px;
+  margin: 0 0 4px 0;
+  font-size: 18px;
 }
 
 .case-card .header p {
   color: rgba(255, 255, 255, 0.85);
   margin: 0;
-  font-size: 14px;
+  font-size: 12px;
 }
 
 .case-card .header .header-actions {
   display: flex;
-  gap: 12px;
+  gap: 8px;
 }
 
 .case-card .header .header-actions select,
 .case-card .header .header-actions button {
-  padding: 10px 18px;
-  border-radius: 10px;
+  padding: 8px 12px;
+  border-radius: 8px;
   border: 1px solid rgba(255, 255, 255, 0.2);
   background: rgba(255, 255, 255, 0.95);
   color: #0f3f86;
   font-weight: 600;
-  font-size: 13px;
+  font-size: 12px;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   cursor: pointer;
 }
@@ -923,6 +923,7 @@
   width: 100%;
   height: 100%;
   background: rgba(0, 0, 0, 0.7);
+  -webkit-backdrop-filter: blur(4px);
   backdrop-filter: blur(4px);
   z-index: 10000;
   animation: fadeIn 0.3s ease;
@@ -1359,6 +1360,7 @@ a:active,
   right: 0;
   bottom: 0;
   background: rgba(0, 0, 0, 0.5);
+  -webkit-backdrop-filter: blur(4px);
   backdrop-filter: blur(4px);
   z-index: 1000;
   align-items: center;

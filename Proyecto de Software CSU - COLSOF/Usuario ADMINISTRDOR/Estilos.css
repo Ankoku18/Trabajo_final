@@ -486,14 +486,14 @@ h1 { font-size: 24px; color: #0b3a66; margin-bottom: 10px; }
 .stats-grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  gap: 18px;
-  margin-bottom: 24px;
+  gap: 12px;
+  margin-bottom: 16px;
 }
 .stat-card {
   background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
   border: 1px solid var(--col-border);
-  border-radius: 12px;
-  padding: 20px;
+  border-radius: 10px;
+  padding: 14px;
   box-shadow: var(--shadow-sm);
   transition: transform 0.3s ease, box-shadow 0.3s ease;
   position: relative;
@@ -521,31 +521,35 @@ h1 { font-size: 24px; color: #0b3a66; margin-bottom: 10px; }
 .stat-card:nth-child(2)::before { background: linear-gradient(90deg, #3b82f6, #60a5fa); }
 .stat-card:nth-child(3)::before { background: linear-gradient(90deg, #f59e0b, #fbbf24); }
 .stat-card:nth-child(4)::before { background: linear-gradient(90deg, #8b5cf6, #a78bfa); }
+.stat-card:nth-child(1) { background: linear-gradient(135deg, #ecfdf5 0%, #ffffff 70%); border-color: #d1fae5; }
+.stat-card:nth-child(2) { background: linear-gradient(135deg, #eff6ff 0%, #ffffff 70%); border-color: #dbeafe; }
+.stat-card:nth-child(3) { background: linear-gradient(135deg, #fff7ed 0%, #ffffff 70%); border-color: #fde68a; }
+.stat-card:nth-child(4) { background: linear-gradient(135deg, #f5f3ff 0%, #ffffff 70%); border-color: #ddd6fe; }
 .stat-title { 
-  font-size: 12px; 
+  font-size: 11px; 
   color: #6b7280; 
-  letter-spacing: 0.5px; 
-  margin-bottom: 12px; 
+  letter-spacing: 0.4px; 
+  margin-bottom: 8px; 
   text-transform: uppercase;
   font-weight: 600;
 }
 .stat-value { 
-  font-size: 32px; 
+  font-size: 24px; 
   font-weight: 700; 
   color: #0f172a;
   line-height: 1;
-  margin-bottom: 8px;
+  margin-bottom: 6px;
   animation: countUp 0.8s ease-out;
 }
 .stat-change { 
-  font-size: 13px; 
-  margin-top: 8px; 
+  font-size: 12px; 
+  margin-top: 6px; 
   font-weight: 600;
   transition: all 0.3s ease;
   display: inline-flex;
   align-items: center;
   gap: 4px;
-  padding: 4px 8px;
+  padding: 3px 8px;
   border-radius: 6px;
 }
 .stat-change.positive { 

@@ -6,6 +6,18 @@ let currentSelectedDraft = null;
 let draftToDelete = null;
 let autoRefreshTimer = null;
 
+// Info banner control
+function initInfoBanner() {
+  const banner = document.getElementById('infoBanner');
+  const closeBtn = document.getElementById('closeBannerBtn');
+  
+  if (!banner || !closeBtn) return;
+  
+  closeBtn.addEventListener('click', () => {
+    banner.classList.add('hide');
+  });
+}
+
 const qs = (sel, ctx = document) => ctx.querySelector(sel);
 const qsa = (sel, ctx = document) => Array.from(ctx.querySelectorAll(sel));
 
@@ -442,6 +454,7 @@ document.addEventListener('DOMContentLoaded', () => {
   if (window.lucide) {
     window.lucide.createIcons();
   }
+  initInfoBanner();
   setupEventListeners();
   fetchDrafts();
   startAutoRefresh();

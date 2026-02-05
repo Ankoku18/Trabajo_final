@@ -248,23 +248,13 @@ function renderMonthlyChart(casos) {
   const ctx = document.getElementById('monthlyChart');
   if (!ctx) return;
 
-  const byMonth = new Map();
-  casos.forEach(caso => {
-    const fecha = new Date(caso.fecha_creacion);
-    if (Number.isNaN(fecha.getTime())) return;
-    const key = `${fecha.getFullYear()}-${String(fecha.getMonth() + 1).padStart(2, '0')}`;
-    const label = fecha.toLocaleString('es-CO', { month: 'short' });
-    if (!byMonth.has(key)) {
-      byMonth.set(key, { label, total: 0, resueltos: 0 });
-    }
-    const item = byMonth.get(key);
-    item.total += 1;
-    if (resolvedStatuses.includes(caso.estado)) item.resueltos += 1;
-  });
+  // Etiquetas de meses
+  const labels = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
 
-  const labels = Array.from(byMonth.keys()).sort().map(key => byMonth.get(key).label);
-  const totals = Array.from(byMonth.keys()).sort().map(key => byMonth.get(key).total);
-  const solved = Array.from(byMonth.keys()).sort().map(key => byMonth.get(key).resueltos);
+  // Datos simulados para tres años con variación realista
+  const datos2019 = [5000, 4000, 6000, 3000, 2000, 6000, 8000, 10000, 12000, 8000, 6000, 4000];
+  const datos2020 = [14000, 22000, 29000, 31000, 33000, 32000, 26000, 31000, 38000, 40000, 37000, 22000];
+  const datos2021 = [23000, 32000, 30000, 2000, 1000, 12000, 20000, 24000, 28000, 26000, 35000, 38000];
 
   if (monthlyChart) monthlyChart.destroy();
 
@@ -274,29 +264,52 @@ function renderMonthlyChart(casos) {
       labels,
       datasets: [
         {
-          label: 'Creados',
-          data: totals,
-          borderWidth: 3,
-          borderColor: '#1d4ed8',
-          backgroundColor: 'rgba(29,78,216,0.12)',
+          label: '2019',
+          data: datos2019,
+          borderWidth: 2.5,
+          borderColor: '#60a5fa',
+          backgroundColor: 'rgba(96,165,250,0.05)',
           tension: 0.4,
-          pointRadius: 5,
-          pointHoverRadius: 7,
-          pointBackgroundColor: '#1d4ed8',
+          pointRadius: 0,
+          pointHoverRadius: 6,
+          pointBackgroundColor: '#60a5fa',
           pointBorderColor: '#fff',
           pointBorderWidth: 2,
-          fill: true
+          fill: false
         },
         {
-          label: 'Resueltos',
-          data: solved,
-          borderWidth: 3,
-          borderColor: '#16a34a',
-          backgroundColor: 'rgba(22,163,74,0.12)',
+          label: '2020',
+          data: datos2020,
+          borderWidth: 2.5,
+          borderColor: '#14b8a6',
+          backgroundColor: 'rgba(20,184,166,0.05)',
           tension: 0.4,
-          pointRadius: 5,
+          pointRadius: 0,
+          pointHoverRadius: 6,
+          pointBackgroundColor: '#14b8a6',
+          pointBorderColor: '#fff',
+          pointBorderWidth: 2,
+          fill: false
+        },
+        {
+          label: '2021',
+          data: datos2021,
+          borderWidth: 3,
+          borderColor: '#8b5cf6',
+          backgroundColor: function(context) {
+            const chart = context.chart;
+            const {ctx, chartArea} = chart;
+            if (!chartArea) return 'rgba(139,92,246,0.15)';
+            const gradient = ctx.createLinearGradient(0, chartArea.top, 0, chartArea.bottom);
+            gradient.addColorStop(0, 'rgba(139,92,246,0.35)');
+            gradient.addColorStop(0.5, 'rgba(139,92,246,0.15)');
+            gradient.addColorStop(1, 'rgba(139,92,246,0.02)');
+            return gradient;
+          },
+          tension: 0.4,
+          pointRadius: 4,
           pointHoverRadius: 7,
-          pointBackgroundColor: '#16a34a',
+          pointBackgroundColor: '#8b5cf6',
           pointBorderColor: '#fff',
           pointBorderWidth: 2,
           fill: true
@@ -313,30 +326,51 @@ function renderMonthlyChart(casos) {
       plugins: { 
         legend: { 
           position: 'top',
+          align: 'end',
           labels: {
             padding: 15,
-            font: { size: 13, weight: '600' },
+            font: { size: 12, weight: '500' },
             usePointStyle: true,
-            pointStyle: 'circle'
+            pointStyle: 'circle',
+            boxWidth: 8,
+            boxHeight: 8
           }
         },
         tooltip: {
-          backgroundColor: 'rgba(0,0,0,0.8)',
+          backgroundColor: 'rgba(0,0,0,0.85)',
           padding: 12,
           cornerRadius: 8,
-          titleFont: { size: 14, weight: '600' },
-          bodyFont: { size: 13 }
+          titleFont: { size: 13, weight: '600' },
+          bodyFont: { size: 12 },
+          displayColors: true,
+          callbacks: {
+            label: function(context) {
+              return context.dataset.label + ': ' + context.parsed.y.toLocaleString();
+            }
+          }
         }
       },
       scales: {
         x: { 
-          ticks: { color: palette.muted, font: { size: 12 } }, 
+          ticks: { 
+            color: '#9ca3af', 
+            font: { size: 11 }
+          }, 
           grid: { display: false },
-          border: { display: false }
+          border: { display: true, color: '#e5e7eb' }
         },
         y: { 
-          ticks: { color: palette.muted, font: { size: 12 } }, 
-          grid: { color: 'rgba(0,0,0,0.05)', drawBorder: false },
+          ticks: { 
+            color: '#9ca3af', 
+            font: { size: 11 },
+            callback: function(value) {
+              return value.toLocaleString();
+            }
+          }, 
+          grid: { 
+            color: 'rgba(0,0,0,0.04)', 
+            drawBorder: false 
+          },
           border: { display: false }
         }
       },
