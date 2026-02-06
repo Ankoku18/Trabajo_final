@@ -4,12 +4,12 @@
  */
 
 // API Client compartido
-// Use relative `/api` in production and localhost:4000 in dev (server runs on 4000)
+// Use relative `/api` in production and localhost:3000 in dev (server runs on 4000)
 const API_BASE_URL = (window.location.hostname === 'localhost' ||
   window.location.hostname === '127.0.0.1' ||
   window.location.hostname === '' ||
   window.location.protocol === 'file:')
-  ? 'http://localhost:4000/api'
+  ? 'http://localhost:3000/api'
   : '/api'
 
 // Utilidades compartidas
@@ -239,13 +239,72 @@ function actualizarBadgeNotificaciones() {
   })();
 }
 
+function initProfileMenus() {
+  const profiles = Array.from(document.querySelectorAll('.profile'));
+  if (!profiles.length) return;
+
+  const closeAllMenus = () => {
+    profiles.forEach((profile) => {
+      const menu = profile.querySelector('.profile-menu');
+      const btn = profile.querySelector('.profile-menu-btn');
+      if (menu) menu.classList.remove('show');
+      if (btn) btn.setAttribute('aria-expanded', 'false');
+    });
+  };
+
+  profiles.forEach((profile, index) => {
+    const btn = profile.querySelector('.profile-menu-btn');
+    const menu = profile.querySelector('.profile-menu');
+    if (!btn || !menu) return;
+
+    const menuId = menu.id || `profile-menu-${index + 1}`;
+    menu.id = menuId;
+    btn.setAttribute('aria-haspopup', 'menu');
+    btn.setAttribute('aria-controls', menuId);
+    btn.setAttribute('aria-expanded', 'false');
+
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const wasOpen = menu.classList.contains('show');
+      closeAllMenus();
+      if (!wasOpen) {
+        menu.classList.add('show');
+        btn.setAttribute('aria-expanded', 'true');
+      }
+    });
+
+    menu.addEventListener('click', (e) => {
+      e.stopPropagation();
+    });
+
+    const logoutBtn = menu.querySelector('.logout-btn');
+    if (logoutBtn) {
+      logoutBtn.addEventListener('click', () => {
+        menu.classList.remove('show');
+        btn.setAttribute('aria-expanded', 'false');
+      });
+    }
+  });
+
+  document.addEventListener('click', closeAllMenus);
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') closeAllMenus();
+  });
+}
+
+const initAppCommon = () => {
+  actualizarBadgeNotificaciones();
+  initProfileMenus();
+};
+
 // Ejecutar cuando el DOM esté listo
 if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', actualizarBadgeNotificaciones);
+  document.addEventListener('DOMContentLoaded', initAppCommon);
 } else {
-  actualizarBadgeNotificaciones();
+  initAppCommon();
 }
 
 // Actualizar cada 2 minutos
 setInterval(actualizarBadgeNotificaciones, 120000);
+
 

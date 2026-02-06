@@ -6,7 +6,7 @@ document.addEventListener('DOMContentLoaded', function() {
     let currentPage = 1;
     const itemsPerPage = 10;
 
-    const API_BASE = 'http://localhost:4000/api?action=get_casos_simple';
+    const API_BASE = 'http://localhost:3000/api?action=get_casos_simple';
 
     // DOM elements
     const table = document.getElementById('casesTable');

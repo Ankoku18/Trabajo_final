@@ -51,49 +51,11 @@
   function qsa(sel, ctx=document){ return Array.from(ctx.querySelectorAll(sel)); }
 
   // Configuración de API
-  const API_URL = 'http://localhost:4000/api';
+  const API_URL = 'http://localhost:3000/api';
   let refreshInterval = null;
   let currentTimeRange = '12'; // meses por defecto
 
-  // Perfil: abrir/cerrar menú y cerrar sesión
-  (function(){
-    const btn = qs('#btnProfile') || qs('.profile-menu-btn');
-    const menu = qs('#menuProfile') || qs('.profile-menu');
-    if (btn && menu) {
-      btn.addEventListener('click', (e) => {
-        e.stopPropagation();
-        menu.classList.toggle('show');
-      });
-      document.addEventListener('click', () => menu.classList.remove('show'));
-    }
-    const resolveLoginPath = () => {
-      const href = window.location.href;
-      const encodedMarker = 'Proyecto%20de%20Software%20CSU%20-%20COLSOF';
-      if (href.includes(encodedMarker)) return href.split(encodedMarker)[0] + `${encodedMarker}/index.html`;
 
-      const plainMarker = 'Proyecto de Software CSU - COLSOF';
-      if (href.includes(plainMarker)) return href.split(plainMarker)[0] + `${plainMarker}/index.html`;
-
-      return '/index.html';
-    };
-
-    /* LOGOUT DESCONECTADO - REQUIERE LOGIN
-    const loginPath = resolveLoginPath();
-    qsa('.logout-btn').forEach(btn => {
-      btn.addEventListener('click', () => {
-        alert('Sesión cerrada.');
-        window.location.href = loginPath;
-      });
-    });
-    */
-
-    // Botón de logout en modo standalone
-    qsa('.logout-btn').forEach(btn => {
-      btn.addEventListener('click', () => {
-        alert('Modo standalone - La funcionalidad de logout está desconectada del login.');
-      });
-    });
-  })();
 
   // Modal de construcción (compatibilidad con ambos ids)
   (function(){

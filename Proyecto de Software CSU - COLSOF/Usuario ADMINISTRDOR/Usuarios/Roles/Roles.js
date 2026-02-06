@@ -1,5 +1,5 @@
 // API Configuration
-const API_URL = 'http://localhost:4000/api';
+const API_URL = 'http://localhost:3000/api';
 
 let editingRole = null;
 let roles = [];
@@ -321,3 +321,4 @@ document.addEventListener('DOMContentLoaded', async () => {
   setupEventListeners();
   startAutoRefresh();
 });
+
