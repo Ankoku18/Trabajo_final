@@ -78,7 +78,7 @@ document.addEventListener('DOMContentLoaded', () => {
   let casesPaginationInitialized = false;
 
   const loginPath = resolveLoginPath();
-  $('.logout-btn').forEach(btn => {
+  $$('.logout-btn').forEach(btn => {
     btn.addEventListener('click', () => {
       alert('Sesión cerrada.');
       window.location.href = loginPath;
@@ -121,13 +121,13 @@ document.addEventListener('DOMContentLoaded', () => {
     'Alpina', 'Nutresa', 'Carvajal', 'Compensar', 'Sura', 'Seguros Bolívar'
   ];
 
-  // API base (local: http://localhost:4000/api, producción: {origin}/api, file:// -> localhost)
+  // API base (local: http://localhost:3000/api, producción: {origin}/api, file:// -> localhost)
   const getApiUrl = () => {
     const isLocal = window.location.hostname === 'localhost' ||
       window.location.hostname === '127.0.0.1' ||
       window.location.hostname === '' ||
       window.location.protocol === 'file:';
-    if (isLocal) return 'http://localhost:4000/api';
+    if (isLocal) return 'http://localhost:3000/api';
     return '/api';
   };
 
@@ -219,20 +219,6 @@ document.addEventListener('DOMContentLoaded', () => {
       return;
     }
   });
-
-  // =====================
-  // MenÃº de perfil
-  // =====================
-  const profileBtn = $('.profile-menu-btn');
-  const profileMenu = $('.profile-menu');
-  if (profileBtn && profileMenu) {
-    profileBtn.addEventListener('click', (e) => {
-      e.stopPropagation();
-      profileMenu.style.display = (profileMenu.style.display === 'block') ? 'none' : 'block';
-    });
-
-    document.addEventListener('click', () => { if (profileMenu.style.display === 'block') profileMenu.style.display = 'none'; });
-  }
 
   // =====================
   // PÃ¡gina: MenÃº principal

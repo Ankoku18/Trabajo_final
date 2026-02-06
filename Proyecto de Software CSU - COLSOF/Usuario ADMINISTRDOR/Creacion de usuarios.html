@@ -623,19 +623,26 @@ document.querySelector('.gen-pass-btn').addEventListener('click', function(e) {
     document.getElementById('contrasena').value = pass;
 });
 // Submenú de perfil
-const menuBtn = document.querySelector('.profile-menu-btn');
-const menu = document.querySelector('.profile-menu');
-menuBtn.addEventListener('click', function(e) {
-    e.stopPropagation();
-    menu.style.display = menu.style.display === 'block' ? 'none' : 'block';
-});
-document.addEventListener('click', function(e) {
-    if (menu.style.display === 'block') menu.style.display = 'none';
-});
-document.querySelector('.logout-btn').addEventListener('click', function() {
-    alert('Sesión cerrada');
-});
+document.addEventListener('DOMContentLoaded', function() {
+    const menuBtn = document.querySelector('.profile-menu-btn');
+    const menu = document.querySelector('.profile-menu');
+    if (menuBtn && menu) {
+        menuBtn.addEventListener('click', function(e) {
+            e.stopPropagation();
+            menu.style.display = menu.style.display === 'block' ? 'none' : 'block';
+        });
+        document.addEventListener('click', function() {
+            if (menu.style.display === 'block') menu.style.display = 'none';
+        });
+    }
 
+    const logoutBtn = document.querySelector('.logout-btn');
+    if (logoutBtn) {
+        logoutBtn.addEventListener('click', function() {
+            alert('Sesión cerrada');
+        });
+    }
+});
 // Envío del formulario: validar, mostrar éxito o error y redirigir
 (function(){
   const form = document.querySelector('.user-form');
@@ -663,5 +670,6 @@ document.querySelector('.logout-btn').addEventListener('click', function() {
   });
 })();
 </script>
+<script src="scripts.js"></script>
 </body>
 </html>

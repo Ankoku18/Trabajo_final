@@ -210,5 +210,27 @@
 
 		<script src="../../scripts.js"></script>
 		<script src="Evidencias.js"></script>
+		<script>
+			document.addEventListener('DOMContentLoaded', function() {
+				const menuBtn = document.querySelector('.profile-menu-btn');
+				const menu = document.querySelector('.profile-menu');
+				if (menuBtn && menu) {
+					menuBtn.addEventListener('click', function(e) {
+						e.stopPropagation();
+						menu.style.display = menu.style.display === 'block' ? 'none' : 'block';
+					});
+					document.addEventListener('click', function() {
+						if (menu.style.display === 'block') menu.style.display = 'none';
+					});
+				}
+
+				const logoutBtn = document.querySelector('.logout-btn');
+				if (logoutBtn) {
+					logoutBtn.addEventListener('click', function() {
+						alert('Sesión cerrada');
+					});
+				}
+			});
+		</script>
 </body>
 </html>

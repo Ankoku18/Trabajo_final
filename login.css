@@ -75,11 +75,12 @@ body {
 .page {
   max-width: 480px;
   margin: 0 auto;
-  padding: 48px 20px 80px;
+  min-height: calc(100vh - 72px);
+  padding: clamp(16px, 4vh, 40px) 20px clamp(20px, 6vh, 56px);
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 40px;
+  gap: clamp(20px, 4vh, 36px);
   animation: fadeIn 0.5s ease-out;
 }
 
@@ -114,7 +115,7 @@ body {
   background: var(--panel);
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow-xl);
-  padding: 40px 36px;
+  padding: clamp(24px, 4vh, 36px) clamp(20px, 4vw, 32px);
   border: 1px solid rgba(148, 163, 184, 0.1);
   animation: fadeInUp 0.6s ease-out 0.2s both;
   transition: var(--transition);
@@ -481,8 +482,8 @@ body {
 /* ===== Responsive ===== */
 @media (max-width: 560px) {
   .page {
-    padding: 32px 16px 60px;
-    gap: 32px;
+    padding: 24px 16px 40px;
+    gap: 24px;
   }
 
   .title {
@@ -494,7 +495,7 @@ body {
   }
 
   .card {
-    padding: 32px 24px;
+    padding: 24px 20px;
   }
 
   .input-group input {
@@ -509,6 +510,25 @@ body {
 
   .options {
     font-size: 0.8125rem;
+  }
+}
+
+@media (max-height: 720px) {
+  .page {
+    padding: 16px 16px 28px;
+    gap: 18px;
+  }
+
+  .title {
+    font-size: 2rem;
+  }
+
+  .card {
+    padding: 20px 18px;
+  }
+
+  .support {
+    margin-top: 12px;
   }
 }
 
