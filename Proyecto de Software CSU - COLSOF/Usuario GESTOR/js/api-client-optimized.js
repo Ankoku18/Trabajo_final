@@ -10,7 +10,16 @@
  * const casos = await apiClient.getCasos({ estado: 'abierto' });
  */
 
-const API_URL = 'http://localhost:3000/api';
+const API_URL = (typeof window !== 'undefined' && window.API_BASE_URL)
+  ? window.API_BASE_URL
+  : ((typeof window !== 'undefined' && (
+      window.location.hostname === 'localhost' ||
+      window.location.hostname === '127.0.0.1' ||
+      window.location.hostname === '' ||
+      window.location.protocol === 'file:'
+    ))
+    ? 'http://localhost:3000/api'
+    : '/api');
 
 // Deduplicación de requests - evita requests duplicados simultáneos
 const requestCache = new Map();

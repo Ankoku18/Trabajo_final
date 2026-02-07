@@ -18,11 +18,152 @@ let dbConnected = false
 app.use(cors())
 app.use(express.json())
 
+// ==================== ARCHIVOS ESTÁTICOS ====================
+
+// Servir archivos estáticos desde la raíz del proyecto
+app.use(express.static(__dirname + '/..'))
+
+// Headers para archivos estáticos
+app.use((req, res, next) => {
+  if (req.path.match(/\.(css|js|png|jpg|jpeg|gif|ico|svg|woff|woff2)$/)) {
+    res.setHeader('Cache-Control', 'public, max-age=31536000, immutable')
+  }
+  next()
+})
+
 // ==================== RUTAS DE API (ANTES DE ARCHIVOS ESTÁTICOS) ====================
 
 // Health check
 app.get('/api/health', (req, res) => {
   res.json({ status: 'ok', message: 'API running', dbConnected })
+})
+
+// Compatibilidad con endpoints legacy basados en ?action=
+app.get('/api', async (req, res) => {
+  const { action } = req.query
+  try {
+    if (action === 'get_casos_simple') {
+      const result = await pool.query('SELECT * FROM casos ORDER BY fecha_creacion DESC')
+      return res.json({ cases: result.rows })
+    }
+
+    if (action === 'get_dashboard_stats') {
+      const stats = await Promise.all([
+        pool.query('SELECT COUNT(*)::int as total FROM casos'),
+        pool.query("SELECT COUNT(*)::int as count FROM casos WHERE estado = 'pausado'"),
+        pool.query("SELECT COUNT(*)::int as count FROM casos WHERE estado = 'resuelto'"),
+        pool.query("SELECT COUNT(*)::int as count FROM casos WHERE estado = 'cerrado'"),
+        pool.query("SELECT COUNT(*)::int as count FROM casos WHERE estado = 'abierto' OR estado = 'en_progreso'")
+      ])
+
+      return res.json({
+        total_casos: stats[0].rows[0].total,
+        pausados: stats[1].rows[0].count,
+        resueltos: stats[2].rows[0].count,
+        cerrados: stats[3].rows[0].count,
+        pendientes: stats[4].rows[0].count,
+        reportes_generados: 0,
+        usuarios_activos: 0
+      })
+    }
+
+    if (action === 'get_recent_reports') {
+      const result = await pool.query(
+        'SELECT id, cliente, fecha_creacion, categoria FROM casos ORDER BY fecha_creacion DESC LIMIT 8'
+      )
+      return res.json(result.rows)
+    }
+
+    if (action === 'get_next_id') {
+      const result = await pool.query(
+        "SELECT MAX(id::bigint) as max_id FROM casos WHERE id ~ '^[0-9]+$'"
+      )
+      const maxId = result.rows[0]?.max_id || 0
+      return res.json({ new_id: String(Number(maxId) + 1) })
+    }
+
+    if (action === 'get_notifications') {
+      return res.json([])
+    }
+
+    return res.status(400).json({ success: false, error: 'Acción no soportada' })
+  } catch (error) {
+    console.error('Error en /api (legacy):', error)
+    res.status(500).json({ success: false, error: error.message })
+  }
+})
+
+app.post('/api', async (req, res) => {
+  const { action } = req.query
+  try {
+    if (action === 'update_case') {
+      const { id, estado, descripcion } = req.body
+      const result = await pool.query(
+        'UPDATE casos SET estado = $1, descripcion = $2, fecha_actualizacion = NOW() WHERE id = $3 RETURNING *',
+        [estado, descripcion, id]
+      )
+      return res.json({ success: result.rows.length > 0, data: result.rows[0] })
+    }
+
+    if (action === 'delete_case') {
+      const { id } = req.body
+      const result = await pool.query('DELETE FROM casos WHERE id = $1 RETURNING id', [id])
+      return res.json({ success: result.rows.length > 0 })
+    }
+
+    if (action === 'save_case') {
+      const data = req.body || {}
+      const nextIdResult = await pool.query(
+        "SELECT MAX(id::bigint) as max_id FROM casos WHERE id ~ '^[0-9]+$'"
+      )
+      const maxId = nextIdResult.rows[0]?.max_id || Date.now()
+      const newId = String(data.id || Number(maxId) + 1)
+
+      const result = await pool.query(
+        `INSERT INTO casos (
+          id, cliente, sede, contacto, correo, telefono,
+          contacto2, correo2, telefono2, centro_costos,
+          serial, marca, tipo, categoria, descripcion,
+          asignado_a, prioridad, estado, autor,
+          fecha_creacion, fecha_actualizacion
+        ) VALUES (
+          $1,$2,$3,$4,$5,$6,
+          $7,$8,$9,$10,
+          $11,$12,$13,$14,$15,
+          $16,$17,$18,$19,
+          NOW(), NOW()
+        ) RETURNING *`,
+        [
+          newId,
+          data.cliente || null,
+          data.sede || null,
+          data.contacto || null,
+          data.correo || null,
+          data.telefono || null,
+          data.contacto2 || null,
+          data.correo2 || null,
+          data.telefono2 || null,
+          data.centro_costos || null,
+          data.serial || null,
+          data.marca || null,
+          data.tipo || null,
+          data.categoria || null,
+          data.descripcion || null,
+          data.asignado || data.asignado_a || null,
+          data.prioridad || null,
+          data.estado || 'Abierto',
+          data.autor || null
+        ]
+      )
+
+      return res.json({ success: true, data: result.rows[0] })
+    }
+
+    return res.status(400).json({ success: false, error: 'Acción no soportada' })
+  } catch (error) {
+    console.error('Error en /api (legacy POST):', error)
+    res.status(500).json({ success: false, error: error.message })
+  }
 })
 
 // ==================== AUTENTICACIÓN ====================
@@ -100,6 +241,8 @@ app.post('/api/login', async (req, res) => {
   }
 })
 
+// ==================== CASOS ====================
+
 // Obtener todos los casos
 app.get('/api/casos', async (req, res) => {
   try {
@@ -122,7 +265,7 @@ app.get('/api/casos', async (req, res) => {
     }
     if (asignado_a) {
       query += ' AND asignado_a = $' + (params.length + 1)
-      params.push(asignado_a)
+      params.push(asignado_to)
     }
 
     query += ' ORDER BY fecha_creacion DESC'
@@ -247,7 +390,8 @@ app.put('/api/casos/:id', async (req, res) => {
   }
 })
 
-// Estadísticas
+// ==================== ESTADÍSTICAS ====================
+
 app.get('/api/estadisticas', async (req, res) => {
   try {
     const stats = await Promise.all([
@@ -431,7 +575,30 @@ app.get('/api/usuarios-stats', async (req, res) => {
   }
 })
 
-// 404
+// ==================== RUTAS HTML (SPA FALLBACK) ====================
+
+// Estas rutas deben ir después de todas las rutas de API
+app.get('/login', (req, res) => {
+  res.sendFile(path.join(__dirname, '..', 'index.html'))
+})
+
+app.get('/admin', (req, res) => {
+  res.sendFile(path.join(__dirname, '..', 'Proyecto de Software CSU - COLSOF', 'Usuario ADMINISTRDOR', 'Menu principal Admin.html'))
+})
+
+app.get('/gestor', (req, res) => {
+  res.sendFile(path.join(__dirname, '..', 'Proyecto de Software CSU - COLSOF', 'Usuario GESTOR', 'Menu principal.html'))
+})
+
+// 404 para rutas API
+app.use('/api', (req, res) => {
+  res.status(404).json({
+    success: false,
+    error: 'Ruta de API no encontrada'
+  })
+})
+
+// 404 para rutas no encontradas
 app.use((req, res) => {
   res.status(404).json({
     success: false,
@@ -439,5 +606,21 @@ app.use((req, res) => {
   })
 })
 
+// Error handler
+app.use((err, req, res, next) => {
+  console.error('Error:', err)
+  res.status(500).json({
+    success: false,
+    error: err.message || 'Error interno del servidor'
+  })
+})
+
 // Exportar app para Vercel (serverless handler)
 export default app
+
+// Si no está en Vercel, iniciar servidor
+if (process.env.VERCEL === undefined) {
+  app.listen(PORT, () => {
+    console.log(`🚀 Servidor ejecutándose en http://localhost:${PORT}`)
+  })
+}

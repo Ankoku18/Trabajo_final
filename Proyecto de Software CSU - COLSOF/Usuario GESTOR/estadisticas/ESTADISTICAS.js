@@ -15,11 +15,15 @@ let categoryChart;
 let priorityChart;
 let hourChart;
 
-const resolvedStatuses = ['Cerrado', 'Resuelto'];
+const resolvedStatuses = ['cerrado', 'resuelto'];
+
+let cachedCasos = [];
+let cachedStats = null;
 
 document.addEventListener('DOMContentLoaded', () => {
   loadDashboard();
   setupExportButton();
+  setupDateRange();
 });
 
 async function loadDashboard() {
@@ -32,14 +36,9 @@ async function loadDashboard() {
 
     console.log('✅ Datos cargados desde la API:', { stats, casos: casos.length });
 
-    const normalized = normalizeStats(stats);
-
-    updateKPIs(normalized, casos);
-    renderMonthlyChart(casos);
-    renderCategoryChart(casos);
-    renderPriorityChart(casos, normalized);
-    renderHourChart(casos);
-    renderTechTable(casos);
+    cachedCasos = casos;
+    cachedStats = normalizeStats(stats);
+    applyDashboard(cachedCasos, cachedStats);
   } catch (error) {
     console.warn('⚠️ Error al cargar estadísticas desde API:', error);
     console.log('➡️ Cargando datos de ejemplo para demostración...');
@@ -48,16 +47,11 @@ async function loadDashboard() {
     const casosEjemplo = generarCasosEjemplo();
     const statsEjemplo = generarEstadisticasEjemplo(casosEjemplo);
     
-    const normalized = normalizeStats(statsEjemplo);
+    cachedCasos = casosEjemplo;
+    cachedStats = normalizeStats(statsEjemplo);
+    applyDashboard(cachedCasos, cachedStats);
     
-    updateKPIs(normalized, casosEjemplo);
-    renderMonthlyChart(casosEjemplo);
-    renderCategoryChart(casosEjemplo);
-    renderPriorityChart(casosEjemplo, normalized);
-    renderHourChart(casosEjemplo);
-    renderTechTable(casosEjemplo);
-    
-    utils.showToast('📊 Mostrando datos de ejemplo (sin conexión a BD)', false);
+    utils.showToast('📊 Mostrando datos', false);
   }
 }
 
@@ -128,21 +122,89 @@ function generarEstadisticasEjemplo(casos) {
 function normalizeStats(stats) {
   const porEstado = {};
   (stats.por_estado || []).forEach(item => {
-    porEstado[item.estado || 'Sin estado'] = Number(item.count) || 0;
+    const key = String(item.estado || 'sin estado').toLowerCase();
+    porEstado[key] = Number(item.count) || 0;
   });
 
   const porPrioridad = {};
   (stats.por_prioridad || []).forEach(item => {
-    porPrioridad[item.prioridad || 'Sin prioridad'] = Number(item.count) || 0;
+    const key = String(item.prioridad || 'sin prioridad').toLowerCase();
+    porPrioridad[key] = Number(item.count) || 0;
   });
 
   const porTecnico = {};
   (stats.por_tecnico || []).forEach(item => {
-    porTecnico[item.asignado_a || 'Sin asignar'] = Number(item.count) || 0;
+    const key = item.asignado_a || 'Sin asignar';
+    porTecnico[key] = Number(item.count) || 0;
   });
 
   return {
     total: Number(stats.total) || 0,
+    porEstado,
+    porPrioridad,
+    porTecnico
+  };
+}
+
+function applyDashboard(casos, stats) {
+  const derived = buildStatsFromCasos(casos, stats);
+  updateKPIs(derived, casos);
+  renderMonthlyChart(casos);
+  renderCategoryChart(casos);
+  renderPriorityChart(casos, derived);
+  renderHourChart(casos);
+  renderTechTable(casos);
+}
+
+function setupDateRange() {
+  const dateRange = document.getElementById('dateRange');
+  if (!dateRange) return;
+
+  dateRange.addEventListener('change', () => {
+    if (!cachedCasos.length || !cachedStats) return;
+    const filtered = filterCasosByRange(cachedCasos, dateRange.value);
+    applyDashboard(filtered, cachedStats);
+  });
+}
+
+function filterCasosByRange(casos, range) {
+  const now = new Date();
+  const daysMap = {
+    '7days': 7,
+    '30days': 30,
+    '3months': 90,
+    'year': 365
+  };
+  const days = daysMap[range] || 30;
+  const cutoff = new Date(now.getTime() - days * 86400000);
+
+  return casos.filter(caso => {
+    const fecha = new Date(caso.fecha_creacion);
+    return !Number.isNaN(fecha.getTime()) && fecha >= cutoff;
+  });
+}
+
+function buildStatsFromCasos(casos, fallback) {
+  if (!Array.isArray(casos) || casos.length === 0) {
+    return fallback || { total: 0, porEstado: {}, porPrioridad: {}, porTecnico: {} };
+  }
+
+  const porEstado = {};
+  const porPrioridad = {};
+  const porTecnico = {};
+
+  casos.forEach(caso => {
+    const estado = String(caso.estado || 'sin estado').toLowerCase();
+    const prioridad = String(caso.prioridad || 'sin prioridad').toLowerCase();
+    const tecnico = caso.asignado_a || 'Sin asignar';
+
+    porEstado[estado] = (porEstado[estado] || 0) + 1;
+    porPrioridad[prioridad] = (porPrioridad[prioridad] || 0) + 1;
+    porTecnico[tecnico] = (porTecnico[tecnico] || 0) + 1;
+  });
+
+  return {
+    total: casos.length,
     porEstado,
     porPrioridad,
     porTecnico
@@ -231,7 +293,7 @@ function setFallbackKPIs() {
 }
 
 function calcularTiempoPromedio(casos) {
-  const completados = casos.filter(c => resolvedStatuses.includes(c.estado));
+  const completados = casos.filter(c => resolvedStatuses.includes(String(c.estado || '').toLowerCase()));
   if (completados.length === 0) return 0;
 
   const totalHoras = completados.reduce((sum, caso) => {
@@ -248,13 +310,7 @@ function renderMonthlyChart(casos) {
   const ctx = document.getElementById('monthlyChart');
   if (!ctx) return;
 
-  // Etiquetas de meses
-  const labels = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
-
-  // Datos simulados para tres años con variación realista
-  const datos2019 = [5000, 4000, 6000, 3000, 2000, 6000, 8000, 10000, 12000, 8000, 6000, 4000];
-  const datos2020 = [14000, 22000, 29000, 31000, 33000, 32000, 26000, 31000, 38000, 40000, 37000, 22000];
-  const datos2021 = [23000, 32000, 30000, 2000, 1000, 12000, 20000, 24000, 28000, 26000, 35000, 38000];
+  const { labels, data } = buildMonthlySeries(casos, 12);
 
   if (monthlyChart) monthlyChart.destroy();
 
@@ -264,52 +320,24 @@ function renderMonthlyChart(casos) {
       labels,
       datasets: [
         {
-          label: '2019',
-          data: datos2019,
-          borderWidth: 2.5,
-          borderColor: '#60a5fa',
-          backgroundColor: 'rgba(96,165,250,0.05)',
-          tension: 0.4,
-          pointRadius: 0,
-          pointHoverRadius: 6,
-          pointBackgroundColor: '#60a5fa',
-          pointBorderColor: '#fff',
-          pointBorderWidth: 2,
-          fill: false
-        },
-        {
-          label: '2020',
-          data: datos2020,
-          borderWidth: 2.5,
-          borderColor: '#14b8a6',
-          backgroundColor: 'rgba(20,184,166,0.05)',
-          tension: 0.4,
-          pointRadius: 0,
-          pointHoverRadius: 6,
-          pointBackgroundColor: '#14b8a6',
-          pointBorderColor: '#fff',
-          pointBorderWidth: 2,
-          fill: false
-        },
-        {
-          label: '2021',
-          data: datos2021,
+          label: 'Casos creados',
+          data,
           borderWidth: 3,
-          borderColor: '#8b5cf6',
+          borderColor: '#2563eb',
           backgroundColor: function(context) {
             const chart = context.chart;
-            const {ctx, chartArea} = chart;
-            if (!chartArea) return 'rgba(139,92,246,0.15)';
+            const { ctx, chartArea } = chart;
+            if (!chartArea) return 'rgba(37,99,235,0.15)';
             const gradient = ctx.createLinearGradient(0, chartArea.top, 0, chartArea.bottom);
-            gradient.addColorStop(0, 'rgba(139,92,246,0.35)');
-            gradient.addColorStop(0.5, 'rgba(139,92,246,0.15)');
-            gradient.addColorStop(1, 'rgba(139,92,246,0.02)');
+            gradient.addColorStop(0, 'rgba(37,99,235,0.35)');
+            gradient.addColorStop(0.5, 'rgba(37,99,235,0.15)');
+            gradient.addColorStop(1, 'rgba(37,99,235,0.02)');
             return gradient;
           },
-          tension: 0.4,
+          tension: 0.35,
           pointRadius: 4,
           pointHoverRadius: 7,
-          pointBackgroundColor: '#8b5cf6',
+          pointBackgroundColor: '#2563eb',
           pointBorderColor: '#fff',
           pointBorderWidth: 2,
           fill: true
@@ -380,6 +408,38 @@ function renderMonthlyChart(casos) {
       }
     }
   });
+}
+
+function buildMonthlySeries(casos, monthsBack = 12) {
+  const now = new Date();
+  const start = new Date(now.getFullYear(), now.getMonth() - (monthsBack - 1), 1);
+  const map = new Map();
+
+  for (let i = 0; i < monthsBack; i++) {
+    const d = new Date(start.getFullYear(), start.getMonth() + i, 1);
+    const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+    map.set(key, 0);
+  }
+
+  casos.forEach(caso => {
+    const fecha = new Date(caso.fecha_creacion);
+    if (Number.isNaN(fecha.getTime())) return;
+    if (fecha < start) return;
+    const key = `${fecha.getFullYear()}-${String(fecha.getMonth() + 1).padStart(2, '0')}`;
+    if (map.has(key)) map.set(key, map.get(key) + 1);
+  });
+
+  const labels = [];
+  const data = [];
+  map.forEach((value, key) => {
+    const [year, month] = key.split('-');
+    const d = new Date(Number(year), Number(month) - 1, 1);
+    const label = d.toLocaleString('es-CO', { month: 'short' }) + ' ' + String(year).slice(2);
+    labels.push(label);
+    data.push(value);
+  });
+
+  return { labels, data };
 }
 
 // Actualizar gráfico de categoría
@@ -466,7 +526,8 @@ function renderPriorityChart(casos, stats) {
   if (!ctx) return;
 
   const orden = ['Crítica', 'Urgente', 'Alta', 'Media', 'Baja'];
-  const counts = orden.map(p => stats.porPrioridad[p] || stats.porPrioridad[p?.toLowerCase()] || 0);
+  const keys = ['crítica', 'urgente', 'alta', 'media', 'baja'];
+  const counts = keys.map(p => stats.porPrioridad[p] || 0);
 
   if (priorityChart) priorityChart.destroy();
 
@@ -676,7 +737,7 @@ function buildTechData(casos) {
     }
     const item = map.get(tecnico);
     item.total += 1;
-    if (resolvedStatuses.includes(caso.estado)) {
+    if (resolvedStatuses.includes(String(caso.estado || '').toLowerCase())) {
       item.resueltos += 1;
       const inicio = new Date(caso.fecha_creacion).getTime();
       const fin = new Date(caso.fecha_actualizacion || caso.fecha_creacion).getTime();

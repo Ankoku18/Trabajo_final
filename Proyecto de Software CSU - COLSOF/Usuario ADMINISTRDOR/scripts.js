@@ -51,7 +51,16 @@
   function qsa(sel, ctx=document){ return Array.from(ctx.querySelectorAll(sel)); }
 
   // Configuración de API
-  const API_URL = 'http://localhost:3000/api';
+  const API_URL = window.API_BASE_URL || ((window.location.hostname === 'localhost' ||
+    window.location.hostname === '127.0.0.1' ||
+    window.location.hostname === '' ||
+    window.location.protocol === 'file:')
+    ? 'http://localhost:3000/api'
+    : '/api');
+  const normalizeCasos = (payload) => {
+    if (Array.isArray(payload)) return payload;
+    return payload?.data || payload?.cases || [];
+  };
   let refreshInterval = null;
   let currentTimeRange = '12'; // meses por defecto
 
@@ -73,10 +82,11 @@
   async function loadDashboardStats() {
     try {
       // Cargar estadísticas de casos
-      const response = await fetch(`${API_URL}?action=get_casos_simple`);
+      const response = await fetch(`${API_URL}/casos`);
       if (!response.ok) throw new Error('Error al cargar estadísticas');
       
-      const casos = await response.json();
+      const payload = await response.json();
+      const casos = normalizeCasos(payload);
       
       // Obtener fecha actual y mes anterior
       const ahora = new Date();
@@ -234,10 +244,11 @@
   // =====================
   async function loadUsuarios() {
     try {
-      const response = await fetch(`${API_URL}?action=get_casos_simple`);
+      const response = await fetch(`${API_URL}/casos`);
       if (!response.ok) throw new Error('Error al cargar datos');
       
-      const casos = await response.json();
+      const payload = await response.json();
+      const casos = normalizeCasos(payload);
       
       // Extraer usuarios únicos de los casos
       const usuariosMap = new Map();
@@ -308,10 +319,11 @@
     if (!btnCSV) return;
     btnCSV.addEventListener('click', async () => {
       try {
-        const response = await fetch(`${API_URL}?action=get_casos_simple`);
+        const response = await fetch(`${API_URL}/casos`);
         if (!response.ok) throw new Error('Error al cargar datos');
         
-        const casos = await response.json();
+        const payload = await response.json();
+        const casos = normalizeCasos(payload);
         
         // Crear CSV con datos reales
         const headers = ['ID', 'Cliente', 'Estado', 'Prioridad', 'Categoría', 'Asignado', 'Fecha Creación'];
@@ -369,9 +381,9 @@
         
         // Recargar datos con el nuevo filtro y actualizar gráfico
         loadDashboardStats();
-        fetch(`${API_URL}?action=get_casos_simple`)
+        fetch(`${API_URL}/casos`)
           .then(r => r.json())
-          .then(casos => generateDynamicChart(casos, currentTimeRange))
+          .then(payload => generateDynamicChart(normalizeCasos(payload), currentTimeRange))
           .catch(e => console.error('Error al actualizar gráfico:', e));
         showNotification(`Filtro aplicado: ${text}`, 'info');
       });

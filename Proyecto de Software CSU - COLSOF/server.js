@@ -317,6 +317,113 @@ app.get('/api/estadisticas', async (req, res) => {
   }
 })
 
+// Resumen de casos para dashboards
+app.get('/api/casos/stats/summary', async (req, res) => {
+  try {
+    const stats = await Promise.all([
+      pool.query('SELECT COUNT(*)::int as total FROM casos'),
+      pool.query('SELECT estado, COUNT(*)::int as count FROM casos GROUP BY estado'),
+      pool.query('SELECT prioridad, COUNT(*)::int as count FROM casos GROUP BY prioridad')
+    ])
+
+    res.json({
+      success: true,
+      data: {
+        total: stats[0].rows[0]?.total || 0,
+        por_estado: stats[1].rows,
+        por_prioridad: stats[2].rows
+      }
+    })
+  } catch (error) {
+    console.error('Error en /api/casos/stats/summary:', error)
+    res.status(500).json({
+      success: false,
+      error: 'Error al obtener resumen de casos'
+    })
+  }
+})
+
+// ==================== CLIENTES ====================
+
+app.get('/api/clientes', async (req, res) => {
+  try {
+    const result = await pool.query(
+      `SELECT
+        row_number() over (ORDER BY cliente) as id,
+        cliente as nombre
+      FROM casos
+      WHERE cliente IS NOT NULL
+      GROUP BY cliente
+      ORDER BY cliente`
+    )
+
+    const data = result.rows.map((row) => ({
+      id: row.id,
+      nombre: row.nombre,
+      estado: 'Activo',
+      industria: 'General',
+      ciudad: null,
+      direccion: null,
+      contacto: null,
+      email: null,
+      telefono: null
+    }))
+
+    res.json({ success: true, data })
+  } catch (error) {
+    console.error('Error en /api/clientes:', error)
+    res.status(500).json({
+      success: false,
+      error: 'Error al obtener clientes'
+    })
+  }
+})
+
+app.get('/api/clientes/:id', async (req, res) => {
+  try {
+    const { id } = req.params
+    const result = await pool.query(
+      `WITH clientes AS (
+        SELECT
+          row_number() over (ORDER BY cliente) as id,
+          cliente as nombre
+        FROM casos
+        WHERE cliente IS NOT NULL
+        GROUP BY cliente
+        ORDER BY cliente
+      )
+      SELECT * FROM clientes WHERE id = $1`,
+      [id]
+    )
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ success: false, error: 'Cliente no encontrado' })
+    }
+
+    const row = result.rows[0]
+    res.json({
+      success: true,
+      data: {
+        id: row.id,
+        nombre: row.nombre,
+        estado: 'Activo',
+        industria: 'General',
+        ciudad: null,
+        direccion: null,
+        contacto: null,
+        email: null,
+        telefono: null
+      }
+    })
+  } catch (error) {
+    console.error('Error en /api/clientes/:id:', error)
+    res.status(500).json({
+      success: false,
+      error: 'Error al obtener cliente'
+    })
+  }
+})
+
 // ==================== USUARIOS ====================
 
 // Obtener todos los usuarios

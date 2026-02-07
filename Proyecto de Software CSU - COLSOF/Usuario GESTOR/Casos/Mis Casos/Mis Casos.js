@@ -2,7 +2,17 @@ let cases = [];
 let allCases = [];
 let filterStatus = 'all';
 let autoRefreshTimer = null;
-const CURRENT_USER = 'Juan Perez';
+
+const getCurrentUserName = () => {
+  try {
+    const raw = localStorage.getItem('usuario');
+    if (!raw) return '';
+    const user = JSON.parse(raw);
+    return `${user.nombre || ''} ${user.apellido || ''}`.trim();
+  } catch {
+    return '';
+  }
+};
 
 const qs = (sel, ctx = document) => ctx.querySelector(sel);
 const normalize = (val = '') => String(val || '').toLowerCase();
@@ -11,10 +21,10 @@ const formatCaseId = (id) => `#${String(id ?? '').padStart(8, '0')}`;
 
 const isMyCases = (item) => {
   const tecnico = normalize(item.tecnico_asignado || item.asignado_a || item.tecnico);
-  const currentUser = normalize(CURRENT_USER);
-  return tecnico.includes(currentUser.split(' ')[0]) || 
-         tecnico.includes(currentUser.split(' ')[1]) ||
-         tecnico === currentUser;
+  const currentUser = normalize(getCurrentUserName());
+  if (!currentUser) return false;
+  const parts = currentUser.split(' ').filter(Boolean);
+  return parts.some((part) => tecnico.includes(part)) || tecnico === currentUser;
 };
 
 const formatDate = (value) => {

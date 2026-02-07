@@ -1,6 +1,6 @@
-const API_URL = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
+const API_URL = window.API_BASE_URL || ((window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' || window.location.hostname === '' || window.location.protocol === 'file:')
   ? 'http://localhost:3000/api'
-  : '/api'
+  : '/api')
 
 let cases = []
 let technicians = []
@@ -226,13 +226,12 @@ const setupSearch = () => {
 const fetchAssigned = async () => {
   try {
     console.log('🔄 Cargando casos asignados...')
-    const res = await fetch(`${API_URL}/casos?asignado_a=*`)
+    const res = await fetch(`${API_URL}/casos`)
     if (!res.ok) throw new Error(`HTTP ${res.status}`)
 
     const data = await res.json()
-    if (!data.success) throw new Error(data.error || 'API error')
-
-    const filtered = Array.isArray(data.data) ? data.data.filter(isAssigned) : []
+    const items = Array.isArray(data?.data) ? data.data : (Array.isArray(data) ? data : [])
+    const filtered = items.filter(isAssigned)
     cases = filtered.map(mapCase)
     buildTechnicians()
     render()

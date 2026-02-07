@@ -8,43 +8,71 @@ const __dirname = path.dirname(__filename)
 
 let connectionString = process.env.DATABASE_URL
 
+// Si no hay variable de entorno, intentar leer desde Config.env (solo desarrollo local)
 if (!connectionString) {
-  const envPath = path.resolve(__dirname, '../../Config.env')
-  try {
-    const envContent = fs.readFileSync(envPath, 'utf-8')
-    const match = envContent.match(/DATABASE_URL\s*=\s*"([^"]+)"/)
-    if (match) {
-      connectionString = match[1]
+  const envPaths = [
+    path.resolve(__dirname, '../../Config.env'),
+    path.resolve(__dirname, '../../.env.local'),
+    path.resolve(__dirname, '../.env.local')
+  ]
+  
+  for (const envPath of envPaths) {
+    try {
+      if (fs.existsSync(envPath)) {
+        const envContent = fs.readFileSync(envPath, 'utf-8')
+        const match = envContent.match(/DATABASE_URL\s*=\s*"([^"]+)"/)
+        if (match) {
+          connectionString = match[1]
+          console.log(`📄 Leído DATABASE_URL desde: ${envPath}`)
+          break
+        }
+      }
+    } catch (error) {
+      console.warn(`No se pudo leer ${envPath}:`, error.message)
     }
-  } catch (error) {
-    console.error(`No se pudo leer ${envPath}:`, error.message)
   }
 }
 
 if (!connectionString) {
-  throw new Error('DATABASE_URL no está definido. Verifica Config.env o tus variables de entorno.')
+  console.warn('⚠️  DATABASE_URL no está definido. La API funcionará pero fallará en consultas a BD.')
+  console.warn('   Para desarrollo local, asegúrate de que Config.env tenga DATABASE_URL.')
+  console.warn('   Para producción, configura DATABASE_URL en las variables de entorno de Vercel.')
 }
 
-const pool = new Pool({
+// Configuración del pool de conexiones
+const poolConfig = {
   connectionString,
-  max: 10,
+  max: process.env.VERCEL ? 5 : 10,
   idleTimeoutMillis: 20000,
   connectionTimeoutMillis: 10000,
-  ssl: { rejectUnauthorized: false },
+  ssl: process.env.VERCEL ? { rejectUnauthorized: false } : false
+}
+
+const pool = new Pool(poolConfig)
+
+// Manejo de errores del pool
+pool.on('error', (err) => {
+  console.error('❌ Error inesperado en el pool de conexiones:', err)
 })
 
+// Función para probar la conexión
 async function testConnection() {
-  const client = await pool.connect()
   try {
-    const { rows } = await client.query(
-      'select current_user as user, current_database() as database, now() as now',
-    )
-    return rows[0]
-  } finally {
-    client.release()
+    const client = await pool.connect()
+    try {
+      const { rows } = await client.query(
+        'SELECT current_user as user, current_database() as database, now() as now'
+      )
+      return { success: true, ...rows[0] }
+    } finally {
+      client.release()
+    }
+  } catch (error) {
+    return { success: false, error: error.message }
   }
 }
 
+// Función para cerrar el pool
 async function closePool() {
   await pool.end()
 }

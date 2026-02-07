@@ -1,4 +1,5 @@
 const STORAGE_KEY = 'colsof_config_settings';
+const API_BASE_URL = window.API_BASE_URL || '/api';
 
 const defaultSettings = {
   systemName: 'CSU - Centro de Soporte a Usuarios',
@@ -83,7 +84,7 @@ const saveToStorage = (data) => {
 
 const fetchSettings = async () => {
   try {
-    const res = await fetch(`${API_URL}?action=get_settings`);
+    const res = await fetch(`${API_BASE_URL}?action=get_settings`);
     if (!res.ok) throw new Error('HTTP ' + res.status);
     const data = await res.json();
     return { ...defaultSettings, ...data };
@@ -97,7 +98,7 @@ const fetchSettings = async () => {
 
 const persistSettings = async (data) => {
   try {
-    const res = await fetch(API_URL, {
+    const res = await fetch(API_BASE_URL, {
       method: 'POST',
       headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
       body: new URLSearchParams({ action: 'save_settings', payload: JSON.stringify(data) })
