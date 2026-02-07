@@ -4,7 +4,7 @@
  */
 
 // API Client compartido
-// Use relative `/api` in production and localhost:3000 in dev (server runs on 4000)
+// Use relative `/api` in production and localhost:3000 in dev (server runs on 3000)
 const API_BASE_URL = (window.location.hostname === 'localhost' ||
   window.location.hostname === '127.0.0.1' ||
   window.location.hostname === '' ||
@@ -94,6 +94,23 @@ const utils = {
   },
 
   normalize: (val) => String(val || '').toLowerCase()
+}
+
+// Resolver ruta al login desde cualquier subcarpeta (file:// o servidor)
+function resolveLoginPath() {
+  if (window.location.protocol !== 'file:') {
+    return '/index.html'
+  }
+
+  const marker = 'Proyecto de Software CSU - COLSOF/'
+  const path = decodeURIComponent(window.location.pathname).replace(/\\/g, '/')
+  const idx = path.indexOf(marker)
+  if (idx === -1) return 'index.html'
+
+  const after = path.slice(idx + marker.length)
+  const parts = after.split('/').filter(Boolean)
+  const depth = Math.max(parts.length, 1)
+  return '../'.repeat(depth) + 'index.html'
 }
 
 // Cliente API
@@ -193,6 +210,7 @@ const api = new APIClient()
 window.api = api
 window.utils = utils
 window.API_BASE_URL = API_BASE_URL
+window.resolveLoginPath = resolveLoginPath
 
 console.log('✅ Sistema inicializado - API conectada a:', API_BASE_URL)
 

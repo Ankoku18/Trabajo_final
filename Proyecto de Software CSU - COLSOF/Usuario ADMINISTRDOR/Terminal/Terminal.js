@@ -26,7 +26,8 @@ document.addEventListener('DOMContentLoaded', function() {
     async function loadDataFromAPI() {
         try {
             const response = await fetch(API_BASE);
-            const casos = await response.json();
+            const payload = await response.json();
+            const casos = Array.isArray(payload) ? payload : (payload.cases || payload.data || []);
             
             if (Array.isArray(casos)) {
                 generateSystemData(casos);

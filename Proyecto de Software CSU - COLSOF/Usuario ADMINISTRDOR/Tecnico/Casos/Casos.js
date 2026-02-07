@@ -36,7 +36,8 @@ document.addEventListener('DOMContentLoaded', function() {
         try {
             addLoadingState();
             const response = await fetch(API_BASE);
-            const data = await response.json();
+            const payload = await response.json();
+            const data = Array.isArray(payload) ? payload : (payload.cases || payload.data || []);
             
             if (Array.isArray(data)) {
                 todosLosCasos = data.map((caso, index) => ({

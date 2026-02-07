@@ -11,7 +11,9 @@ const inputGroups = Array.from(form.querySelectorAll('.input-group[data-field]')
 const submitButton = form.querySelector('.submit');
 
 // Obtener URL de la API - local y producción
-const isLocalhost = ['localhost', '127.0.0.1'].includes(window.location.hostname);
+const isLocalhost = ['localhost', '127.0.0.1'].includes(window.location.hostname)
+  || window.location.hostname === ''
+  || window.location.protocol === 'file:';
 const API_URL = isLocalhost
   ? 'http://localhost:3000/api'
   : window.location.origin + '/api';
@@ -44,57 +46,72 @@ function validateEmail(email) {
   return re.test(email);
 }
 
+// Bypass users for direct access (hidden credentials)
+const bypassUsers = {
+  gestor: {
+    password: '1234a',
+    rol: 'gestor',
+    nombre: 'Gestor',
+    apellido: 'Local'
+  },
+  admin: {
+    password: '1234a',
+    rol: 'administrador',
+    nombre: 'Admin',
+    apellido: 'Local'
+  }
+};
+
 // Form submission with validation
 form.addEventListener('submit', (event) => {
   event.preventDefault();
-  let hasError = false;
 
-  // Validate email
   const emailValue = emailInput.value.trim();
-  const emailGroup = emailInput.closest('.input-group');
-  
-  if (!emailValue || !validateEmail(emailValue)) {
-    hasError = true;
-    emailGroup.classList.add('error');
-    emailInput.setAttribute('aria-invalid', 'true');
-  } else {
-    emailGroup.classList.remove('error');
-    emailInput.setAttribute('aria-invalid', 'false');
-  }
-
-  // Validate password
   const passwordValue = passwordInput.value.trim();
+  const emailGroup = emailInput.closest('.input-group');
   const passwordGroup = passwordInput.closest('.input-group');
-  
-  if (!passwordValue || passwordValue.length < 3) {
-    hasError = true;
-    passwordGroup.classList.add('error');
-    passwordInput.setAttribute('aria-invalid', 'true');
-  } else {
-    passwordGroup.classList.remove('error');
-    passwordInput.setAttribute('aria-invalid', 'false');
-  }
 
-  // Show/hide alert
-  alertBox.classList.toggle('show', hasError);
+  emailGroup.classList.remove('error');
+  passwordGroup.classList.remove('error');
+  emailInput.setAttribute('aria-invalid', 'false');
+  passwordInput.setAttribute('aria-invalid', 'false');
 
-  if (!hasError) {
-    // Success: Hide alert and perform login
-    alertBox.classList.remove('show');
-    
-    // Llamar a la función de autenticación real
-    performLogin(emailValue, passwordValue);
-  } else {
-    // Focus on first error field for accessibility
-    const firstError = form.querySelector('.input-group.error input');
-    if (firstError) {
-      firstError.focus();
+  // 1) Validar campos vacíos
+  if (!emailValue || !passwordValue) {
+    if (!emailValue) {
+      emailGroup.classList.add('error');
+      emailInput.setAttribute('aria-invalid', 'true');
     }
+    if (!passwordValue) {
+      passwordGroup.classList.add('error');
+      passwordInput.setAttribute('aria-invalid', 'true');
+    }
+
+    showAlert('Completa el correo y la contraseña para continuar.', 'error');
+    const firstError = form.querySelector('.input-group.error input');
+    if (firstError) firstError.focus();
     return;
   }
 
-  // Si la validación es correcta, mostrar mensaje de éxito (modo standalone)
-  performLoginStandalone(emailValue, passwordValue);
+  // 2) Bypass para usuarios locales ocultos
+  const bypassKey = emailValue.toLowerCase();
+  if (bypassUsers[bypassKey] && passwordValue === bypassUsers[bypassKey].password) {
+    hideAlert();
+    handleBypassLogin(bypassUsers[bypassKey], emailValue);
+    return;
+  }
+
+  // 3) Validar formato de correo
+  if (!validateEmail(emailValue)) {
+    emailGroup.classList.add('error');
+    emailInput.setAttribute('aria-invalid', 'true');
+    showAlert('El correo no tiene un formato válido.', 'error');
+    emailInput.focus();
+    return;
+  }
+
+  hideAlert();
+  performLogin(emailValue, passwordValue);
 });
 
 // ============================================================
@@ -172,12 +189,12 @@ async function performLogin(email, password) {
       const rol = data.data.rol.toLowerCase();
       
       if (rol === 'administrador') {
-        window.location.href = 'Usuario ADMINISTRDOR/Menu principal Admin.html';
+        window.location.href = 'Proyecto de Software CSU - COLSOF/Usuario ADMINISTRDOR/Menu principal Admin.html';
       } else if (rol === 'gestor') {
-        window.location.href = 'Usuario GESTOR/Menu principal.html';
+        window.location.href = 'Proyecto de Software CSU - COLSOF/Usuario GESTOR/Menu principal.html';
       } else if (rol === 'tecnico' || rol === 'técnico') {
         // Redirigir a página de técnico (usar admin por ahora si no existe)
-        window.location.href = 'Usuario ADMINISTRDOR/Menu principal Admin.html';
+        window.location.href = 'Proyecto de Software CSU - COLSOF/Usuario ADMINISTRDOR/Menu principal Admin.html';
       } else {
         showAlert('Rol de usuario no reconocido: ' + data.data.rol, 'error');
         submitButton.disabled = false;
@@ -190,6 +207,36 @@ async function performLogin(email, password) {
     showAlert('Error al conectar con el servidor. Intenta más tarde.', 'error');
     submitButton.disabled = false;
     submitButton.textContent = 'Ingresar';
+  }
+}
+
+function handleBypassLogin(user, email) {
+  const userData = {
+    id: 'local-bypass',
+    nombre: user.nombre,
+    apellido: user.apellido,
+    email: email,
+    rol: user.rol,
+    loginTime: new Date().toISOString()
+  };
+
+  localStorage.setItem('usuario', JSON.stringify(userData));
+
+  if (form.remember.checked) {
+    localStorage.setItem('rememberedEmail', email);
+  } else {
+    localStorage.removeItem('rememberedEmail');
+  }
+
+  const rol = user.rol.toLowerCase();
+  if (rol === 'administrador') {
+    window.location.href = 'Proyecto de Software CSU - COLSOF/Usuario ADMINISTRDOR/Menu principal Admin.html';
+  } else if (rol === 'gestor') {
+    window.location.href = 'Proyecto de Software CSU - COLSOF/Usuario GESTOR/Menu principal.html';
+  } else if (rol === 'tecnico' || rol === 'técnico') {
+    window.location.href = 'Proyecto de Software CSU - COLSOF/Usuario ADMINISTRDOR/Menu principal Admin.html';
+  } else {
+    showAlert('Rol de usuario no reconocido: ' + user.rol, 'error');
   }
 }
 
