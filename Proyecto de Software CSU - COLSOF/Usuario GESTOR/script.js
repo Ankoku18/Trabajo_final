@@ -1,4 +1,4 @@
-'use strict';
+﻿'use strict';
 
 document.addEventListener('DOMContentLoaded', () => {
   // =====================
@@ -33,16 +33,10 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   // Actualizar la información del perfil en la interfaz
-  const profileName = document.querySelector('.profile-name');
-  const profileEmail = document.querySelector('.profile-email');
-  
-  if (profileName) {
-    profileName.textContent = `${usuario.nombre} ${usuario.apellido}`;
-  }
-  
-  if (profileEmail) {
-    profileEmail.textContent = usuario.email;
-  }
+  // (app-init.js también lo hace; esto cubre casos anteriores al script)
+  const nombreCompleto = [usuario.nombre, usuario.apellido].filter(Boolean).join(' ').trim() || usuario.email || 'Gestor';
+  document.querySelectorAll('.profile-name').forEach(el => { el.textContent = nombreCompleto; });
+  document.querySelectorAll('.profile-email').forEach(el => { el.textContent = usuario.email || ''; });
 
   // =====================
   // Helpers
@@ -61,6 +55,7 @@ document.addEventListener('DOMContentLoaded', () => {
     'en_progreso': { clase: 'progreso', etiqueta: 'En Progreso', color: '#f59e0b' },
     'en progreso': { clase: 'progreso', etiqueta: 'En Progreso', color: '#f59e0b' },
     'pausado': { clase: 'pausado', etiqueta: 'Pausado', color: '#6b7280' },
+    'escalado': { clase: 'pausado', etiqueta: 'Escalado', color: '#f97316' },
     'resuelto': { clase: 'resuelto', etiqueta: 'Resuelto', color: '#2563eb' },
     'cerrado': { clase: 'cerrado', etiqueta: 'Cerrado', color: '#0f172a' },
     'cancelado': { clase: 'cancelado', etiqueta: 'Cancelado', color: '#a855f7' }
@@ -163,10 +158,10 @@ document.addEventListener('DOMContentLoaded', () => {
   }
   */
 
-  // Cierre de la funciÃ³n de badge (bloque comentado arriba)
+  // Cierre de la función de badge (bloque comentado arriba)
   }
 
-  // Actualizar badge al cargar la pÃ¡gina
+  // Actualizar badge al cargar la página
   updateBadgeWithUnreadUrgent();
   // Actualizar cada 30 segundos
   setInterval(updateBadgeWithUnreadUrgent, 30000);
@@ -183,45 +178,45 @@ document.addEventListener('DOMContentLoaded', () => {
            window.location.pathname.includes('Clientes');
   };
 
-  // Interceptar enlaces del menÃº (excepto Inicio si existe)
+  // Interceptar enlaces del menú (excepto Inicio si existe)
   $$('.menu-list a').forEach(a => {
     if (a.id === 'link-inicio' || a.getAttribute('href').includes('Menu principal.html')) return; // dejar navegar
 
     const inSubfolder = isInSubfolder();
 
-    // Permitir navegaciÃ³n a Notificaciones
+    // Permitir navegación a Notificaciones
     if (a.textContent.includes('Notificaciones') || a.querySelector('.badge')) {
       a.href = inSubfolder ? '../notificaciones/Menu - Notificaciones.html' : 'notificaciones/Menu - Notificaciones.html';
       return;
     }
 
-    // Permitir navegaciÃ³n a EstadÃ­sticas
-    if (a.textContent.includes('EstadÃ­sticas') || a.textContent.includes('Estadisticas')) {
+    // Permitir navegación a Estadísticas
+    if (a.textContent.includes('Estadísticas') || a.textContent.includes('Estadisticas')) {
       a.href = inSubfolder ? '../estadisticas/Menu - Estadisticas.html' : 'estadisticas/Menu - Estadisticas.html';
       return;
     }
 
-    // Permitir navegaciÃ³n a Reportes
+    // Permitir navegación a Reportes
     if (a.textContent.includes('Reportes')) {
       a.href = inSubfolder ? '../reportes/Menu - Reportes.html' : 'reportes/Menu - Reportes.html';
       return;
     }
 
-    // Permitir navegaciÃ³n a Herramientas
+    // Permitir navegación a Herramientas
     if (a.textContent.includes('Herramientas')) {
       a.href = inSubfolder ? '../herramientas/Menu - Herramientas.html' : 'herramientas/Menu - Herramientas.html';
       return;
     }
 
-    // Permitir navegaciÃ³n a ConfiguraciÃ³n
-    if (a.textContent.includes('ConfiguraciÃ³n') || a.textContent.includes('Configuracion')) {
+    // Permitir navegación a Configuración
+    if (a.textContent.includes('Configuración') || a.textContent.includes('Configuracion')) {
       a.href = inSubfolder ? '../configuracion/Menu - Configuracion.html' : 'configuracion/Menu - Configuracion.html';
       return;
     }
   });
 
   // =====================
-  // PÃ¡gina: MenÃº principal
+  // Página: Menú principal
   // =====================
   const btnNuevoCaso = document.getElementById('btn-nuevo-caso');
   if (btnNuevoCaso) {
@@ -285,8 +280,8 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   // =====================
-  // PÃ¡gina: CreaciÃ³n de Casos 
-  // NOTA: Los handlers completos estÃ¡n implementados mÃ¡s abajo (lÃ­nea 553+)
+  // Página: Creación de Casos 
+  // NOTA: Los handlers completos están implementados más abajo (línea 553+)
   // =====================
 
   // =====================
@@ -314,7 +309,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const caret = document.createElement('span');
     caret.className = 'cs-caret';
-    caret.textContent = 'â–¾';
+    caret.textContent = '▾';
 
     trigger.append(valueSpan, caret);
 
@@ -362,7 +357,7 @@ document.addEventListener('DOMContentLoaded', () => {
   })();
 
   // =====================
-  // Resumen dinÃ¡mico + ID
+  // Resumen dinámico + ID
   // =====================
   (function summaryBindings() {
     const idEl = document.getElementById('summary-id');
@@ -380,23 +375,22 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (!idEl && !sCliente && !sCategoria && !sPrioridad && !sTecnicos && !sAdjuntos) return;
 
-    // Obtener ID real de la base de datos
+    // Generar ID único basado en timestamp
     if (idEl) {
-      fetch(getApiUrl() + '?action=get_next_id')
-        .then(res => res.json())
-        .then(data => { if(data.new_id) idEl.textContent = data.new_id; })
-        .catch(err => console.error(err));
+      const timestamp = Date.now();
+      const newId = 'CASO-' + timestamp;
+      idEl.textContent = newId;
     }
 
-    const updateCliente = () => { if (sCliente) sCliente.textContent = inputCliente && inputCliente.value ? inputCliente.value : 'â€”'; };
+    const updateCliente = () => { if (sCliente) sCliente.textContent = inputCliente && inputCliente.value ? inputCliente.value : '—'; };
     const updateCategoria = () => {
       if (!sCategoria) return;
       const opt = selectCategoria && selectCategoria.selectedOptions && selectCategoria.selectedOptions[0];
-      sCategoria.textContent = opt ? opt.textContent.toUpperCase() : 'â€”';
+      sCategoria.textContent = opt ? opt.textContent.toUpperCase() : '—';
     };
     const updatePrioridad = () => {
       if (!sPrioridad) return;
-      const val = selectPrioridad ? (selectPrioridad.value || selectPrioridad.options[selectPrioridad.selectedIndex]?.text) : 'â€”';
+      const val = selectPrioridad ? (selectPrioridad.value || selectPrioridad.options[selectPrioridad.selectedIndex]?.text) : '—';
       sPrioridad.textContent = val;
       const low = String(val).toLowerCase();
       sPrioridad.className = 'pill ' + (low === 'alta' ? 'green' : 'gray');
@@ -418,7 +412,7 @@ document.addEventListener('DOMContentLoaded', () => {
   })();
 
   // =====================
-  // Carga de Datos para Panel de MÃ©tricas (Menu principal)
+  // Carga de Datos para Panel de Métricas (Menu principal)
   // =====================
   (function loadMetricsPanel() {
     const metricCreados = document.getElementById('metric-creados');
@@ -426,49 +420,51 @@ document.addEventListener('DOMContentLoaded', () => {
     const metricSolucionados = document.getElementById('metric-solucionados');
     const metricCerrados = document.getElementById('metric-cerrados');
 
-    // Si no existen estos elementos, no estamos en el menÃº principal
+    // Si no existen estos elementos, no estamos en el menú principal
     if (!metricCreados) return;
 
-    // Cargar estadÃ­sticas desde la API
-    fetch(getApiUrl() + '?action=get_dashboard_stats')
+    // Cargar estadísticas desde la API
+    fetch(getApiUrl() + '/dashboard/stats')
       .then(res => res.json())
-      .then(data => {
-        // Actualizar los valores de las mÃ©tricas
+      .then(result => {
+        // El API retorna { success, data: { total_casos, pausados, resueltos, cerrados } }
+        const data = (result.success && result.data) ? result.data : result;
+        // Actualizar los valores de las métricas
         if (metricCreados) metricCreados.textContent = (data.total_casos || 0).toLocaleString('es-CO');
         if (metricPausados) metricPausados.textContent = (data.pausados || 0).toLocaleString('es-CO');
         if (metricSolucionados) metricSolucionados.textContent = (data.resueltos || 0).toLocaleString('es-CO');
         if (metricCerrados) metricCerrados.textContent = (data.cerrados || 0).toLocaleString('es-CO');
       })
       .catch(err => {
-        console.error('Error cargando mÃ©tricas:', err);
+        console.error('Error cargando métricas:', err);
         // Mantener valores en 0 en caso de error
       });
   })();
 
   // =====================
-  // Carga de Datos para Reportes (Si estamos en la pÃ¡gina de reportes)
+  // Carga de Datos para Reportes (Si estamos en la página de reportes)
   // =====================
   (function loadReportsData() {
     const kpiGenerados = document.getElementById('kpi-generados');
     const kpiUsuarios = document.getElementById('kpi-usuarios');
     const listRecent = document.getElementById('recentReports');
 
-    // Si no existen estos elementos, no estamos en la pÃ¡gina de reportes
+    // Si no existen estos elementos, no estamos en la página de reportes
     if (!kpiGenerados && !listRecent) return;
 
-    // Cargar EstadÃ­sticas
-    fetch(getApiUrl() + '?action=get_dashboard_stats')
+    // Cargar Estadísticas
+    fetch(getApiUrl() + '/dashboard/stats')
       .then(res => res.json())
-      .then(data => {
-        if (kpiGenerados) kpiGenerados.innerHTML = `<strong>${data.reportes_generados || 0}</strong>`;
-        if (kpiUsuarios) kpiUsuarios.innerHTML = `<strong>${data.usuarios_activos || 0}</strong>`;
-        // Puedes agregar mÃ¡s KPIs aquÃ­
+      .then(result => {
+        const data = (result.success && result.data) ? result.data : result;
+        if (kpiGenerados) kpiGenerados.innerHTML = `<strong>${data.total_casos || 0}</strong>`;
+        if (kpiUsuarios) kpiUsuarios.innerHTML = `<strong>${data.resueltos || 0}</strong>`;
       })
       .catch(err => console.error('Error cargando stats:', err));
 
     // Cargar Lista Reciente
     if (listRecent) {
-      fetch(getApiUrl() + '?action=get_recent_reports')
+      fetch(getApiUrl() + '/casos?limit=8')
         .then(res => res.json())
         .then(reports => {
           listRecent.innerHTML = ''; // Limpiar lista ficticia
@@ -477,13 +473,13 @@ document.addEventListener('DOMContentLoaded', () => {
             li.className = 'report-item';
             li.innerHTML = `
               <div class="left">
-                <div class="r-icon">ðŸ“„</div>
+                <div class="r-icon">📄</div>
                 <div class="r-info">
                   <div class="r-title">Caso #${rep.id} - ${rep.cliente}</div>
-                  <div class="r-meta">${rep.fecha_creacion} â€¢ ${rep.categoria}</div>
+                  <div class="r-meta">${rep.fecha_creacion} • ${rep.categoria}</div>
                 </div>
               </div>
-              <div class="r-actions">ðŸ”½</div>
+              <div class="r-actions">→</div>
             `;
             listRecent.appendChild(li);
           });
@@ -494,11 +490,11 @@ document.addEventListener('DOMContentLoaded', () => {
   })();
 
   // =====================
-  // PaginaciÃ³n de Tabla de Casos (Menu principal.html)
+  // Paginación de Tabla de Casos (Menu principal.html)
   // =====================
   (function initCasesPagination() {
     if (casesPaginationInitialized) return;
-    if (casesPaginationInitialized) return; // evitar doble inicializaciÃ³n
+    if (casesPaginationInitialized) return; // evitar doble inicialización
     casesPaginationInitialized = true;
 
     const tbody = document.getElementById('cases-table-body');
@@ -511,7 +507,7 @@ document.addEventListener('DOMContentLoaded', () => {
     
     if (!tbody || !pagerContainer) return;
 
-    const itemsPerPage = 12; // 12 casos por pÃ¡gina
+    const itemsPerPage = 12; // 12 casos por página
     let allCases = [];
     let currentPage = 1;
     let currentView = 'lista'; // vista activa: 'lista', 'cuadricula', 'arbol'
@@ -683,7 +679,7 @@ document.addEventListener('DOMContentLoaded', () => {
               </div>` : ''}
               ${caseData.correo ? `
               <div class="case-modal-detail__field">
-                <label class="case-modal-detail__label">✉️ Correo Electrónico</label>
+                <label class="case-modal-detail__label">✉️ Correo Electrónico</label>
                 <p class="case-modal-detail__value"><a href="mailto:${caseData.correo}" style="color: var(--accent); text-decoration: none;">${caseData.correo}</a></p>
               </div>` : ''}
               ${caseData.telefono ? `
@@ -873,7 +869,7 @@ document.addEventListener('DOMContentLoaded', () => {
             </select>
           </div>
           <div class="field">
-            <label>DescripciÃ³n</label>
+            <label>Descripción</label>
             <textarea id="case-descripcion" ${readOnly ? 'disabled' : ''}>${caseData.descripcion || ''}</textarea>
           </div>
           ${timelineHtml}
@@ -893,10 +889,10 @@ document.addEventListener('DOMContentLoaded', () => {
           const newEstado = overlay.querySelector('#case-estado').value;
           const newDescripcion = overlay.querySelector('#case-descripcion').value;
           try {
-            const resp = await fetch(getApiUrl() + '?action=update_case', {
-              method: 'POST',
+            const resp = await fetch(getApiUrl() + '/casos/' + caseData.id, {
+              method: 'PUT',
               headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ id: caseData.id, estado: newEstado, descripcion: newDescripcion })
+              body: JSON.stringify({ estado: newEstado, descripcion: newDescripcion })
             });
             const data = await resp.json();
             if (!data.success) throw new Error(data.error || 'No se pudo actualizar');
@@ -923,12 +919,11 @@ document.addEventListener('DOMContentLoaded', () => {
         alert('Solo el autor puede eliminar este caso');
         return;
       }
-      if (!confirm('Â¿Seguro que deseas eliminar el caso #' + formatCaseId(caseData.id) + '?')) return;
+      if (!confirm('¿Seguro que deseas eliminar el caso #' + formatCaseId(caseData.id) + '?')) return;
       try {
-        const resp = await fetch(getApiUrl() + '?action=delete_case', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ id: caseData.id })
+        const resp = await fetch(getApiUrl() + '/casos/' + caseData.id, {
+          method: 'DELETE',
+          headers: { 'Content-Type': 'application/json' }
         });
         const data = await resp.json();
         if (!data.success) throw new Error(data.error || 'No se pudo eliminar');
@@ -941,7 +936,7 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     }
 
-    // FunciÃ³n para renderizar una pÃ¡gina
+    // Función para renderizar una página
     function renderPage(page) {
       const startIdx = (page - 1) * itemsPerPage;
       const endIdx = startIdx + itemsPerPage;
@@ -964,7 +959,7 @@ document.addEventListener('DOMContentLoaded', () => {
       tbody.innerHTML = '';
 
       if (pageCases.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="10" style="text-align:center; padding:20px;">No hay casos en esta pÃ¡gina</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="10" style="text-align:center; padding:20px;">No hay casos en esta página</td></tr>';
         return;
       }
 
@@ -1010,7 +1005,7 @@ document.addEventListener('DOMContentLoaded', () => {
           <td><span class="category-badge">${c.categoria || 'General'}</span></td>
           <td>${clienteNombre}</td>
           <td><small>${autorNombre}</small></td>
-          <td class="ellipsis">···</td>
+          <td class="ellipsis">Â·Â·Â·</td>
         `;
         
         // Evento para abrir modal al hacer clic en la fila
@@ -1135,12 +1130,12 @@ document.addEventListener('DOMContentLoaded', () => {
       });
     }
 
-    // Actualizar nÃºmeros de pÃ¡gina
+    // Actualizar números de página
     function updatePagerButtons() {
       const totalPages = Math.ceil(allCases.length / itemsPerPage);
       const pages = [];
       
-      // LÃ³gica para mostrar pÃ¡ginas (ej: 1, 2, 3, ..., 8, 9, 10)
+      // Lógica para mostrar páginas (ej: 1, 2, 3, ..., 8, 9, 10)
       if (totalPages <= 7) {
         for (let i = 1; i <= totalPages; i++) pages.push(i);
       } else {
@@ -1152,7 +1147,7 @@ document.addEventListener('DOMContentLoaded', () => {
         return `<span class="pg ${p === currentPage ? 'active' : ''}" data-page="${p}">${p}</span>`;
       }).join('');
 
-      // Eventos para nÃºmeros de pÃ¡gina
+      // Eventos para números de página
       pagerContainer.querySelectorAll('[data-page]').forEach(el => {
         el.addEventListener('click', () => {
           currentPage = parseInt(el.dataset.page);
@@ -1170,7 +1165,7 @@ document.addEventListener('DOMContentLoaded', () => {
       nextBtn.style.cursor = currentPage === totalPages ? 'not-allowed' : 'pointer';
     }
 
-    // MenÃº contextual en ellipsis
+    // Menú contextual en ellipsis
     tbody.addEventListener('click', (e) => {
       const target = e.target.closest('.ellipsis');
       if (!target) return;
@@ -1182,7 +1177,7 @@ document.addEventListener('DOMContentLoaded', () => {
       showCaseMenu(caseData, rect);
     });
 
-    // Acciones del menÃº
+    // Acciones del menú
     document.body.addEventListener('click', (e) => {
       if (!contextMenu || contextMenu.style.display !== 'block') return;
       if (e.target.dataset.action === 'view' || e.target.dataset.action === 'edit' || e.target.dataset.action === 'delete') {
@@ -1221,7 +1216,7 @@ document.addEventListener('DOMContentLoaded', () => {
         id: 2,
         cliente: 'Telecom Colombia',
         estado: 'abierto',
-        asignado_a: 'Técnico 1',
+        asignado_a: 'Elena Muñoz',
         prioridad: 'critica',
         categoria: 'SERVIDOR',
         autor: 'Juan Pérez',
@@ -1241,7 +1236,7 @@ document.addEventListener('DOMContentLoaded', () => {
         id: 3,
         cliente: 'Alpina',
         estado: 'pausado',
-        asignado_a: 'Técnico 2',
+        asignado_a: 'Fernando Álvarez',
         prioridad: 'media',
         categoria: 'BACKUP',
         autor: 'Juan Pérez',
@@ -1263,7 +1258,7 @@ document.addEventListener('DOMContentLoaded', () => {
         id: 5,
         cliente: 'Sura',
         estado: 'en_progreso',
-        asignado_a: 'Técnico 3',
+        asignado_a: 'Jorge Hernández',
         prioridad: 'urgente',
         categoria: 'SEGURIDAD',
         autor: 'Juan Pérez',
@@ -1274,7 +1269,7 @@ document.addEventListener('DOMContentLoaded', () => {
         id: 6,
         cliente: 'Nutresa',
         estado: 'abierto',
-        asignado_a: 'Técnico 4',
+        asignado_a: 'Miguel Jiménez',
         prioridad: 'alta',
         categoria: 'HARDWARE',
         autor: 'Juan Pérez',
@@ -1285,16 +1280,16 @@ document.addEventListener('DOMContentLoaded', () => {
         id: 7,
         cliente: 'Carvajal',
         estado: 'cerrado',
-        asignado_a: 'Técnico 5',
+        asignado_a: 'Patricia Ruiz',
         prioridad: 'media',
-        categoria: 'TELEFONÍA',
+        categoria: 'TELEFONÁA',
         autor: 'Juan Pérez',
         fecha_creacion: '2026-01-19T15:00:00Z',
         descripcion: 'Configuración de extensiones telefónicas'
       },
       {
         id: 8,
-        cliente: 'PostobÃ³n',
+        cliente: 'Postobón',
         estado: 'en_progreso',
         asignado_a: 'Carlos Méndez',
         prioridad: 'media',
@@ -1354,7 +1349,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // =====================
-    // Cambio de vista (Lista, Cuadrícula, Árbol)
+    // Cambio de vista (Lista, Cuadrícula, Árbol)
     // =====================
     const viewButtons = document.querySelectorAll('.segmented button[data-view]');
     viewButtons.forEach(btn => {
@@ -1395,7 +1390,7 @@ document.addEventListener('DOMContentLoaded', () => {
   })();
 
   // =====================
-  // Auto-actualizaciÃ³n de tabla de casos cada 30 segundos
+  // Auto-actualización de tabla de casos cada 30 segundos
   // =====================
   (function autoRefreshCases() {
     const tbody = document.getElementById('cases-table-body');
@@ -1405,7 +1400,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let autoRefreshInterval;
     let lastCasesCount = 0;
 
-    // Mostrar indicador de auto-actualizaciÃ³n
+    // Mostrar indicador de auto-actualización
     if (indicator) {
       indicator.style.display = 'flex';
       setTimeout(() => {
@@ -1421,16 +1416,16 @@ document.addEventListener('DOMContentLoaded', () => {
           if (casos && casos.length > 0) {
             // Solo actualizar si hay cambios en la cantidad de casos
             if (casos.length !== lastCasesCount) {
-              console.log(`ðŸ”„ Datos actualizados: ${casos.length} casos (antes: ${lastCasesCount})`);
+              console.log(`🔄 Datos actualizados: ${casos.length} casos (antes: ${lastCasesCount})`);
               lastCasesCount = casos.length;
               allCases = casos;
               
-              // Re-renderizar la pÃ¡gina actual
+              // Re-renderizar la página actual
               if (typeof renderPage === 'function') {
                 renderPage(currentPage);
               }
               
-              // Mostrar notificaciÃ³n sutil
+              // Mostrar notificación sutil
               showRefreshNotification(casos.length);
               
               // Animar indicador
@@ -1443,11 +1438,11 @@ document.addEventListener('DOMContentLoaded', () => {
             }
           }
         })
-        .catch(err => console.error('Error en auto-actualizaciÃ³n:', err));
+        .catch(err => console.error('Error en auto-actualización:', err));
     }
 
     function showRefreshNotification(count) {
-      // Crear notificaciÃ³n temporal
+      // Crear notificación temporal
       const notification = document.createElement('div');
       notification.style.cssText = `
         position: fixed;
@@ -1462,28 +1457,28 @@ document.addEventListener('DOMContentLoaded', () => {
         font-weight: 600;
         animation: slideIn 0.3s ease;
       `;
-      notification.textContent = `âœ“ ${count} casos actualizados`;
+      notification.textContent = `✓ ${count} casos actualizados`;
       document.body.appendChild(notification);
 
-      // Remover despuÃ©s de 3 segundos
+      // Remover después de 3 segundos
       setTimeout(() => {
         notification.style.animation = 'slideOut 0.3s ease';
         setTimeout(() => notification.remove(), 300);
       }, 3000);
     }
 
-    // Iniciar auto-actualizaciÃ³n cada 30 segundos
+    // Iniciar auto-actualización cada 30 segundos
     autoRefreshInterval = setInterval(refreshCasesData, 30000);
-    console.log('âœ“ Auto-actualizaciÃ³n de casos activada (cada 30 segundos)');
+    console.log('✓ Auto-actualización de casos activada (cada 30 segundos)');
 
-    // Limpiar intervalo al salir de la pÃ¡gina
+    // Limpiar intervalo al salir de la página
     window.addEventListener('beforeunload', () => {
       if (autoRefreshInterval) clearInterval(autoRefreshInterval);
     });
   })();
 
   // =====================
-  // Carga de Datos para EstadÃ­sticas (Menu - Estadisticas.html)
+  // Carga de Datos para Estadísticas (Menu - Estadisticas.html)
   // =====================
   (function loadStatsData() {
     const statTotal = document.getElementById('stat-total');
@@ -1492,18 +1487,19 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (!statTotal && !statResolved && !statPending) return;
 
-    fetch(getApiUrl() + '?action=get_dashboard_stats')
+    fetch(getApiUrl() + '/dashboard/stats')
       .then(res => res.json())
-      .then(data => {
+      .then(result => {
+        const data = (result.success && result.data) ? result.data : result;
         if (statTotal) statTotal.textContent = data.total_casos || 0;
         if (statResolved) statResolved.textContent = data.resueltos || 0;
-        if (statPending) statPending.textContent = data.pendientes || 0;
+        if (statPending) statPending.textContent = (data.pausados || 0);
       })
       .catch(err => console.error('Error cargando estadisticas:', err));
   })();
 
   // =====================
-  // Funcionalidad de CreaciÃ³n de Casos
+  // Funcionalidad de Creación de Casos
   // =====================
   const btnCrearCaso = document.getElementById('btn-crear-caso');
   const btnGuardarBorrador = document.getElementById('btn-guardar-borrador');
@@ -1532,7 +1528,7 @@ document.addEventListener('DOMContentLoaded', () => {
         asignado: document.getElementById('asignar')?.value || '',
         prioridad: document.getElementById('prioridad')?.value || '',
         estado: 'Activo',
-        autor: 'Juan PÃ©rez'
+        autor: 'Juan Pérez'
       };
 
       // Validar campos obligatorios
@@ -1543,7 +1539,7 @@ document.addEventListener('DOMContentLoaded', () => {
       }
       
       if (!caseData.categoria) {
-        alert('Por favor seleccione una categorÃ­a');
+        alert('Por favor seleccione una categoría');
         document.getElementById('categoria')?.focus();
         return;
       }
@@ -1555,17 +1551,17 @@ document.addEventListener('DOMContentLoaded', () => {
       }
       
       if (!caseData.descripcion) {
-        alert('Por favor ingrese una descripciÃ³n de la falla');
+        alert('Por favor ingrese una descripción de la falla');
         document.getElementById('descripcion')?.focus();
         return;
       }
 
-      // Deshabilitar botÃ³n mientras se procesa
+      // Deshabilitar botón mientras se procesa
       btnCrearCaso.disabled = true;
       btnCrearCaso.textContent = 'Guardando...';
 
       try {
-        const response = await fetch(getApiUrl() + '?action=save_case', {
+        const response = await fetch(getApiUrl() + '/casos', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json'
@@ -1579,12 +1575,12 @@ document.addEventListener('DOMContentLoaded', () => {
           // Limpiar borrador guardado
           localStorage.removeItem('caso_borrador');
           
-          // Mostrar modal de Ã©xito
+          // Mostrar modal de éxito
           if (modalExito) {
             modalExito.style.display = 'flex';
             setTimeout(() => {
               modalExito.style.display = 'none';
-              // Redirigir al menÃº principal
+              // Redirigir al menú principal
               window.location.href = 'Menu principal.html';
             }, 2000);
           } else {
@@ -1598,14 +1594,14 @@ document.addEventListener('DOMContentLoaded', () => {
         }
       } catch (error) {
         console.error('Error:', error);
-        alert('Error de conexiÃ³n. Por favor intente nuevamente.');
+        alert('Error de conexión. Por favor intente nuevamente.');
         btnCrearCaso.disabled = false;
         btnCrearCaso.textContent = 'Crear Caso';
       }
     });
   }
 
-  // Funcionalidad del botÃ³n Cancelar
+  // Funcionalidad del botón Cancelar
   if (btnCancelar && modalCancelar) {
     btnCancelar.addEventListener('click', () => {
       modalCancelar.style.display = 'flex';
@@ -1627,7 +1623,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
   
-  // Funcionalidad del botÃ³n Guardar Borrador
+  // Funcionalidad del botón Guardar Borrador
   if (btnGuardarBorrador) {
     btnGuardarBorrador.addEventListener('click', () => {
       // Guardar en localStorage como borrador
@@ -1661,7 +1657,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (!draft) return;
 
     const data = JSON.parse(draft);
-    if (!confirm('Se encontrÃ³ un borrador guardado. Â¿Desea cargarlo?')) {
+    if (!confirm('Se encontró un borrador guardado. ¿Desea cargarlo?')) {
       localStorage.removeItem('caso_borrador');
       return;
     }
@@ -1675,7 +1671,7 @@ document.addEventListener('DOMContentLoaded', () => {
     updateSummary();
   };
   
-  // Ejecutar al cargar la pÃ¡gina
+  // Ejecutar al cargar la página
   if (btnCrearCaso) {
     loadDraft();
   }
@@ -1712,7 +1708,7 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   // =====================
-  // Sistema de Filtros DinÃ¡micos
+  // Sistema de Filtros Dinámicos
   // =====================
   (function initFilters() {
     const filterBtn = document.getElementById('btn-filtros');
@@ -1793,7 +1789,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   })();
 
-  // FunciÃ³n para aplicar filtros a la tabla
+  // Función para aplicar filtros a la tabla
   window.applyFiltersToTable = function(filters) {
     const tbody = document.getElementById('cases-table-body');
     if (!tbody) return;
@@ -1822,21 +1818,21 @@ document.addEventListener('DOMContentLoaded', () => {
         const prioridadCell = row.querySelector('td:nth-child(6)');
         const prioridadText = prioridadCell?.textContent.trim().toLowerCase() || '';
         const match = filters.prioridades.some(pri => {
-          if (pri === 'critica' || pri === 'urgente') return prioridadText.includes('urgente') || prioridadText.includes('crÃ­tica');
+          if (pri === 'critica' || pri === 'urgente') return prioridadText.includes('urgente') || prioridadText.includes('crítica');
           return prioridadText.includes(pri);
         });
 
         showRow = showRow && match;
       }
 
-      // Filtro por categorÃ­a
+      // Filtro por categoría
       if (filters.categoria) {
         const categoriaCell = row.querySelector('td:nth-child(7)');
         const categoriaText = categoriaCell?.textContent.trim() || '';
         showRow = showRow && categoriaText === filters.categoria;
       }
 
-      // Filtro por tÃ©cnico asignado
+      // Filtro por técnico asignado
       if (filters.tecnico) {
         const tecnicoCell = row.querySelector('td:nth-child(5)');
         const tecnicoText = tecnicoCell?.textContent.trim() || '';
@@ -1857,3 +1853,4 @@ document.addEventListener('DOMContentLoaded', () => {
   };
 
 });
+

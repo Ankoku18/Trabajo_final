@@ -317,6 +317,51 @@ app.get('/api/estadisticas', async (req, res) => {
   }
 })
 
+// Métricas del mes actual vs mes anterior para el dashboard
+app.get('/api/dashboard/stats', async (req, res) => {
+  try {
+    const result = await pool.query(`
+      SELECT
+        -- Mes actual
+        COUNT(CASE WHEN DATE_TRUNC('month', fecha_creacion) = DATE_TRUNC('month', NOW()) THEN 1 END)::int                                                    AS creados_mes,
+        COUNT(CASE WHEN estado = 'resuelto' AND DATE_TRUNC('month', fecha_actualizacion) = DATE_TRUNC('month', NOW()) THEN 1 END)::int                        AS solucionados_mes,
+        COUNT(CASE WHEN estado = 'pausado'  AND DATE_TRUNC('month', fecha_actualizacion) = DATE_TRUNC('month', NOW()) THEN 1 END)::int                        AS pausados_mes,
+        COUNT(CASE WHEN estado = 'cerrado'  AND DATE_TRUNC('month', fecha_actualizacion) = DATE_TRUNC('month', NOW()) THEN 1 END)::int                        AS cerrados_mes,
+        -- Mes anterior
+        COUNT(CASE WHEN DATE_TRUNC('month', fecha_creacion) = DATE_TRUNC('month', NOW() - INTERVAL '1 month') THEN 1 END)::int                               AS creados_mes_ant,
+        COUNT(CASE WHEN estado = 'resuelto' AND DATE_TRUNC('month', fecha_actualizacion) = DATE_TRUNC('month', NOW() - INTERVAL '1 month') THEN 1 END)::int   AS solucionados_mes_ant,
+        COUNT(CASE WHEN estado = 'pausado'  AND DATE_TRUNC('month', fecha_actualizacion) = DATE_TRUNC('month', NOW() - INTERVAL '1 month') THEN 1 END)::int   AS pausados_mes_ant,
+        COUNT(CASE WHEN estado = 'cerrado'  AND DATE_TRUNC('month', fecha_actualizacion) = DATE_TRUNC('month', NOW() - INTERVAL '1 month') THEN 1 END)::int   AS cerrados_mes_ant
+      FROM casos
+    `)
+
+    const row = result.rows[0]
+
+    const calcPct = (actual, anterior) => {
+      if (anterior === 0) return actual > 0 ? 100 : 0
+      return Math.round(((actual - anterior) / anterior) * 100)
+    }
+
+    res.json({
+      success: true,
+      data: {
+        creados:      row.creados_mes,
+        resueltos:    row.solucionados_mes,
+        pausados:     row.pausados_mes,
+        cerrados:     row.cerrados_mes,
+        total_casos:  row.creados_mes,
+        cambio_creados:      calcPct(row.creados_mes,      row.creados_mes_ant),
+        cambio_resueltos:    calcPct(row.solucionados_mes, row.solucionados_mes_ant),
+        cambio_pausados:     calcPct(row.pausados_mes,     row.pausados_mes_ant),
+        cambio_cerrados:     calcPct(row.cerrados_mes,     row.cerrados_mes_ant)
+      }
+    })
+  } catch (error) {
+    console.error('Error en /api/dashboard/stats:', error)
+    res.status(500).json({ success: false, error: 'Error al obtener estadísticas del dashboard' })
+  }
+})
+
 // Resumen de casos para dashboards
 app.get('/api/casos/stats/summary', async (req, res) => {
   try {
@@ -505,13 +550,16 @@ app.get('/api/usuarios/:id', async (req, res) => {
 // Crear usuario con hash de contraseña
 app.post('/api/usuarios', async (req, res) => {
   try {
-    const { nombre, apellido, email, password, rol } = req.body
+    const { nombre, apellido, email, password } = req.body
+    // Normalizar rol al formato exacto del enum rol_enum: 'Administrador', 'Gestor', 'Tecnico'
+    const rawRol = req.body.rol || ''
+    const rol = rawRol ? rawRol.charAt(0).toUpperCase() + rawRol.slice(1).toLowerCase() : ''
 
     // Validación de entrada
-    if (!nombre || !apellido || !email || !password || !rol) {
+    if (!nombre || !email || !password || !rol) {
       return res.status(400).json({
         success: false,
-        error: 'Todos los campos son requeridos: nombre, apellido, email, password, rol'
+        error: 'Los campos nombre, email, contraseña y rol son requeridos'
       })
     }
 
@@ -529,15 +577,15 @@ app.post('/api/usuarios', async (req, res) => {
       })
     }
 
-    // Verificar si el email ya existe
+    // Verificar si el correo ya existe en la tabla real 'usuario'
     const existingUser = await pool.query(
-      'SELECT id FROM usuarios WHERE email = $1',
+      'SELECT id_usuario FROM usuario WHERE correo = $1',
       [email.toLowerCase()]
     )
     if (existingUser.rows.length > 0) {
       return res.status(409).json({
         success: false,
-        error: 'El email ya esta registrado'
+        error: 'El correo ya está registrado'
       })
     }
 
@@ -545,12 +593,22 @@ app.post('/api/usuarios', async (req, res) => {
     const saltRounds = 10
     const hashedPassword = await bcrypt.hash(password, saltRounds)
 
-    // Insertar usuario con contraseña hasheada
+    // nombre_usuario = nombre + apellido juntos (estructura real de la BD)
+    const nombreCompleto = [sanitizeInput(nombre), sanitizeInput(apellido)].filter(Boolean).join(' ').trim()
+
+    // Obtener el id del administrador activo (FK obligatoria en tabla usuario)
+    const adminResult = await pool.query('SELECT id_administrador FROM administrador LIMIT 1')
+    if (adminResult.rows.length === 0) {
+      return res.status(500).json({ success: false, error: 'No hay administrador registrado en el sistema' })
+    }
+    const adminId = adminResult.rows[0].id_administrador
+
+    // Insertar en la tabla real 'usuario'
     const result = await pool.query(
-      `INSERT INTO usuarios (nombre, apellido, email, password, rol, activo, fecha_creacion, fecha_actualizacion)
-       VALUES ($1, $2, $3, $4, $5, true, NOW(), NOW())
-       RETURNING id, nombre, apellido, email, rol, activo, fecha_creacion`,
-      [sanitizeInput(nombre), sanitizeInput(apellido), email.toLowerCase(), hashedPassword, rol]
+      `INSERT INTO usuario (nombre_usuario, correo, contrasena, rol, estado, administrador_id_administrador, fecha_creacion, fecha_modificacion)
+       VALUES ($1, $2, $3, $4::rol_enum, $5::estado_usuario_enum, $6, NOW(), NOW())
+       RETURNING id_usuario, nombre_usuario, correo, rol, estado, fecha_creacion`,
+      [nombreCompleto, email.toLowerCase(), hashedPassword, rol, 'Activo', adminId]
     )
 
     res.json({
@@ -572,59 +630,78 @@ app.put('/api/usuarios/:id', async (req, res) => {
     const { id } = req.params
     const updates = req.body
 
-    // Validar ID
     if (!/^\d+$/.test(id)) {
-      return res.status(400).json({
-        success: false,
-        error: 'Formato de ID invalido'
-      })
+      return res.status(400).json({ success: false, error: 'Formato de ID invalido' })
     }
 
-    // Campos permitidos para actualización
-    const camposPermitidos = ['nombre', 'apellido', 'email', 'rol', 'activo']
-    const keys = Object.keys(updates).filter(key => camposPermitidos.includes(key))
+    const updateFields = []
+    const values = []
+    let paramIdx = 1
 
-    if (keys.length === 0) {
-      return res.status(400).json({
-        success: false,
-        error: 'No hay campos validos para actualizar'
-      })
-    }
-
-    const values = keys.map(key => {
-      if (key === 'email') {
-        return String(updates[key]).toLowerCase()
+    // Campos de texto directos
+    for (const campo of ['nombre', 'apellido']) {
+      if (updates[campo] !== undefined && updates[campo] !== null) {
+        updateFields.push(`${campo} = $${paramIdx++}`)
+        values.push(sanitizeInput(updates[campo]))
       }
-      return sanitizeInput(updates[key])
-    })
-    const setClauses = keys.map((key, idx) => `${key} = $${idx + 1}`).join(', ')
+    }
+
+    // Rol: normalizar al formato exacto del enum (ej. 'GESTOR' → 'Gestor')
+    if (updates.rol !== undefined && updates.rol !== null) {
+      const r = String(updates.rol).trim()
+      const rolNorm = r.charAt(0).toUpperCase() + r.slice(1).toLowerCase()
+      updateFields.push(`rol = $${paramIdx++}`)
+      values.push(rolNorm)
+    }
+
+    // Email (normalizar a minúsculas)
+    if (updates.email !== undefined && updates.email !== null) {
+      updateFields.push(`email = $${paramIdx++}`)
+      values.push(String(updates.email).toLowerCase().trim())
+    }
+
+    // estado → deriva y actualiza solo 'activo' (columna estado se agrega con migración manual)
+    if (updates.estado !== undefined) {
+      const estadosValidos = ['activo', 'suspendido', 'inactivo']
+      const estadoLower = String(updates.estado).toLowerCase()
+      if (!estadosValidos.includes(estadoLower)) {
+        return res.status(400).json({ success: false, error: 'Estado invalido. Valores permitidos: activo, suspendido, inactivo' })
+      }
+      updateFields.push(`activo = $${paramIdx++}`)
+      values.push(estadoLower === 'activo')
+    }
+
+    // Contraseña → hashear con bcrypt
+    if (updates.password) {
+      if (!validatePassword(updates.password)) {
+        return res.status(400).json({ success: false, error: 'La contrasena debe tener al menos 8 caracteres' })
+      }
+      const hashed = await bcrypt.hash(updates.password, saltRounds)
+      updateFields.push(`password = $${paramIdx++}`)
+      values.push(hashed)
+    }
+
+    if (updateFields.length === 0) {
+      return res.status(400).json({ success: false, error: 'No hay campos validos para actualizar' })
+    }
 
     const query = `
-      UPDATE usuarios 
-      SET ${setClauses}, fecha_actualizacion = NOW()
-      WHERE id = $${keys.length + 1}
+      UPDATE usuarios
+      SET ${updateFields.join(', ')}, fecha_actualizacion = NOW()
+      WHERE id = $${paramIdx}
       RETURNING id, nombre, apellido, email, rol, activo, fecha_creacion
     `
 
     const result = await pool.query(query, [...values, id])
 
     if (result.rows.length === 0) {
-      return res.status(404).json({
-        success: false,
-        error: 'Usuario no encontrado'
-      })
+      return res.status(404).json({ success: false, error: 'Usuario no encontrado' })
     }
 
-    res.json({
-      success: true,
-      data: result.rows[0]
-    })
+    res.json({ success: true, data: result.rows[0] })
   } catch (error) {
     console.error('Error en PUT /api/usuarios/:id:', error)
-    res.status(500).json({
-      success: false,
-      error: 'Error al actualizar usuario'
-    })
+    res.status(500).json({ success: false, error: 'Error al actualizar usuario' })
   }
 })
 
@@ -686,6 +763,7 @@ if (!isVercel) {
     console.log(`   POST http://localhost:${PORT}/api/casos`)
     console.log(`   PUT  http://localhost:${PORT}/api/casos/:id`)
     console.log(`   GET  http://localhost:${PORT}/api/estadisticas`)
+    console.log(`   GET  http://localhost:${PORT}/api/dashboard/stats`)
     console.log(`   GET  http://localhost:${PORT}/api/usuarios`)
     console.log(`   GET  http://localhost:${PORT}/api/usuarios/:id`)
     console.log(`   POST http://localhost:${PORT}/api/usuarios`)

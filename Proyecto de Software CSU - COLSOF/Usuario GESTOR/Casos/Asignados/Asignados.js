@@ -11,8 +11,11 @@ const normalize = (val = '') => String(val || '').toLowerCase()
 const formatCaseId = (id) => `#${String(id ?? '').padStart(8, '0')}`
 
 const isAssigned = (item) => {
-  const tecnico = normalize(item.asignado_a || item.tecnico_asignado || '')
-  return tecnico && tecnico !== 'sin asignar'
+  // Casos en progreso = asignados y activos
+  const estado = normalize(item.estado || '')
+  return estado === 'en_progreso' || estado === 'escalado' ||
+         (normalize(item.asignado_a || item.tecnico_asignado || '') !== '' &&
+          estado !== 'cerrado' && estado !== 'resuelto')
 }
 
 const formatDate = (value) => {
@@ -81,44 +84,47 @@ const buildTechnicians = () => {
 }
 
 const updateMetrics = (filtered = cases) => {
-  const enProgreso = filtered.filter((c) => normalize(c.status).includes('progreso')).length
-  const pendientes = filtered.filter((c) => normalize(c.status) === 'pendiente').length
-  const urgentes = filtered.filter((c) => normalize(c.priority) === 'alta').length
-  const programados = filtered.filter((c) => normalize(c.status).includes('programado')).length
+  const enProgreso = filtered.filter((c) => normalize(c.status).includes('progreso') || normalize(c.status).includes('en_progreso')).length
+  const pendientes = filtered.filter((c) => normalize(c.status) === 'pendiente' || normalize(c.status) === 'abierto').length
+  const urgentes = filtered.filter((c) => normalize(c.priority) === 'alta' || normalize(c.priority) === 'critica').length
+  const escalados = filtered.filter((c) => normalize(c.status).includes('escalado')).length
 
-  qs('#kpiProgress').textContent = enProgreso || '0'
-  qs('#kpiPending').textContent = pendientes || '0'
-  qs('#kpiUrgent').textContent = urgentes || '0'
-  qs('#kpiScheduled').textContent = programados || '0'
-  qs('#totalCases').textContent = filtered.length || '0'
+  const set = (id, val) => { const n = qs(id); if (n) n.textContent = val }
+  set('#kpiProgress', enProgreso || '0')
+  set('#kpiPending', pendientes || '0')
+  set('#kpiUrgent', urgentes || '0')
+  set('#kpiScheduled', escalados || '0')
+  set('#totalCases', filtered.length || '0')
 }
 
 const renderTable = (filtered = cases) => {
-  const tbody = qs('#casesTable')
-  if (!tbody) return
+  const list = qs('#casesList') || qs('#casesTable')
+  if (!list) return
 
   if (filtered.length === 0) {
-    tbody.innerHTML =
-      '<tr><td colspan="8" style="text-align: center; padding: 20px; color: #7b8694;">No hay casos asignados</td></tr>'
+    list.innerHTML = '<div style="text-align:center;padding:20px;color:#7b8694;">No hay casos asignados</div>'
     return
   }
 
-  tbody.innerHTML = filtered
-    .map(
-      (c) => `
-    <tr onclick="openModal('${c.id}')">
-      <td><strong>${c.formattedId}</strong><br>${c.title.substring(0, 30)}</td>
-      <td>${c.technician}</td>
-      <td>${c.client}</td>
-      <td>${c.category}</td>
-      <td><span style="background: ${getPriorityColor(c.priority)}; padding: 4px 8px; border-radius: 4px; color: white; font-size: 12px;">${c.priority}</span></td>
-      <td><span style="background: ${getStatusColor(c.status)}; padding: 4px 8px; border-radius: 4px; color: white; font-size: 12px;">${c.status}</span></td>
-      <td>${c.deadline}</td>
-      <td><button onclick="event.stopPropagation(); reassign('${c.id}')" style="padding: 4px 8px; background: #1976d2; color: white; border: none; border-radius: 4px; cursor: pointer;">...</button></td>
-    </tr>
-  `
-    )
-    .join('')
+  list.innerHTML = filtered.map((c) => `
+    <div class="case" onclick="openModal('${c.id}')" style="cursor:pointer;border:1px solid #e5e7eb;border-radius:8px;padding:16px;margin-bottom:12px;background:#fff;">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+        <div>
+          <strong>${c.formattedId}</strong>
+          <span style="background:${getPriorityColor(c.priority)};color:#fff;padding:2px 8px;border-radius:4px;font-size:12px;margin-left:8px;">${c.priority}</span>
+          <span style="background:${getStatusColor(c.status)};color:#fff;padding:2px 8px;border-radius:4px;font-size:12px;margin-left:4px;">${c.status}</span>
+        </div>
+        <button onclick="event.stopPropagation(); reassign('${c.id}')" style="padding:4px 10px;background:#1976d2;color:#fff;border:none;border-radius:4px;cursor:pointer;font-size:12px;">Reasignar</button>
+      </div>
+      <p style="margin:4px 0;font-weight:600;">${c.title.substring(0, 60)}</p>
+      <div style="display:flex;gap:16px;font-size:13px;color:#6b7280;margin-top:6px;">
+        <span>👤 ${c.technician}</span>
+        <span>🏢 ${c.client}</span>
+        <span>🏷 ${c.category}</span>
+        <span>📅 ${c.deadline}</span>
+      </div>
+    </div>
+  `).join('')
 }
 
 const getPriorityColor = (priority) => {
@@ -139,7 +145,8 @@ const getStatusColor = (status) => {
 const render = () => {
   updateMetrics()
   renderTable()
-  renderTechnicians()
+  const techSection = qs('#technicians')
+  if (techSection) renderTechnicians()
 }
 
 const renderTechnicians = () => {
@@ -195,7 +202,7 @@ const reassign = (id) => {
 }
 
 const setupSearch = () => {
-  const input = qs('.search input')
+  const input = qs('#search') || qs('.search input') || qs('.filters input')
   if (!input) return
 
   input.addEventListener('input', (e) => {
@@ -225,9 +232,17 @@ const fetchAssigned = async () => {
       showToast('API no disponible', true)
       return
     }
-    const data = await window.api.getCasos()
-    const filtered = Array.isArray(data) ? data.filter(isAssigned) : []
-    cases = filtered.map(mapCase)
+    // Casos en progreso y escalados de toda la organización
+    const user = JSON.parse(localStorage.getItem('usuario') || '{}')
+    const [dataProgress, dataEscalado] = await Promise.all([
+      window.api.getCasos({ estado: 'en_progreso' }),
+      window.api.getCasos({ estado: 'escalado' })
+    ])
+    const combined = [
+      ...(Array.isArray(dataProgress) ? dataProgress : []),
+      ...(Array.isArray(dataEscalado) ? dataEscalado : [])
+    ]
+    cases = combined.filter(isAssigned).map(mapCase)
     buildTechnicians()
     render()
     showToast(`${cases.length} casos asignados cargados`)

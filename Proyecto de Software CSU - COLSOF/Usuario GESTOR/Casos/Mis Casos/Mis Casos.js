@@ -20,11 +20,12 @@ const normalize = (val = '') => String(val || '').toLowerCase();
 const formatCaseId = (id) => `#${String(id ?? '').padStart(8, '0')}`;
 
 const isMyCases = (item) => {
-  const tecnico = normalize(item.tecnico_asignado || item.asignado_a || item.tecnico);
+  // Para un gestor, "Mis Casos" = casos donde el gestor ES el autor
+  const gestor = normalize(item.autor || '');
   const currentUser = normalize(getCurrentUserName());
-  if (!currentUser) return false;
+  if (!currentUser) return true; // sin sesión, muestra todos
   const parts = currentUser.split(' ').filter(Boolean);
-  return parts.some((part) => tecnico.includes(part)) || tecnico === currentUser;
+  return parts.some((part) => gestor.includes(part)) || gestor === currentUser;
 };
 
 const formatDate = (value) => {
@@ -244,12 +245,15 @@ const setupSearch = () => {
 const fetchMyCases = async () => {
   try {
     if (!window.api) return;
-    const data = await window.api.getCasos();
+    // Filtrar por id del gestor logueado
+    const user = JSON.parse(localStorage.getItem('usuario') || '{}');
+    const filters = user.id ? { gestor_id: user.id } : {};
+    const data = await window.api.getCasos(filters);
     const filtered = Array.isArray(data) ? data.filter(isMyCases) : [];
-    allCases = filtered.map(mapCase);
+    allCases = filtered.length ? filtered.map(mapCase) : (Array.isArray(data) ? data.map(mapCase) : []);
     cases = allCases;
     render();
-    showToast('Mis casos actualizados');
+    showToast(`${allCases.length} casos cargados`);
   } catch (err) {
     console.error('Error al cargar mis casos:', err);
     showToast('No se pudieron cargar mis casos', true);

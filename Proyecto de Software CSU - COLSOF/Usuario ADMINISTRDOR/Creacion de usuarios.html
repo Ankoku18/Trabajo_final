@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
@@ -383,7 +383,7 @@
                     <img src="LOGO_COLSOF.png" alt="Logo" class="logo" aria-hidden="true">
                     <h2 class="brand">COLSOF S.A.S</h2>
                 </div>
-                <p class="menu-label">Menu</p>
+                <p class="menu-label">Menú</p>
             </div>
 
             <ul class="menu-list">
@@ -553,9 +553,9 @@
                                 <i class="fas fa-user-tag"></i>
                                 <select id="rol" name="rol" required>
                                     <option value="">Seleccione un rol</option>
-                                    <option value="TECNICO">Técnico</option>
-                                    <option value="GESTOR">Gestor</option>
-                                    <option value="ADMINISTRADOR">Administrador</option>
+                                    <option value="Tecnico">Técnico</option>
+                                    <option value="Gestor">Gestor</option>
+                                    <option value="Administrador">Administrador</option>
                                 </select>
                             </div>
                         </div>
@@ -643,33 +643,9 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 });
-// Envío del formulario: validar, mostrar éxito o error y redirigir
-(function(){
-  const form = document.querySelector('.user-form');
-  const modalExito = document.getElementById('modal-exito');
-  const cerrarExito = document.getElementById('cerrar-modal-exito');
-  const modalError = document.getElementById('modal-error');
-  const cerrarError = document.getElementById('cerrar-modal-error');
-  const goToMenu = () => { window.location.href = 'Menu principal Admin.html'; };
-
-  cerrarError && (cerrarError.onclick = () => { modalError.style.display = 'none'; });
-
-  form.addEventListener('submit', function(e){
-    e.preventDefault();
-    if (form.checkValidity()) {
-      // Mostrar modal de éxito y redirigir
-      modalExito.style.display = 'flex';
-      cerrarExito && (cerrarExito.onclick = goToMenu);
-      // Redirección automática tras breve espera
-      setTimeout(goToMenu, 1400);
-    } else {
-      // Forzar mensajes nativos del navegador y mostrar modal de error
-      form.reportValidity();
-      modalError.style.display = 'flex';
-    }
-  });
-})();
+// El envío del formulario es manejado por scripts.js (llamada real a la API)
 </script>
+<script src="../shared/app-init.js"></script>
 <script src="scripts.js"></script>
 </body>
 </html>

@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="es">
 <head>
   <meta charset="UTF-8">
@@ -19,7 +19,7 @@
         <img class="logo" src="../../LOGO_COLSOF.png" alt="Logo COLSOF" />
         <div class="brand">COLSOF S.A.S</div>
       </div>
-      <div class="menu-label">Menu</div>
+      <div class="menu-label">Menú</div>
       <ul class="menu-list">
         <li class="menu-item">
           <a href="../../Menu principal Admin.html">
@@ -149,10 +149,10 @@
             <div class="kpi-value" id="inactivos"></div>
             <div class="kpi-meta">Sin acceso</div>
           </div>
-          <div class="kpi-card">
-            <div class="kpi-label">Técnicos</div>
-            <div class="kpi-value" id="tecnicos"></div>
-            <div class="kpi-meta">Equipo operativo</div>
+          <div class="kpi-card kpi-suspended">
+            <div class="kpi-label">Suspendidos</div>
+            <div class="kpi-value" id="suspendidos"></div>
+            <div class="kpi-meta">Acceso bloqueado</div>
           </div>
         </section>
 
@@ -168,8 +168,9 @@
             </select>
             <select id="filterStatus" aria-label="Filtrar por estado">
               <option value="todos">Todos los estados</option>
-              <option value="Activo">Activo</option>
-              <option value="Inactivo">Inactivo</option>
+              <option value="activo">Activo</option>
+              <option value="suspendido">Suspendido</option>
+              <option value="inactivo">Inactivo</option>
             </select>
             <button class="btn primary" onclick="exportar()"><i class="fa fa-download"></i> Exportar</button>
           </div>
@@ -203,6 +204,105 @@
     </main>
   </div>
 
+  <!-- ══════════════════════════════════════════
+       Modal Editar Usuario
+  ═══════════════════════════════════════════ -->
+  <div id="editUserModal" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="modalTitle" style="display:none">
+    <div class="modal-panel">
+      <!-- Cabecera -->
+      <div class="modal-header">
+        <div class="modal-user-avatar" id="modalAvatarEl">?</div>
+        <div class="modal-header-info">
+          <h3 id="modalTitle">Editar Usuario</h3>
+          <span class="modal-id-badge" id="modalIdBadge">ID #—</span>
+        </div>
+        <button class="modal-close-btn" id="modalCloseBtn" aria-label="Cerrar">
+          <i class="fa fa-times"></i>
+        </button>
+      </div>
+
+      <!-- Cuerpo / Formulario -->
+      <form id="editUserForm" class="modal-body" autocomplete="off" novalidate>
+        <div class="form-row">
+          <div class="form-group">
+            <label for="editNombre">Nombre</label>
+            <input type="text" id="editNombre" name="nombre" placeholder="Nombre" required>
+          </div>
+          <div class="form-group">
+            <label for="editApellido">Apellido</label>
+            <input type="text" id="editApellido" name="apellido" placeholder="Apellido">
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="editEmail">Correo electrónico</label>
+          <div class="input-icon-wrap">
+            <i class="fa fa-envelope input-icon"></i>
+            <input type="email" id="editEmail" name="email" placeholder="usuario@empresa.com" required>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="editRol">Rol</label>
+            <select id="editRol" name="rol">
+              <option value="Administrador">Administrador</option>
+              <option value="Gestor">Gestor</option>
+              <option value="Tecnico">Técnico</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="editEstado">Estado</label>
+            <select id="editEstado" name="estado">
+              <option value="activo">✅ Activo</option>
+              <option value="suspendido">⏸ Suspendido</option>
+              <option value="inactivo">🚫 Inactivo</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Contraseña (colapsada) -->
+        <div class="form-group password-section">
+          <div class="password-toggle-row">
+            <label>Contraseña</label>
+            <button type="button" class="btn-link" id="togglePwdSection">
+              <i class="fa fa-key"></i> Cambiar contraseña
+            </button>
+          </div>
+          <div id="passwordFields" style="display:none">
+            <div class="input-icon-wrap">
+              <i class="fa fa-lock input-icon"></i>
+              <input type="password" id="editPassword" name="password"
+                placeholder="Nueva contraseña (mín. 8 caracteres)"
+                autocomplete="new-password" minlength="8">
+              <button type="button" class="eye-btn" id="togglePwdEye" title="Mostrar/ocultar">
+                <i class="fa fa-eye" id="eyeIcon"></i>
+              </button>
+            </div>
+            <p class="password-hint">Mínimo 8 caracteres. Deja en blanco para no cambiar la contraseña.</p>
+          </div>
+        </div>
+
+        <!-- Mensaje de error / éxito -->
+        <div id="modalAlert" class="modal-alert" style="display:none"></div>
+      </form>
+
+      <!-- Pie -->
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" id="modalCancelBtn">
+          <i class="fa fa-times"></i> Cancelar
+        </button>
+        <button type="button" class="btn btn-primary" id="modalSaveBtn">
+          <i class="fa fa-save"></i> Guardar cambios
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast notificación -->
+  <div id="toastNotif" class="toast-notif" style="display:none"></div>
+
+  <script src="../../../shared/app-init.js"></script>
   <script src="../../scripts.js"></script>
   <script src="Lista.js"></script>
   <script>

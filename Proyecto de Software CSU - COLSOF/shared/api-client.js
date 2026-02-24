@@ -3,9 +3,19 @@
  * Uso: Importar en cualquier script que necesite comunicarse con el backend
  */
 
-const API_BASE_URL = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
-  ? 'http://localhost:3000/api'
-  : '/api'
+// Construir URL dinámica para evitar problemas CORS
+let API_BASE_URL;
+if (window.location.protocol === 'file:') {
+  // Si se abre como archivo local, usar localhost
+  API_BASE_URL = 'http://localhost:3000/api';
+} else if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+  // En desarrollo: usar el mismo origen del frontend para evitar CORS
+  const port = window.location.port || (window.location.protocol === 'https:' ? 443 : 80);
+  API_BASE_URL = `${window.location.protocol}//${window.location.hostname}:${port}/api`;
+} else {
+  // En producción: usar ruta relativa
+  API_BASE_URL = '/api';
+}
 
 // Caché simple para peticiones
 const cache = new Map()

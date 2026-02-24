@@ -50,6 +50,12 @@ const poolConfig = {
 
 const pool = new Pool(poolConfig)
 
+// Establecer search_path al esquema correcto en cada conexión nueva
+pool.on('connect', (client) => {
+  client.query("SET search_path TO base_de_datos_csu, public")
+    .catch(err => console.warn('No se pudo establecer search_path:', err.message))
+})
+
 // Manejo de errores del pool
 pool.on('error', (err) => {
   console.error('❌ Error inesperado en el pool de conexiones:', err)

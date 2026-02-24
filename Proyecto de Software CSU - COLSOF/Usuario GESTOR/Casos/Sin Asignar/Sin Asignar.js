@@ -23,9 +23,10 @@ const formatCaseId = (id) => `#${String(id ?? '').padStart(8, '0')}`;
 const normalize = (val = '') => String(val || '').toLowerCase();
 
 const isUnassigned = (item) => {
-  const estado = normalize(item.estado);
-  const tecnico = normalize(item.tecnico_asignado || item.asignado_a || item.tecnico);
-  return estado.includes('sin asignar') || estado.includes('no asignado') || estado === '' || !tecnico;
+  // "Sin Asignar" = casos abiertos que aún no están en progreso
+  const estado = normalize(item.estado || '');
+  const tecnico = normalize(item.asignado_a || item.tecnico_asignado || item.tecnico || '');
+  return estado === 'abierto' || !tecnico;
 };
 
 const formatDate = (value) => {
@@ -159,12 +160,17 @@ const updateStats = () => {
 
   const avgLabel = avgHours >= 24 ? `${Math.round(avgHours / 24)}d` : `${avgHours}h`;
 
-  qs('#urgent-count').textContent = urgentCount;
-  qs('#high-count').textContent = highCount;
-  qs('#total-unassigned').textContent = totalCount;
-  qs('#queue-count').textContent = totalCount;
-  const avgNode = qs('.stat-value.average-time');
-  if (avgNode) avgNode.textContent = avgLabel;
+  const el = (id, val) => { const n = qs(id); if (n) n.textContent = val; };
+  // IDs del HTML actual
+  el('#kpiTotal', totalCount);
+  el('#kpiUrgent', urgentCount);
+  el('#kpiHigh', highCount);
+  el('#kpiTime', avgLabel);
+  // Compatibilidad con IDs alternativos
+  el('#urgent-count', urgentCount);
+  el('#high-count', highCount);
+  el('#total-unassigned', totalCount);
+  el('#queue-count', totalCount);
 
   const alertMessage = qs('#alert-message');
   if (alertMessage) {
@@ -173,7 +179,8 @@ const updateStats = () => {
 };
 
 const renderCases = () => {
-  const casesList = qs('#cases-list');
+  const casesList = qs('#casesList') || qs('#cases-list');
+  if (!casesList) return;
   casesList.innerHTML = '';
 
   if (!cases.length) {
@@ -361,14 +368,15 @@ const fetchUnassigned = async () => {
       showToast('API no disponible', true);
       return;
     }
-    const data = await window.api.getCasos();
-    const filtered = Array.isArray(data) ? data.filter(isUnassigned) : [];
-    cases = filtered.map(mapCase);
+    // Casos abiertos (sin asignar / no iniciados) — toda la organización
+    const data = await window.api.getCasos({ estado: 'abierto' });
+    cases = Array.isArray(data) ? data.filter(isUnassigned).map(mapCase) : [];
     buildTechnicians();
     updateStats();
     renderCases();
-    renderTechnicians();
-    showToast('Casos sin asignar actualizados');
+    const techList = qs('#technicians-list');
+    if (techList) renderTechnicians();
+    showToast(`${cases.length} casos sin asignar cargados`);
   } catch (err) {
     console.error('Error al cargar casos sin asignar:', err);
     showToast('No se pudieron cargar los casos sin asignar', true);

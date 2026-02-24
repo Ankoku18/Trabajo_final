@@ -9,9 +9,9 @@ const formatCaseId = (id) => `#${String(id ?? '').padStart(8, '0')}`;
 
 const isPendingClose = (item) => {
   const estado = normalize(item.estado);
-  return estado.includes('completado') || estado.includes('por cerrar') || 
-         estado.includes('resuelto') || estado.includes('pendiente cierre') ||
-         estado.includes('pendiente validacion');
+  // La BD usa: abierto, en_progreso, escalado, resuelto, cerrado
+  // "Por cerrar" = casos resueltos por el técnico, pendientes de aprobación del gestor
+  return estado === 'resuelto' || estado.includes('completado') || estado.includes('por cerrar');
 };
 
 const formatDate = (value) => {
@@ -196,11 +196,14 @@ const rejectCase = (id) => {
 const fetchPendingClose = async () => {
   try {
     if (!window.api) return;
-    const data = await window.api.getCasos();
-    const filtered = Array.isArray(data) ? data.filter(isPendingClose) : [];
-    cases = filtered.map(mapCase);
+    // Casos resueltos del gestor logueado — esperan aprobación de cierre
+    const user = JSON.parse(localStorage.getItem('usuario') || '{}');
+    const filters = { estado: 'resuelto' };
+    if (user.id) filters.gestor_id = user.id;
+    const data = await window.api.getCasos(filters);
+    cases = Array.isArray(data) ? data.filter(isPendingClose).map(mapCase) : [];
     render();
-    showToast('Casos por cerrar actualizados');
+    showToast(`${cases.length} casos por cerrar cargados`);
   } catch (err) {
     console.error('Error al cargar casos por cerrar:', err);
     showToast('No se pudieron cargar los casos por cerrar', true);

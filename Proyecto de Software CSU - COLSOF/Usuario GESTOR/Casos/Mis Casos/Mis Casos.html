@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="es">
 <head>
   <meta charset="UTF-8">
@@ -16,7 +16,7 @@
           <img src="../../LOGO_COLSOF.png" alt="Logo" class="logo" aria-hidden="true" />
           <h2 class="brand">COLSOF S.A.S</h2>
         </div>
-        <p class="menu-label">Menu</p>
+        <p class="menu-label">Menú</p>
       </div>
 
       <ul class="menu-list">
@@ -142,7 +142,7 @@
             <div class="mc-icon">📂</div>
             <div>
               <h1>Mis Casos</h1>
-              <p>Casos asignados a Juan Pérez</p>
+              <p id="user-greeting">Casos asignados a ...</p>
             </div>
           </div>
           <div class="workload">
@@ -203,5 +203,21 @@
 
   <script src="../../../shared/app-init.js"></script>
   <script src="Mis Casos.js"></script>
+  <script>
+    (function actualizarGreeting() {
+      function _setGreeting() {
+        const g = document.getElementById('user-greeting');
+        if (!g) return;
+        const u = window.currentUser;
+        const nombre = u ? ([u.nombre, u.apellido].filter(Boolean).join(' ').trim() || u.email || 'ti') : '';
+        if (nombre) g.textContent = 'Casos asignados a ' + nombre;
+      }
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', _setGreeting);
+      } else {
+        _setGreeting();
+      }
+    })();
+  </script>
 </body>
 </html>
