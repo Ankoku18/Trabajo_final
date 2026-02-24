@@ -33,17 +33,11 @@
   }
 
   // Actualizar la información del perfil en la interfaz cuando el DOM esté listo
+  // (app-init.js también lo hace; este bloque cubre páginas sin app-init.js)
   document.addEventListener('DOMContentLoaded', function() {
-    const profileName = document.querySelector('.profile-name');
-    const profileEmail = document.querySelector('.profile-email');
-    
-    if (profileName) {
-      profileName.textContent = `${usuario.nombre} ${usuario.apellido}`;
-    }
-    
-    if (profileEmail) {
-      profileEmail.textContent = usuario.email;
-    }
+    const nombreCompleto = [usuario.nombre, usuario.apellido].filter(Boolean).join(' ').trim() || usuario.email || 'Administrador';
+    document.querySelectorAll('.profile-name').forEach(el => { el.textContent = nombreCompleto; });
+    document.querySelectorAll('.profile-email').forEach(el => { el.textContent = usuario.email || ''; });
   });
 
   // Utilidades
@@ -63,6 +57,7 @@
   };
   let refreshInterval = null;
   let currentTimeRange = '12'; // meses por defecto
+  let lastCasos = []; // caché de casos para no re-fetch al cambiar rango
 
 
 
@@ -81,68 +76,32 @@
   // =====================
   async function loadDashboardStats() {
     try {
-      // Cargar estadísticas de casos
-      const response = await fetch(`${API_URL}/casos`);
-      if (!response.ok) throw new Error('Error al cargar estadísticas');
-      
-      const payload = await response.json();
-      const casos = normalizeCasos(payload);
-      
-      // Obtener fecha actual y mes anterior
-      const ahora = new Date();
-      const mesActual = ahora.getMonth();
-      const anoActual = ahora.getFullYear();
-      
-      const mesPasado = mesActual === 0 ? 11 : mesActual - 1;
-      const anoPasado = mesActual === 0 ? anoActual - 1 : anoActual;
-      
-      // Separar casos por mes
-      const casosActuales = casos.filter(c => {
-        if (!c.fecha_creacion) return false;
-        const fecha = new Date(c.fecha_creacion);
-        return fecha.getMonth() === mesActual && fecha.getFullYear() === anoActual;
-      });
-      
-      const casosPasados = casos.filter(c => {
-        if (!c.fecha_creacion) return false;
-        const fecha = new Date(c.fecha_creacion);
-        return fecha.getMonth() === mesPasado && fecha.getFullYear() === anoPasado;
-      });
-      
-      // Calcular estadísticas del mes actual
-      const solucionadosActuales = casosActuales.filter(c => c.estado?.toLowerCase() === 'resuelto').length;
-      const creadosActuales = casosActuales.length;
-      const pausadosActuales = casosActuales.filter(c => c.estado?.toLowerCase() === 'pausado').length;
-      const cerradosActuales = casosActuales.filter(c => c.estado?.toLowerCase() === 'cerrado').length;
-      
-      // Calcular estadísticas del mes pasado
-      const solucionadosPasados = casosPasados.filter(c => c.estado?.toLowerCase() === 'resuelto').length || 1;
-      const creadosPasados = casosPasados.length || 1;
-      const pausadosPasados = casosPasados.filter(c => c.estado?.toLowerCase() === 'pausado').length || 1;
-      const cerradosPasados = casosPasados.filter(c => c.estado?.toLowerCase() === 'cerrado').length || 1;
-      
-      // Calcular tendencias reales
-      const tendenciaSolucionados = calcularTendencia(solucionadosActuales, solucionadosPasados);
-      const tendenciaCreados = calcularTendencia(creadosActuales, creadosPasados);
-      const tendenciaPausados = calcularTendencia(pausadosActuales, pausadosPasados);
-      const tendenciaCerrados = calcularTendencia(cerradosActuales, cerradosPasados);
-      
-      // Actualizar las tarjetas de estadísticas
-      const statCards = qsa('.stat-card');
-      if (statCards.length >= 4) {
-        updateStatCard(statCards[0], 'Solucionados', solucionadosActuales, tendenciaSolucionados);
-        updateStatCard(statCards[1], 'Creados', creadosActuales, tendenciaCreados);
-        updateStatCard(statCards[2], 'En Pausa', pausadosActuales, tendenciaPausados);
-        updateStatCard(statCards[3], 'Cerrados', cerradosActuales, tendenciaCerrados);
+      // --- Tarjetas del mes: usar endpoint dedicado ---
+      const statsRes = await fetch(`${API_URL}/dashboard/stats`);
+      if (statsRes.ok) {
+        const statsJson = await statsRes.json();
+        if (statsJson.success && statsJson.data) {
+          const d = statsJson.data;
+          const statCards = qsa('.stat-card');
+          if (statCards.length >= 4) {
+            updateStatCard(statCards[0], 'Solucionados', d.resueltos,  d.cambio_resueltos);
+            updateStatCard(statCards[1], 'Creados',      d.creados,    d.cambio_creados);
+            updateStatCard(statCards[2], 'En Pausa',     d.pausados,   d.cambio_pausados);
+            updateStatCard(statCards[3], 'Cerrados',     d.cerrados,   d.cambio_cerrados);
+          }
+          console.log('✓ Estadísticas del mes actualizadas:', d);
+        }
       }
-      
-      // Actualizar flujo de casos (con todos los casos)
+
+      // --- Gráfico y flujo de casos: seguir usando /api/casos ---
+      const casosRes = await fetch(`${API_URL}/casos`);
+      if (!casosRes.ok) throw new Error('Error al cargar casos para gráfico');
+      const payload = await casosRes.json();
+      const casos = normalizeCasos(payload);
+
+      lastCasos = casos;
       updateFlujoCasos(casos);
-      
-      // Actualizar gráfico
       generateDynamicChart(casos, currentTimeRange);
-      
-      console.log('✓ Estadísticas actualizadas:', { solucionadosActuales, creadosActuales, pausadosActuales, cerradosActuales });
     } catch (error) {
       console.error('Error al cargar estadísticas:', error);
     }
@@ -197,9 +156,9 @@
 
   function updateFlujoCasos(casos) {
     const resueltos = casos.filter(c => c.estado?.toLowerCase() === 'resuelto').length;
-    const enCurso = casos.filter(c => ['abierto', 'en progreso', 'activo'].includes(c.estado?.toLowerCase())).length;
+    const enCurso = casos.filter(c => ['abierto', 'en_progreso'].includes(c.estado?.toLowerCase())).length;
     const pausados = casos.filter(c => c.estado?.toLowerCase() === 'pausado').length;
-    const cancelados = casos.filter(c => c.estado?.toLowerCase() === 'cancelado').length;
+    const cancelados = casos.filter(c => c.estado?.toLowerCase() === 'cerrado').length;
     
     const total = casos.length || 1;
     
@@ -242,72 +201,110 @@
   // =====================
   // CARGAR LISTA DE USUARIOS
   // =====================
+
+  /** Obtiene iniciales de un nombre (ej: "Juan García" → "JG", "juan.garcia" → "JG") */
+  function getInitials(name) {
+    if (!name) return '?';
+    return name.split(/[\s._-]+/).filter(Boolean).slice(0, 2).map(p => p[0].toUpperCase()).join('');
+  }
+
+  /** Clase de color para el avatar según rol */
+  function uiColorClass(rol) {
+    const r = (rol || '').toLowerCase();
+    if (r.includes('admin'))   return 'ui-admin';
+    if (r.includes('tecnico') || r.includes('técnico')) return 'ui-tecnico';
+    if (r.includes('gestor'))  return 'ui-gestor';
+    return 'ui-default';
+  }
+
+  /** Clase de badge de rol */
+  function roleBadgeClass(rol) {
+    const r = (rol || '').toLowerCase();
+    if (r.includes('admin'))   return 'rb-admin';
+    if (r.includes('tecnico') || r.includes('técnico')) return 'rb-tecnico';
+    if (r.includes('gestor'))  return 'rb-gestor';
+    return 'rb-default';
+  }
+
+  /** Badge de estado */
+  function statusBadge(activo, pendiente) {
+    if (pendiente) return `<span class="status-badge sb-pending"><span class="dot yellow"></span>Pendiente</span>`;
+    if (activo)    return `<span class="status-badge sb-active"><span class="dot green"></span>Activo</span>`;
+    return              `<span class="status-badge sb-inactive"><span class="dot red"></span>Inactivo</span>`;
+  }
+
   async function loadUsuarios() {
     try {
-      const response = await fetch(`${API_URL}/casos`);
-      if (!response.ok) throw new Error('Error al cargar datos');
+      const response = await fetch(`${API_URL}/usuarios`);
+      if (!response.ok) throw new Error('Error al cargar usuarios');
       
       const payload = await response.json();
-      const casos = normalizeCasos(payload);
+      const usuarios = payload.data || payload || [];
       
-      // Extraer usuarios únicos de los casos
-      const usuariosMap = new Map();
-      casos.forEach(caso => {
-        if (caso.asignado_a && caso.asignado_a !== 'Sin asignar') {
-          if (!usuariosMap.has(caso.asignado_a)) {
-            usuariosMap.set(caso.asignado_a, {
-              nombre: caso.asignado_a,
-              casos: 0,
-              email: `${caso.asignado_a.toLowerCase().replace(/\s+/g, '.')}@colsof.com.co`,
-              estado: 'Activo',
-              rol: caso.asignado_a.includes('Técnico') ? 'Técnico' : 'Gestor'
-            });
-          }
-          usuariosMap.get(caso.asignado_a).casos++;
-        }
-      });
-      
-      const usuarios = Array.from(usuariosMap.values());
-      
-      // Actualizar lista de usuarios
+      // Actualizar lista de usuarios (tabla principal del dashboard)
       const listContainer = qs('.list');
       if (listContainer && usuarios.length > 0) {
         const usuariosMostrar = usuarios.slice(0, 4);
-        listContainer.innerHTML = usuariosMostrar.map((user, idx) => `
+        const headerRow = `
+          <div class="list-header" role="row">
+            <div class="list-header-cell" role="columnheader">ID</div>
+            <div class="list-header-cell" role="columnheader">Usuario</div>
+            <div class="list-header-cell" role="columnheader">Estado</div>
+            <div class="list-header-cell" role="columnheader">Rol</div>
+            <div class="list-header-cell" role="columnheader"></div>
+          </div>`;
+        const rows = usuariosMostrar.map(user => {
+          const initials  = getInitials(user.nombre || user.email || '');
+          const colorCls  = uiColorClass(user.rol);
+          const roleCls   = roleBadgeClass(user.rol);
+          const badgeHtml = statusBadge(user.activo, false);
+          const rolLabel  = user.rol
+            ? user.rol.charAt(0).toUpperCase() + user.rol.slice(1).toLowerCase()
+            : 'Usuario';
+          return `
           <div class="list-row" role="row">
-            <div class="list-id" role="cell">${18000 + idx}</div>
-            <div role="cell">
-              <div class="list-name">${user.nombre}</div>
-              <div class="list-email">${user.email}</div>
+            <div class="list-id" role="cell">${user.id}</div>
+            <div class="user-cell" role="cell">
+              <span class="user-initials ${colorCls}">${initials}</span>
+              <div>
+                <div class="list-name">${user.nombre || user.email}</div>
+                <div class="list-email">${user.email}</div>
+              </div>
             </div>
-            <div class="status" role="cell"><span class="dot green"></span> ${user.estado}</div>
-            <div class="role" role="cell">${user.rol}</div>
+            <div role="cell">${badgeHtml}</div>
+            <div role="cell"><span class="role-badge ${roleCls}">${rolLabel}</span></div>
             <div role="cell"><button class="btn-icon" aria-label="Más opciones">⋯</button></div>
-          </div>
-        `).join('');
+          </div>`;
+        }).join('');
+        listContainer.innerHTML = headerRow + rows;
       }
       
-      // Actualizar usuarios activos
+      // Actualizar mini-lista de usuarios activos
       const miniList = qs('.mini-list');
       if (miniList && usuarios.length > 0) {
-        const topUsuarios = usuarios.sort((a, b) => b.casos - a.casos).slice(0, 4);
-        const miniItems = topUsuarios.map((user, idx) => `
+        const topUsuarios = usuarios.filter(u => u.activo).slice(0, 4);
+        const miniItems = topUsuarios.map((user, idx) => {
+          const rolLabel = user.rol
+            ? user.rol.charAt(0).toUpperCase() + user.rol.slice(1).toLowerCase()
+            : 'Usuario';
+          const roleCls = roleBadgeClass(user.rol);
+          return `
           <div class="mini-item">
             <div class="mini-left">
-              <span class="mini-avatar"><img src="https://i.pravatar.cc/36?img=${idx + 10}" alt="${user.nombre}"></span>
+              <span class="mini-avatar"><img src="https://i.pravatar.cc/36?img=${idx + 10}" alt="${user.nombre || user.email}"></span>
               <div class="mini-info">
-                <div class="name">${user.nombre}</div>
+                <div class="name">${user.nombre || user.email}</div>
                 <div class="email">${user.email}</div>
               </div>
             </div>
-            <div class="mini-right"><div><strong>${user.casos}</strong></div><div>Casos</div></div>
-          </div>
-        `).join('');
+            <div class="mini-right"><span class="role-badge ${roleCls}">${rolLabel}</span></div>
+          </div>`;
+        }).join('');
         
         miniList.innerHTML = miniItems + '<div class="text-center-margin"><a class="card-action-link" href="Usuarios/Lista/Lista.html">Ver más</a></div>';
       }
       
-      console.log('✓ Usuarios actualizados:', usuarios.length, 'usuarios encontrados');
+      console.log('✓ Usuarios cargados:', usuarios.length, 'usuarios');
     } catch (error) {
       console.error('Error al cargar usuarios:', error);
     }
@@ -367,32 +364,23 @@
     const buttons = qsa('.btn-group button:not(#btnCSV)');
     buttons.forEach(btn => {
       btn.addEventListener('click', function() {
-        // Remover active de todos
         buttons.forEach(b => b.classList.remove('active'));
-        // Agregar active al clickeado
         this.classList.add('active');
-        
-        // Extraer rango
+
         const text = this.textContent.trim();
         if (text.includes('12 Meses')) currentTimeRange = '12';
         else if (text.includes('6 Meses')) currentTimeRange = '6';
         else if (text.includes('30 Días')) currentTimeRange = '30';
         else if (text.includes('7 Días')) currentTimeRange = '7';
-        
-        // Recargar datos con el nuevo filtro y actualizar gráfico
-        loadDashboardStats();
-        fetch(`${API_URL}/casos`)
-          .then(r => r.json())
-          .then(payload => generateDynamicChart(normalizeCasos(payload), currentTimeRange))
-          .catch(e => console.error('Error al actualizar gráfico:', e));
-        showNotification(`Filtro aplicado: ${text}`, 'info');
+
+        // Redibujar con los casos ya en memoria
+        if (lastCasos.length > 0) {
+          generateDynamicChart(lastCasos, currentTimeRange);
+        } else {
+          loadDashboardStats();
+        }
       });
     });
-    
-    // Marcar el primero como activo por defecto
-    if (buttons.length > 0) {
-      buttons[0].classList.add('active');
-    }
   })();
 
   // =====================
@@ -402,31 +390,85 @@
     const chartWrap = qs('.chart-wrap');
     if (!chartWrap) return;
 
-    let datos = {};
     let labels = [];
+    let keysFn;
 
-    if (timeRange === '7') {
-      datos = agruparPorDia(casos, 7);
-      labels = generarEtiquetasDias(7);
-    } else if (timeRange === '30') {
-      datos = agruparPorDia(casos, 30);
-      labels = generarEtiquetasDias(30);
-    } else if (timeRange === '6') {
-      datos = agruparPorMes(casos, 6);
-      labels = generarEtiquetasMeses(6);
+    if (timeRange === '7' || timeRange === '30') {
+      const dias = parseInt(timeRange);
+      labels = generarEtiquetasDias(dias);
+      const keys = generarKeysDias(dias);
+      keysFn = keys;
     } else {
-      datos = agruparPorMes(casos, 12);
-      labels = generarEtiquetasMeses(12);
+      const meses = parseInt(timeRange);
+      labels = generarEtiquetasMeses(meses);
+      const keys = generarKeysMeses(meses);
+      keysFn = keys;
     }
 
-    const puntos = Object.values(datos);
-    if (puntos.length === 0) return;
+    // Serie 1: Creados (por fecha_creacion)
+    const creadosMap = {};
+    keysFn.forEach(k => { creadosMap[k] = 0; });
+    casos.forEach(c => {
+      const k = extractKey(c.fecha_creacion, timeRange);
+      if (k && creadosMap.hasOwnProperty(k)) creadosMap[k]++;
+    });
 
-    const maxValor = Math.max(...puntos, 10);
-    const svg = crearSVGGrafico(puntos, maxValor);
-    
+    // Serie 2: Resueltos (por fecha_actualizacion, estado = resuelto)
+    const resueltosMap = {};
+    keysFn.forEach(k => { resueltosMap[k] = 0; });
+    casos.forEach(c => {
+      if (c.estado?.toLowerCase() !== 'resuelto') return;
+      const k = extractKey(c.fecha_actualizacion || c.fecha_creacion, timeRange);
+      if (k && resueltosMap.hasOwnProperty(k)) resueltosMap[k]++;
+    });
+
+    const creadosArr   = keysFn.map(k => creadosMap[k]);
+    const resueltosArr = keysFn.map(k => resueltosMap[k]);
+
+    const totalCreados   = creadosArr.reduce((a, b) => a + b, 0);
+    const totalResueltos = resueltosArr.reduce((a, b) => a + b, 0);
+
+    // Actualizar subtítulo
+    const periodoText = timeRange === '7' ? 'Últimos 7 días' : timeRange === '30' ? 'Últimos 30 días' : timeRange === '6' ? 'Últimos 6 meses' : 'Últimos 12 meses';
+    const sub = qs('#chartSubtitle');
+    if (sub) sub.textContent = `${periodoText} · Creados: ${totalCreados.toLocaleString('es-CO')} · Resueltos: ${totalResueltos.toLocaleString('es-CO')}`;
+
+    const maxValor = Math.max(...creadosArr, ...resueltosArr, 1);
+    const svg = crearSVGGrafico(creadosArr, resueltosArr, maxValor, labels);
+
     chartWrap.innerHTML = '';
     chartWrap.appendChild(svg);
+  }
+
+  // Genera el key (string) de una fecha para el rango actual
+  function extractKey(dateStr, timeRange) {
+    if (!dateStr) return null;
+    const d = new Date(dateStr);
+    if (isNaN(d)) return null;
+    if (timeRange === '7' || timeRange === '30') {
+      return d.toISOString().split('T')[0];
+    }
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+  }
+
+  function generarKeysDias(dias) {
+    const keys = [];
+    const hoy = new Date();
+    for (let i = dias - 1; i >= 0; i--) {
+      const f = new Date(hoy); f.setDate(f.getDate() - i);
+      keys.push(f.toISOString().split('T')[0]);
+    }
+    return keys;
+  }
+
+  function generarKeysMeses(meses) {
+    const keys = [];
+    const hoy = new Date();
+    for (let i = meses - 1; i >= 0; i--) {
+      const f = new Date(hoy.getFullYear(), hoy.getMonth() - i, 1);
+      keys.push(`${f.getFullYear()}-${String(f.getMonth() + 1).padStart(2, '0')}`);
+    }
+    return keys;
   }
 
   function agruparPorDia(casos, dias) {
@@ -502,99 +544,185 @@
     return etiquetas;
   }
 
-  function crearSVGGrafico(datos, max) {
-    const ancho = 600;
-    const alto = 260;
-    const padding = 40;
-    const graphWidth = ancho - padding * 2;
-    const graphHeight = alto - padding * 2;
+  function crearSVGGrafico(creadosArr, resueltosArr, max, labels) {
+    const W = 580, H = 240;
+    const pad = { top: 24, right: 24, bottom: 38, left: 48 };
+    const gW = W - pad.left - pad.right;
+    const gH = H - pad.top - pad.bottom;
+    const n  = creadosArr.length;
+    const ns = 'http://www.w3.org/2000/svg';
 
-    const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-    svg.setAttribute('viewBox', `0 0 ${ancho} ${alto}`);
-    svg.setAttribute('preserveAspectRatio', 'none');
+    const svg = document.createElementNS(ns, 'svg');
+    svg.setAttribute('viewBox', `0 0 ${W} ${H}`);
+    svg.setAttribute('preserveAspectRatio', 'xMidYMid meet');
     svg.setAttribute('role', 'img');
     svg.setAttribute('aria-label', 'Gráfico de casos por período');
     svg.style.width = '100%';
     svg.style.height = '100%';
+    svg.style.overflow = 'visible';
 
-    const rect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
-    rect.setAttribute('x', '0');
-    rect.setAttribute('y', '0');
-    rect.setAttribute('width', ancho);
-    rect.setAttribute('height', alto);
-    rect.setAttribute('fill', '#fff');
-    svg.appendChild(rect);
-
-    const defs = document.createElementNS('http://www.w3.org/2000/svg', 'defs');
-    const grad1 = document.createElementNS('http://www.w3.org/2000/svg', 'linearGradient');
-    grad1.setAttribute('id', 'g1');
-    grad1.setAttribute('x1', '0');
-    grad1.setAttribute('x2', '0');
-    grad1.setAttribute('y1', '0');
-    grad1.setAttribute('y2', '1');
-    grad1.innerHTML = '<stop offset="0%" stop-color="#7d88ff" stop-opacity="0.25" /><stop offset="100%" stop-color="#7d88ff" stop-opacity="0" />';
-    defs.appendChild(grad1);
-
-    const grad2 = document.createElementNS('http://www.w3.org/2000/svg', 'linearGradient');
-    grad2.setAttribute('id', 'g2');
-    grad2.setAttribute('x1', '0');
-    grad2.setAttribute('x2', '0');
-    grad2.setAttribute('y1', '0');
-    grad2.setAttribute('y2', '1');
-    grad2.innerHTML = '<stop offset="0%" stop-color="#5b6bff" stop-opacity="0.25" /><stop offset="100%" stop-color="#5b6bff" stop-opacity="0" />';
-    defs.appendChild(grad2);
+    // ── Degradados ──
+    const defs = document.createElementNS(ns, 'defs');
+    defs.innerHTML = `
+      <linearGradient id="gradCreados" x1="0" x2="0" y1="0" y2="1">
+        <stop offset="0%"  stop-color="#5b6bff" stop-opacity="0.22"/>
+        <stop offset="90%" stop-color="#5b6bff" stop-opacity="0.02"/>
+      </linearGradient>
+      <linearGradient id="gradResueltos" x1="0" x2="0" y1="0" y2="1">
+        <stop offset="0%"  stop-color="#10b981" stop-opacity="0.18"/>
+        <stop offset="90%" stop-color="#10b981" stop-opacity="0.02"/>
+      </linearGradient>
+    `;
     svg.appendChild(defs);
 
-    const puntos1 = datos.map((valor, i) => {
-      const x = padding + (i / (datos.length - 1 || 1)) * graphWidth;
-      const y = alto - padding - (valor / max) * graphHeight;
-      return [x, y];
-    });
-
-    const puntos2 = datos.map((valor, i) => {
-      const x = padding + (i / (datos.length - 1 || 1)) * graphWidth;
-      const y = alto - padding - ((valor * 0.7) / max) * graphHeight;
-      return [x, y];
-    });
-
-    const pathArea1 = generarPath(puntos1, 'area', alto - padding);
-    pathArea1.setAttribute('fill', 'url(#g1)');
-    svg.appendChild(pathArea1);
-
-    const pathArea2 = generarPath(puntos2, 'area', alto - padding);
-    pathArea2.setAttribute('fill', 'url(#g2)');
-    svg.appendChild(pathArea2);
-
-    const path1 = generarPath(puntos1, 'line');
-    path1.setAttribute('stroke', '#7d88ff');
-    path1.setAttribute('stroke-width', '3');
-    path1.setAttribute('fill', 'none');
-    path1.setAttribute('class', 'chart-line');
-    svg.appendChild(path1);
-
-    const path2 = generarPath(puntos2, 'line');
-    path2.setAttribute('stroke', '#5b6bff');
-    path2.setAttribute('stroke-width', '3');
-    path2.setAttribute('fill', 'none');
-    path2.setAttribute('class', 'chart-line');
-    svg.appendChild(path2);
-
-    return svg;
-  }
-
-  function generarPath(puntos, tipo, altofondo) {
-    const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-    
-    if (tipo === 'line') {
-      const d = puntos.map((p, i) => `${i === 0 ? 'M' : 'L'} ${p[0]} ${p[1]}`).join(' ');
-      path.setAttribute('d', d);
-    } else if (tipo === 'area') {
-      let d = puntos.map((p, i) => `${i === 0 ? 'M' : 'L'} ${p[0]} ${p[1]}`).join(' ');
-      d += ` L ${puntos[puntos.length - 1][0]} ${altofondo} L ${puntos[0][0]} ${altofondo} Z`;
-      path.setAttribute('d', d);
+    // ── Grid + etiquetas Y ──
+    const STEPS = 4;
+    for (let i = 0; i <= STEPS; i++) {
+      const y   = pad.top + gH - (i / STEPS) * gH;
+      const val = Math.round((i / STEPS) * max);
+      const gl  = document.createElementNS(ns, 'line');
+      gl.setAttribute('x1', pad.left); gl.setAttribute('x2', pad.left + gW);
+      gl.setAttribute('y1', y);        gl.setAttribute('y2', y);
+      gl.setAttribute('stroke', i === 0 ? '#cbd5e1' : '#e5e7eb');
+      gl.setAttribute('stroke-width', '1');
+      svg.appendChild(gl);
+      const yt = document.createElementNS(ns, 'text');
+      yt.setAttribute('x', pad.left - 7); yt.setAttribute('y', y + 4);
+      yt.setAttribute('text-anchor', 'end');
+      yt.setAttribute('font-size', '11'); yt.setAttribute('fill', '#9ca3af');
+      yt.setAttribute('font-family', 'Inter,system-ui,sans-serif');
+      yt.textContent = val;
+      svg.appendChild(yt);
     }
 
-    return path;
+    // ── Calcula coordenadas ──
+    const xOf = (i) => pad.left + (n > 1 ? (i / (n - 1)) : 0.5) * gW;
+    const yOf = (v) => pad.top + gH - (max > 0 ? (v / max) : 0) * gH;
+
+    const ptsC = creadosArr.map((v, i)   => ({ x: xOf(i), y: yOf(v), v }));
+    const ptsR = resueltosArr.map((v, i) => ({ x: xOf(i), y: yOf(v), v }));
+
+    // ── Bezier suavizado (catmull-rom) ──
+    const T = 0.35;
+    function bezierPath(pts) {
+      if (pts.length === 0) return '';
+      let d = `M ${pts[0].x.toFixed(1)} ${pts[0].y.toFixed(1)}`;
+      for (let i = 0; i < pts.length - 1; i++) {
+        const p0 = pts[Math.max(i - 1, 0)];
+        const p1 = pts[i];
+        const p2 = pts[i + 1];
+        const p3 = pts[Math.min(i + 2, pts.length - 1)];
+        const cx1 = p1.x + (p2.x - p0.x) * T;
+        const cy1 = p1.y + (p2.y - p0.y) * T;
+        const cx2 = p2.x - (p3.x - p1.x) * T;
+        const cy2 = p2.y - (p3.y - p1.y) * T;
+        d += ` C ${cx1.toFixed(1)} ${cy1.toFixed(1)}, ${cx2.toFixed(1)} ${cy2.toFixed(1)}, ${p2.x.toFixed(1)} ${p2.y.toFixed(1)}`;
+      }
+      return d;
+    }
+
+    const baseline = pad.top + gH;
+
+    // Dibujar áreas y líneas (primero Creados, luego Resueltos encima)
+    [
+      { pts: ptsC, gradId: 'gradCreados',   stroke: '#5b6bff' },
+      { pts: ptsR, gradId: 'gradResueltos', stroke: '#10b981' }
+    ].forEach(({ pts, gradId, stroke }) => {
+      const dLine = bezierPath(pts);
+      if (!dLine) return;
+      const area = document.createElementNS(ns, 'path');
+      area.setAttribute('d', `${dLine} L ${pts[pts.length - 1].x.toFixed(1)} ${baseline} L ${pts[0].x.toFixed(1)} ${baseline} Z`);
+      area.setAttribute('fill', `url(#${gradId})`);
+      svg.appendChild(area);
+
+      const line = document.createElementNS(ns, 'path');
+      line.setAttribute('d', dLine);
+      line.setAttribute('stroke', stroke);
+      line.setAttribute('stroke-width', '2.5');
+      line.setAttribute('fill', 'none');
+      line.setAttribute('stroke-linejoin', 'round');
+      line.setAttribute('stroke-linecap', 'round');
+      svg.appendChild(line);
+    });
+
+    // ── Etiquetas X ──
+    const maxLabels = 8;
+    const step = Math.max(1, Math.ceil(n / maxLabels));
+    (labels || []).forEach((lbl, i) => {
+      if (i % step !== 0 && i !== n - 1) return;
+      const xt = document.createElementNS(ns, 'text');
+      xt.setAttribute('x', ptsC[i].x.toFixed(1)); xt.setAttribute('y', H - 6);
+      xt.setAttribute('text-anchor', 'middle');
+      xt.setAttribute('font-size', '11'); xt.setAttribute('fill', '#9ca3af');
+      xt.setAttribute('font-family', 'Inter,system-ui,sans-serif');
+      xt.textContent = lbl;
+      svg.appendChild(xt);
+    });
+
+    // ── Puntos interactivos con tooltip ──
+    const tooltip = document.createElementNS(ns, 'g');
+    tooltip.setAttribute('id', 'chartTooltip');
+    tooltip.style.display = 'none';
+    tooltip.style.pointerEvents = 'none';
+    tooltip.innerHTML = `
+      <rect id="ttBox" x="0" y="0" width="110" height="54" rx="7" fill="#1e293b" fill-opacity="0.92"/>
+      <text id="ttLabel" x="8" y="17" font-size="11" fill="#94a3b8" font-family="Inter,system-ui,sans-serif"></text>
+      <text id="ttCreados"   x="8" y="33" font-size="12" fill="#7d88ff" font-family="Inter,system-ui,sans-serif" font-weight="600"></text>
+      <text id="ttResueltos" x="8" y="49" font-size="12" fill="#10b981" font-family="Inter,system-ui,sans-serif" font-weight="600"></text>
+    `;
+    svg.appendChild(tooltip);
+
+    // Zonas de hover (rectángulos invisibles por columna)
+    ptsC.forEach((p, i) => {
+      const colW = n > 1 ? gW / (n - 1) : gW;
+      const hx   = p.x - colW / 2;
+      const zone = document.createElementNS(ns, 'rect');
+      zone.setAttribute('x', Math.max(pad.left, hx).toFixed(1));
+      zone.setAttribute('y', String(pad.top));
+      zone.setAttribute('width', colW.toFixed(1));
+      zone.setAttribute('height', String(gH));
+      zone.setAttribute('fill', 'transparent');
+      zone.style.cursor = 'crosshair';
+
+      zone.addEventListener('mouseenter', () => {
+        const ttG   = svg.getElementById('chartTooltip');
+        const ttBox = svg.getElementById('ttBox');
+        const lbl   = (labels || [])[i] || '';
+        svg.getElementById('ttLabel').textContent    = lbl;
+        svg.getElementById('ttCreados').textContent   = `● Creados: ${creadosArr[i]}`;
+        svg.getElementById('ttResueltos').textContent = `● Resueltos: ${resueltosArr[i]}`;
+        let tx = p.x + 10, ty = Math.min(ptsC[i].y, ptsR[i].y) - 10;
+        if (tx + 114 > W) tx = p.x - 120;
+        if (ty < 4) ty = 4;
+        ttG.setAttribute('transform', `translate(${tx.toFixed(1)},${ty.toFixed(1)})`);
+        ttG.style.display = 'block';
+
+        // Marcar los dos puntos activos
+        svg.querySelectorAll('.hover-dot').forEach(d => d.remove());
+        [
+          { pt: ptsC[i],  stroke: '#5b6bff' },
+          { pt: ptsR[i], stroke: '#10b981' }
+        ].forEach(({ pt, stroke }) => {
+          const d = document.createElementNS(ns, 'circle');
+          d.setAttribute('cx', pt.x.toFixed(1)); d.setAttribute('cy', pt.y.toFixed(1));
+          d.setAttribute('r', '5.5');
+          d.setAttribute('fill', '#fff');
+          d.setAttribute('stroke', stroke); d.setAttribute('stroke-width', '2.5');
+          d.classList.add('hover-dot');
+          svg.insertBefore(d, ttG);
+        });
+      });
+
+      zone.addEventListener('mouseleave', () => {
+        const ttG = svg.getElementById('chartTooltip');
+        if (ttG) ttG.style.display = 'none';
+        svg.querySelectorAll('.hover-dot').forEach(d => d.remove());
+      });
+
+      svg.appendChild(zone);
+    });
+
+    return svg;
   }
 
   // =====================
@@ -689,33 +817,73 @@
     });
   })();
 
-  // Envío del formulario de creación: validar, mostrar éxito/error y redirigir
+  // Envío del formulario de creación: llamada real a la API
   (function(){
     const form = qs('.user-form');
     if (!form) return;
     const modalExito = qs('#modal-exito');
     const modalError = qs('#modal-error');
+    const modalErrorMsg = modalError ? modalError.querySelector('.text-muted') : null;
     const cerrarError = qs('#cerrar-modal-error');
     const goToMenu = () => { window.location.href = 'Menu principal Admin.html'; };
 
     if (cerrarError && modalError) cerrarError.onclick = () => { modalError.style.display = 'none'; };
 
-    form.addEventListener('submit', function(e){
+    form.addEventListener('submit', async function(e){
       e.preventDefault();
-      if (form.checkValidity()) {
-        if (modalExito) {
-          modalExito.style.display = 'flex';
-          // Redirección automática
-          setTimeout(goToMenu, 1400);
-          // Si existe botón de cierre, también redirige
-          const cerrarExito = qs('#cerrar-modal-exito');
-          if (cerrarExito) cerrarExito.onclick = goToMenu;
-        } else {
-          goToMenu();
-        }
-      } else {
+      e.stopImmediatePropagation();
+
+      if (!form.checkValidity()) {
         form.reportValidity();
+        return;
+      }
+
+      const nombre   = (qs('#nombres',  form) || {}).value?.trim() || '';
+      const apellido = (qs('#apellidos', form) || {}).value?.trim() || '';
+      const email    = (qs('#correo',   form) || {}).value?.trim() || '';
+      const rol      = (qs('#rol',      form) || {}).value || '';
+      const password = (qs('#contrasena', form) || {}).value || '';
+
+      const submitBtn = form.querySelector('.submit-btn');
+      const originalHTML = submitBtn ? submitBtn.innerHTML : '';
+      if (submitBtn) {
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Creando...';
+      }
+
+      try {
+        const res  = await fetch(`${API_URL}/usuarios`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ nombre, apellido, email, password, rol })
+        });
+        const data = await res.json();
+
+        if (res.ok && data.success) {
+          form.reset();
+          if (modalExito) {
+            modalExito.style.display = 'flex';
+            setTimeout(goToMenu, 1800);
+            const cerrarExito = qs('#cerrar-modal-exito');
+            if (cerrarExito) cerrarExito.onclick = goToMenu;
+          } else {
+            goToMenu();
+          }
+        } else {
+          const msg = data.error || 'Error al crear el usuario. Intente nuevamente.';
+          if (modalErrorMsg) modalErrorMsg.textContent = msg;
+          if (modalError) modalError.style.display = 'flex';
+        }
+      } catch (err) {
+        console.error('Error al crear usuario:', err);
+        const msg = 'No se pudo conectar con el servidor. Verifique que esté activo.';
+        if (modalErrorMsg) modalErrorMsg.textContent = msg;
         if (modalError) modalError.style.display = 'flex';
+      } finally {
+        if (submitBtn) {
+          submitBtn.disabled = false;
+          submitBtn.innerHTML = originalHTML;
+        }
       }
     });
   })();

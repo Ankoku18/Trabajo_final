@@ -8,11 +8,11 @@ let currentTimeRange = '24h';
 // Cargar datos desde la API
 async function loadDataFromAPI() {
   try {
-    const response = await fetch(`${API_URL}?action=get_casos_simple`);
+    const response = await fetch(`${API_URL}/casos`);
     if (!response.ok) throw new Error('Error al cargar datos');
     
     const data = await response.json();
-    casesData = data.cases || [];
+    casesData = data.data || [];
     
     // Extraer usuarios
     extractUsers();

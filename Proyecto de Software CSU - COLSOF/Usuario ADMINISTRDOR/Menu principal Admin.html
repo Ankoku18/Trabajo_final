@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="es">
 <head>
   <meta charset="UTF-8" />
@@ -18,7 +18,7 @@
         <div class="brand">COLSOF S.A.S</div>
       </div>
 
-      <div class="menu-label">Menu</div>
+      <div class="menu-label">Menú</div>
       <ul class="menu-list">
         <li class="menu-item active">
           <a href="#">
@@ -148,33 +148,43 @@
           <div class="card-header">
             <div>
               <div class="card-title">Reporte casos</div>
+              <div class="card-subtitle" id="chartSubtitle" style="font-size:12px;color:#6b7280;margin-top:2px;">Cargando datos…</div>
             </div>
-            <div class="btn-group" role="group" aria-label="Rango de tiempo">
-              <button class="btn">12 Meses</button>
-              <button class="btn">6 Meses</button>
-              <button class="btn">30 Días</button>
-              <button class="btn">7 Días</button>
-              <button class="btn" id="btnCSV">📄 Export CSV</button>
+            <div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap;">
+              <div style="display:flex;align-items:center;gap:12px;font-size:12px;color:#6b7280;">
+                <span style="display:flex;align-items:center;gap:5px;"><span style="width:12px;height:3px;background:#5b6bff;border-radius:2px;display:inline-block;"></span>Creados</span>
+                <span style="display:flex;align-items:center;gap:5px;"><span style="width:12px;height:3px;background:#10b981;border-radius:2px;display:inline-block;"></span>Resueltos</span>
+              </div>
+              <div class="btn-group" role="group" aria-label="Rango de tiempo">
+                <button class="btn active">12 Meses</button>
+                <button class="btn">6 Meses</button>
+                <button class="btn">30 Días</button>
+                <button class="btn">7 Días</button>
+                <button class="btn" id="btnCSV">📄 Export CSV</button>
+              </div>
             </div>
           </div>
           <div class="chart-wrap" aria-label="Área de gráfico">
-            <!-- Simple placeholder chart (SVG) -->
-            <svg viewBox="0 0 600 260" preserveAspectRatio="none" role="img" aria-label="Tendencia de casos">
+            <!-- El gráfico dinámico se genera con scripts.js -->
+            <svg viewBox="0 0 580 240" style="width:100%;height:100%" role="img" aria-label="Cargando gráfico...">
               <defs>
-                <linearGradient id="g1" x1="0" x2="0" y1="0" y2="1">
-                  <stop offset="0%" stop-color="#7d88ff" stop-opacity="0.25" />
-                  <stop offset="100%" stop-color="#7d88ff" stop-opacity="0" />
-                </linearGradient>
-                <linearGradient id="g2" x1="0" x2="0" y1="0" y2="1">
-                  <stop offset="0%" stop-color="#5b6bff" stop-opacity="0.25" />
-                  <stop offset="100%" stop-color="#5b6bff" stop-opacity="0" />
+                <linearGradient id="chartGradPlaceholder" x1="0" x2="0" y1="0" y2="1">
+                  <stop offset="0%" stop-color="#5b6bff" stop-opacity="0.3"/>
+                  <stop offset="90%" stop-color="#5b6bff" stop-opacity="0.02"/>
                 </linearGradient>
               </defs>
-              <rect x="0" y="0" width="600" height="260" fill="#fff" />
-              <path d="M0 180 C 60 160, 120 170, 180 150 C 240 140, 300 155, 360 140 C 420 130, 480 145, 540 120 L 600 135 L 600 260 L 0 260 Z" fill="url(#g1)" />
-              <path d="M0 200 C 60 180, 120 190, 180 170 C 240 160, 300 170, 360 160 C 420 150, 480 165, 540 150 L 600 160 L 600 260 L 0 260 Z" fill="url(#g2)" />
-              <polyline fill="none" stroke="#7d88ff" stroke-width="3" points="0,180 60,160 120,170 180,150 240,140 300,155 360,140 420,130 480,145 540,120 600,135" />
-              <polyline fill="none" stroke="#5b6bff" stroke-width="3" points="0,200 60,180 120,190 180,170 240,160 300,170 360,160 420,150 480,165 540,150 600,160" />
+              <line x1="48" x2="560" y1="20"  y2="20"  stroke="#e5e7eb" stroke-width="1"/>
+              <line x1="48" x2="560" y1="65"  y2="65"  stroke="#e5e7eb" stroke-width="1"/>
+              <line x1="48" x2="560" y1="110" y2="110" stroke="#e5e7eb" stroke-width="1"/>
+              <line x1="48" x2="560" y1="155" y2="155" stroke="#e5e7eb" stroke-width="1"/>
+              <line x1="48" x2="560" y1="200" y2="200" stroke="#cbd5e1" stroke-width="1"/>
+              <path d="M 48 155 C 100 130, 140 140, 190 110 C 240 82, 290 95, 340 65 C 390 40, 440 55, 490 40 L 560 45 L 560 200 L 48 200 Z" fill="url(#chartGradPlaceholder)"/>
+              <path d="M 48 155 C 100 130, 140 140, 190 110 C 240 82, 290 95, 340 65 C 390 40, 440 55, 490 40 L 560 45" fill="none" stroke="#5b6bff" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>
+              <circle cx="48"  cy="155" r="4.5" fill="#fff" stroke="#5b6bff" stroke-width="2"/>
+              <circle cx="190" cy="110" r="4.5" fill="#fff" stroke="#5b6bff" stroke-width="2"/>
+              <circle cx="340" cy="65"  r="4.5" fill="#fff" stroke="#5b6bff" stroke-width="2"/>
+              <circle cx="490" cy="40"  r="4.5" fill="#fff" stroke="#5b6bff" stroke-width="2"/>
+              <circle cx="560" cy="45"  r="4.5" fill="#fff" stroke="#5b6bff" stroke-width="2"/>
             </svg>
           </div>
         </div>
@@ -218,47 +228,68 @@
           </div>
 
           <div class="list" role="table" aria-label="Lista de usuarios">
+            <!-- Encabezado de columnas -->
+            <div class="list-header" role="row">
+              <div class="list-header-cell" role="columnheader">ID</div>
+              <div class="list-header-cell" role="columnheader">Usuario</div>
+              <div class="list-header-cell" role="columnheader">Estado</div>
+              <div class="list-header-cell" role="columnheader">Rol</div>
+              <div class="list-header-cell" role="columnheader"></div>
+            </div>
+
             <div class="list-row" role="row">
               <div class="list-id" role="cell">18294</div>
-              <div role="cell">
-                <div class="list-name">María González</div>
-                <div class="list-email">mgonzalez@colsof.com.co</div>
+              <div class="user-cell" role="cell">
+                <span class="user-initials ui-default">MG</span>
+                <div>
+                  <div class="list-name">María González</div>
+                  <div class="list-email">mgonzalez@colsof.com.co</div>
+                </div>
               </div>
-              <div class="status" role="cell"><span class="dot green"></span> Activo</div>
-              <div class="role" role="cell">Empleado</div>
+              <div role="cell"><span class="status-badge sb-active"><span class="dot green"></span>Activo</span></div>
+              <div role="cell"><span class="role-badge rb-default">Empleado</span></div>
               <div role="cell"><button class="btn-icon" aria-label="Más opciones">⋯</button></div>
             </div>
 
             <div class="list-row" role="row">
               <div class="list-id" role="cell">9900</div>
-              <div role="cell">
-                <div class="list-name">Juan Pérez</div>
-                <div class="list-email">jperez@colsof.com.co</div>
+              <div class="user-cell" role="cell">
+                <span class="user-initials ui-default">JP</span>
+                <div>
+                  <div class="list-name">Juan Pérez</div>
+                  <div class="list-email">jperez@colsof.com.co</div>
+                </div>
               </div>
-              <div class="status" role="cell"><span class="dot green"></span> Activo</div>
-              <div class="role" role="cell">Empleado</div>
+              <div role="cell"><span class="status-badge sb-active"><span class="dot green"></span>Activo</span></div>
+              <div role="cell"><span class="role-badge rb-default">Empleado</span></div>
               <div role="cell"><button class="btn-icon" aria-label="Más opciones">⋯</button></div>
             </div>
 
             <div class="list-row" role="row">
               <div class="list-id" role="cell">24994</div>
-              <div role="cell">
-                <div class="list-name">Lucía Ramírez</div>
-                <div class="list-email">lramirez@colsof.co</div>
+              <div class="user-cell" role="cell">
+                <span class="user-initials ui-default">LR</span>
+                <div>
+                  <div class="list-name">Lucía Ramírez</div>
+                  <div class="list-email">lramirez@colsof.co</div>
+                </div>
               </div>
-              <div class="status" role="cell"><span class="dot yellow"></span> Pendiente</div>
-              <div class="role" role="cell">Pasante</div>
+              <div role="cell"><span class="status-badge sb-pending"><span class="dot yellow"></span>Pendiente</span></div>
+              <div role="cell"><span class="role-badge rb-default">Pasante</span></div>
               <div role="cell"><button class="btn-icon" aria-label="Más opciones">⋯</button></div>
             </div>
 
             <div class="list-row" role="row">
               <div class="list-id" role="cell">19924</div>
-              <div role="cell">
-                <div class="list-name">Carlos Herrera</div>
-                <div class="list-email">cherrera@colsof.com.co</div>
+              <div class="user-cell" role="cell">
+                <span class="user-initials ui-default">CH</span>
+                <div>
+                  <div class="list-name">Carlos Herrera</div>
+                  <div class="list-email">cherrera@colsof.com.co</div>
+                </div>
               </div>
-              <div class="status" role="cell"><span class="dot red"></span> Inactivo</div>
-              <div class="role" role="cell">Empleado</div>
+              <div role="cell"><span class="status-badge sb-inactive"><span class="dot red"></span>Inactivo</span></div>
+              <div role="cell"><span class="role-badge rb-default">Empleado</span></div>
               <div role="cell"><button class="btn-icon" aria-label="Más opciones">⋯</button></div>
             </div>
           </div>
@@ -266,7 +297,11 @@
 
         <div class="card">
           <div class="card-header">
-            <div class="card-title">Usuarios Activos</div>
+            <div>
+              <div class="card-title">Usuarios Activos</div>
+              <div class="card-subtitle">Conectados recientemente</div>
+            </div>
+            <a class="card-action-link" href="Usuarios/Monitoreo/Monitoreo.html">Ver todo →</a>
           </div>
           <div class="mini-list">
             <div class="mini-item">
@@ -277,7 +312,7 @@
                   <div class="email">w.lawson@colsof.com.co</div>
                 </div>
               </div>
-              <div class="mini-right"><div><strong>198</strong></div><div>Casos</div></div>
+              <div class="mini-right"><span class="role-badge rb-tecnico">Técnico</span></div>
             </div>
             <div class="mini-item">
               <div class="mini-left">
@@ -287,7 +322,7 @@
                   <div class="email">dat.roberts@colsof.com.co</div>
                 </div>
               </div>
-              <div class="mini-right"><div><strong>201</strong></div><div>Casos</div></div>
+              <div class="mini-right"><span class="role-badge rb-gestor">Gestor</span></div>
             </div>
             <div class="mini-item">
               <div class="mini-left">
@@ -297,7 +332,7 @@
                   <div class="email">jgraham@colsof.com.co</div>
                 </div>
               </div>
-              <div class="mini-right"><div><strong>187</strong></div><div>Casos</div></div>
+              <div class="mini-right"><span class="role-badge rb-tecnico">Técnico</span></div>
             </div>
             <div class="mini-item">
               <div class="mini-left">
@@ -307,10 +342,10 @@
                   <div class="email">curtis.dc@colsof.com.co</div>
                 </div>
               </div>
-              <div class="mini-right"><div><strong>165</strong></div><div>Casos</div></div>
+              <div class="mini-right"><span class="role-badge rb-admin">Admin</span></div>
             </div>
             <div class="text-center-margin">
-              <a class="card-action-link" href="#">Ver más</a>
+              <a class="card-action-link" href="Usuarios/Monitoreo/Monitoreo.html">Ver más →</a>
             </div>
           </div>
         </div>
@@ -326,6 +361,7 @@
     <span>Actualización automática activa</span>
   </div>
 
+  <script src="../shared/app-init.js"></script>
   <script src="scripts.js" defer></script>
   <script>
     document.addEventListener('DOMContentLoaded', function() {

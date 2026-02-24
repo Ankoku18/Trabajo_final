@@ -474,8 +474,18 @@ async function createCase() {
   if (!validateForm()) return
 
   const caseId = formElements.summaryId.textContent
+
+  // Obtener el ID del gestor logueado desde localStorage
+  const usuarioSesion = JSON.parse(localStorage.getItem('usuario') || '{}')
+  const gestorId = usuarioSesion.id || null
+
+  if (!gestorId) {
+    utils.showToast('Error: No hay sesión activa. Por favor inicia sesión.', true)
+    return
+  }
+
   const newCase = {
-    id: caseId,
+    gestor_id: gestorId,
     cliente: formElements.cliente.value.trim(),
     sede: formElements.sede.value.trim(),
     contacto: formElements.contacto.value.trim() || null,
@@ -492,7 +502,7 @@ async function createCase() {
     descripcion: formElements.descripcion.value.trim(),
     asignado_a: formElements.asignar.value || null,
     prioridad: formElements.prioridad.value || 'Media',
-    estado: 'Abierto',
+    estado: 'abierto',
     fecha_creacion: new Date().toISOString()
   }
 
@@ -503,15 +513,15 @@ async function createCase() {
     const result = await api.crearCaso(newCase)
     
     console.log('✅ Caso creado:', result)
-    utils.showToast(`Caso ${caseId} creado exitosamente`, false)
+    utils.showToast(`Caso creado exitosamente`, false)
     
     showModal(modals.exito)
     setTimeout(() => {
-      clearForm()
-      sessionStorage.removeItem('case-draft')
-      generateCaseId()
       closeModal(modals.exito)
-    }, 2000)
+      sessionStorage.removeItem('case-draft')
+      localStorage.removeItem('csu-borrador-editar')
+      window.location.href = 'Menu principal.html'
+    }, 1800)
   } catch (error) {
     console.error('❌ Error creando caso:', error)
     utils.showToast('Error al crear caso: ' + error.message, true)

@@ -3,14 +3,19 @@
  * Incluir en todas las páginas HTML antes de los scripts específicos
  */
 
-// API Client compartido
-// Use relative `/api` in production and localhost:3000 in dev (server runs on 3000)
-const API_BASE_URL = (window.location.hostname === 'localhost' ||
-  window.location.hostname === '127.0.0.1' ||
-  window.location.hostname === '' ||
-  window.location.protocol === 'file:')
-  ? 'http://localhost:3000/api'
-  : '/api'
+// API Client compartido - Construir URL dinámica para evitar problemas CORS
+let API_BASE_URL;
+if (window.location.protocol === 'file:') {
+  // Si se abre como archivo local, usar localhost
+  API_BASE_URL = 'http://localhost:3000/api';
+} else if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+  // En desarrollo: usar el mismo origen del frontend para evitar CORS
+  const port = window.location.port || (window.location.protocol === 'https:' ? 443 : 80);
+  API_BASE_URL = `${window.location.protocol}//${window.location.hostname}:${port}/api`;
+} else {
+  // En producción: usar ruta relativa (mismo dominio)
+  API_BASE_URL = '/api';
+}
 
 // Utilidades compartidas
 const utils = {
@@ -128,7 +133,13 @@ class APIClient {
       })
 
       if (!response.ok) {
-        throw new Error(`HTTP ${response.status}: ${response.statusText}`)
+        // Intentar leer el mensaje de error del cuerpo JSON
+        let errorMsg = `HTTP ${response.status}: ${response.statusText}`
+        try {
+          const errData = await response.json()
+          if (errData.error) errorMsg = errData.error
+        } catch (_) { /* ignorar si el cuerpo no es JSON */ }
+        throw new Error(errorMsg)
       }
 
       const data = await response.json()
@@ -212,7 +223,37 @@ window.utils = utils
 window.API_BASE_URL = API_BASE_URL
 window.resolveLoginPath = resolveLoginPath
 
+// Supabase (frontend)
+const SUPABASE_URL = window.SUPABASE_URL || ''
+const SUPABASE_ANON_KEY = window.SUPABASE_ANON_KEY || ''
+
+async function initSupabaseClient() {
+  if (!SUPABASE_URL || !SUPABASE_ANON_KEY) return
+
+  if (!window.supabase) {
+    await new Promise((resolve, reject) => {
+      const script = document.createElement('script')
+      script.src = 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2'
+      script.async = true
+      script.onload = resolve
+      script.onerror = reject
+      document.head.appendChild(script)
+    })
+  }
+
+  if (window.supabase && typeof window.supabase.createClient === 'function') {
+    window.supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
+    console.log('✅ Supabase client inicializado')
+  } else {
+    console.warn('⚠️ No se pudo inicializar Supabase: libreria no disponible')
+  }
+}
+
 console.log('✅ Sistema inicializado - API conectada a:', API_BASE_URL)
+
+initSupabaseClient().catch((error) => {
+  console.warn('⚠️ Error inicializando Supabase:', error)
+})
 
 // ===== ACTUALIZACIÓN AUTOMÁTICA DEL BADGE DE NOTIFICACIONES =====
 function actualizarBadgeNotificaciones() {
@@ -257,6 +298,52 @@ function actualizarBadgeNotificaciones() {
   })();
 }
 
+// ===== GESTIÓN DEL USUARIO EN SESIÓN =====
+
+/**
+ * Lee el usuario del localStorage y actualiza todos los elementos de perfil
+ * visibles en la página. Si no hay sesión activa, redirige al login.
+ */
+function initUserSession() {
+  const raw = localStorage.getItem('usuario');
+
+  // Si no hay sesión, redirigir al login
+  if (!raw) {
+    window.location.replace(resolveLoginPath());
+    return null;
+  }
+
+  let usuario;
+  try {
+    usuario = JSON.parse(raw);
+  } catch (_) {
+    localStorage.removeItem('usuario');
+    window.location.replace(resolveLoginPath());
+    return null;
+  }
+
+  // Construir nombre completo para mostrar
+  const nombreCompleto = [usuario.nombre, usuario.apellido]
+    .filter(Boolean)
+    .join(' ')
+    .trim() || usuario.email || 'Usuario';
+
+  const emailMostrado = usuario.email || usuario.rol || '';
+
+  // Actualizar todos los elementos .profile-name y .profile-email
+  document.querySelectorAll('.profile-name').forEach(el => {
+    el.textContent = nombreCompleto;
+  });
+  document.querySelectorAll('.profile-email').forEach(el => {
+    el.textContent = emailMostrado;
+  });
+
+  // Exponer globalmente para uso en otros scripts
+  window.currentUser = usuario;
+
+  return usuario;
+}
+
 function initProfileMenus() {
   const profiles = Array.from(document.querySelectorAll('.profile'));
   if (!profiles.length) return;
@@ -298,8 +385,8 @@ function initProfileMenus() {
     const logoutBtn = menu.querySelector('.logout-btn');
     if (logoutBtn) {
       logoutBtn.addEventListener('click', () => {
-        menu.classList.remove('show');
-        btn.setAttribute('aria-expanded', 'false');
+        localStorage.removeItem('usuario');
+        window.location.replace(resolveLoginPath());
       });
     }
   });
@@ -311,6 +398,7 @@ function initProfileMenus() {
 }
 
 const initAppCommon = () => {
+  initUserSession();
   actualizarBadgeNotificaciones();
   initProfileMenus();
 };

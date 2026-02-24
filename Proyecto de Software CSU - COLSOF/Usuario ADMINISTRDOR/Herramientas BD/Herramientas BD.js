@@ -56,9 +56,9 @@ document.addEventListener('DOMContentLoaded', async function() {
 // Cargar estadísticas de la BD desde la API
 async function loadDatabaseStats() {
     try {
-        const response = await fetch('http://localhost:3000/api?action=get_casos_simple');
+        const response = await fetch('http://localhost:3000/api/casos');
         const data = await response.json();
-        allCases = data.cases || [];
+        allCases = data.data || [];
         
         // Calcular estadísticas
         updateDatabaseMetrics();

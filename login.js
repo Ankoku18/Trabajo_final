@@ -10,13 +10,20 @@ const togglePassword = document.querySelector('.toggle');
 const inputGroups = Array.from(form.querySelectorAll('.input-group[data-field]'));
 const submitButton = form.querySelector('.submit');
 
-// Obtener URL de la API - local y producción
+// Obtener URL de la API - usa el mismo origen (localhost, 127.0.0.1, o producción)
 const isLocalhost = ['localhost', '127.0.0.1'].includes(window.location.hostname)
   || window.location.hostname === ''
   || window.location.protocol === 'file:';
-const API_URL = isLocalhost
-  ? 'http://localhost:3000/api'
-  : window.location.origin + '/api';
+
+// Construir API URL usando el mismo origen para evitar CORS
+let API_URL;
+if (window.location.protocol === 'file:') {
+  // Si se abre como archivo local
+  API_URL = 'http://localhost:3000/api';
+} else {
+  // Usar el mismo origen del frontend (localhost, 127.0.0.1, o dominio de Vercel)
+  API_URL = `${window.location.protocol}//${window.location.hostname}:${window.location.port || (window.location.protocol === 'https:' ? 443 : 80)}/api`;
+}
 
 // Toggle password visibility
 if (togglePassword) {

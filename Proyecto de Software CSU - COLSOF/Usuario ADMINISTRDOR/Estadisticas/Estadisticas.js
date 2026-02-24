@@ -1,4 +1,4 @@
-let currentPeriod = 'trimestre';
+﻿let currentPeriod = 'trimestre';
 let allCases = [];
 
 // Colores para categorías
@@ -15,9 +15,9 @@ const categoryColors = {
 // Fetch data from API
 async function loadStatsFromAPI() {
   try {
-    const response = await fetch('http://localhost:3000/api?action=get_casos_simple');
+    const response = await fetch('http://localhost:3000/api/casos');
     const data = await response.json();
-    allCases = data.cases || [];
+    allCases = data.data || [];
     
     updateAllStatistics();
   } catch (error) {
